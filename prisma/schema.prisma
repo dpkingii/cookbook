@@ -5,132 +5,204 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
 
+enum Difficulty {
+  easy
+  medium
+  hard
+
+  @@map("difficulty")
+}
+
+enum Technique {
+  chop
+  mince
+  slice
+  season
+  whisk
+  fold
+  knead
+  marinate
+  saute
+  sear
+  fry
+  boil
+  simmer
+  drain
+  roast
+  bake
+  broil
+  rest
+  chill
+  plate
+
+  @@map("technique")
+}
+
+enum Heat {
+  low
+  medium
+  high
+
+  @@map("heat")
+}
+
+enum TimerMode {
+  stay
+  background
+
+  @@map("timer_mode")
 }
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  username     String   @unique
-  fullName     String?  @map("full_name")
-  avatarUrl    String?  @map("avatar_url")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @default(now()) @map("updated_at")
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  username  String   @unique
+  fullName  String?  @map("full_name")
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   recipes         Recipe[]
   cookingSessions CookingSession[]
   favoriteRecipes FavoriteRecipe[]
+
+  @@map("users")
 }
 
 model Cuisine {
-  id      String   @id @default(uuid())
-  name    String   @unique
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
   recipes Recipe[]
+
+  @@map("cuisines")
 }
 
 model Recipe {
-  id               String   @id @default(uuid())
-  userId           String
-  cuisineId        String?
-  title            String
-  description      String?
-  difficultyLevel  String?
-  prepTimeMinutes  Int?
-  cookTimeMinutes  Int?
-  totalTimeMinutes Int?     @default(0)
-  servings         Int?
-  imageUrl         String?
-  isPublic         Boolean  @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @default(now())
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String?    @map("user_id") @db.Uuid
+  cuisineId   String?    @map("cuisine_id") @db.Uuid
+  title       String
+  description String?
+  difficulty  Difficulty
+  prepMinutes Int        @map("prep_minutes")
+  cookMinutes Int        @map("cook_minutes")
+  servings    Int
+  imageUrl    String?    @map("image_url")
+  isPublic    Boolean    @default(false) @map("is_public")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
 
-  user        User               @relation(fields: [userId], references: [id])
+  user        User?              @relation(fields: [userId], references: [id])
   cuisine     Cuisine?           @relation(fields: [cuisineId], references: [id])
   ingredients RecipeIngredient[]
   steps       RecipeStep[]
   sessions    CookingSession[]
   favoritedBy FavoriteRecipe[]
-}
 
-model Ingredient {
-  id             String    @id @default(uuid())
-  name           String    @unique
-  offFoodId      String?   @map("off_food_id")
-  caloriesPer100 Float?    @map("calories_per_100g")
-  proteinPer100  Float?    @map("protein_per_100g")
-  carbsPer100    Float?    @map("carbs_per_100g")
-  fatPer100      Float?    @map("fat_per_100g")
-  updatedAt      DateTime? @map("updated_at")
-
-  recipes RecipeIngredient[]
+  @@map("recipes")
 }
 
 model RecipeIngredient {
-  id           String  @id @default(uuid())
-  recipeId     String
-  ingredientId String
-  amount       Float?
-  unit         String?
-  order        Int
-  notes        String?
+  id         String  @id @default(uuid()) @db.Uuid
+  recipeId   String  @map("recipe_id") @db.Uuid
+  position   Int
+  name       String
+  quantity   Float?
+  unit       String?
+  note       String?
+  tokenShape String  @map("token_shape")
+  tokenColor String  @map("token_color")
 
-  recipe     Recipe     @relation(fields: [recipeId], references: [id])
-  ingredient Ingredient @relation(fields: [ingredientId], references: [id])
+  recipe   Recipe           @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  stepUses StepIngredient[]
 
-  @@unique([recipeId, ingredientId])
+  @@index([recipeId, position])
+  @@map("recipe_ingredients")
 }
 
 model RecipeStep {
-  id              String  @id @default(uuid())
-  recipeId        String
-  stepNumber      Int
-  instruction     String
-  durationMinutes Int?
-  imageUrl        String?
+  id           String     @id @default(uuid()) @db.Uuid
+  recipeId     String     @map("recipe_id") @db.Uuid
+  position     Int
+  text         String
+  technique    Technique
+  heat         Heat?
+  timerSeconds Int?       @map("timer_seconds")
+  timerMode    TimerMode? @map("timer_mode")
+  timerLabel   String?    @map("timer_label")
+  cue          String?
 
-  recipe          Recipe                @relation(fields: [recipeId], references: [id])
-  sessionProgress SessionStepProgress[]
+  recipe      Recipe           @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  ingredients StepIngredient[]
 
-  @@unique([recipeId, stepNumber])
+  @@index([recipeId, position])
+  @@map("recipe_steps")
+}
+
+model StepIngredient {
+  id           String  @id @default(uuid()) @db.Uuid
+  stepId       String  @map("step_id") @db.Uuid
+  ingredientId String  @map("ingredient_id") @db.Uuid
+  portion      Float   @default(1)
+  note         String?
+
+  step       RecipeStep       @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  ingredient RecipeIngredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([stepId])
+  @@index([ingredientId])
+  @@map("step_ingredients")
 }
 
 model CookingSession {
-  id               String    @id @default(uuid())
-  userId           String
-  recipeId         String
-  startedAt        DateTime  @default(now())
-  completedAt      DateTime?
-  totalTimeMinutes Int?
-  difficultyRating Int?      @map("difficulty_rating")
-  notes            String?
+  id              String      @id @default(uuid()) @db.Uuid
+  userId          String?     @map("user_id") @db.Uuid
+  recipeId        String?     @map("recipe_id") @db.Uuid
+  recipeSnapshot  Json        @map("recipe_snapshot")
+  startedAt       DateTime    @map("started_at")
+  finishedAt      DateTime?   @map("finished_at")
+  durationSeconds Int?        @map("duration_seconds")
+  techniques      Technique[]
+  cuisineName     String?     @map("cuisine_name")
+  difficulty      Difficulty?
+  rating          Int?
+  note            String?
 
-  user         User                  @relation(fields: [userId], references: [id])
-  recipe       Recipe                @relation(fields: [recipeId], references: [id])
-  stepProgress SessionStepProgress[]
+  user   User?   @relation(fields: [userId], references: [id])
+  recipe Recipe? @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+  events SessionEvent[]
+
+  @@index([userId, finishedAt])
+  @@map("cooking_sessions")
 }
 
-model SessionStepProgress {
-  id          String    @id @default(uuid())
-  sessionId   String
-  stepId      String
-  completedAt DateTime?
-  isCompleted Boolean   @default(false) @map("is_completed")
+model SessionEvent {
+  id         String   @id @db.Uuid
+  sessionId  String   @map("session_id") @db.Uuid
+  type       String
+  stepIndex  Int?     @map("step_index")
+  at         DateTime
+  payload    Json?
+  receivedAt DateTime @default(now()) @map("received_at")
 
-  session CookingSession @relation(fields: [sessionId], references: [id])
-  step    RecipeStep     @relation(fields: [stepId], references: [id])
+  session CookingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  @@unique([sessionId, stepId])
+  @@index([sessionId, at])
+  @@map("session_events")
 }
 
 model FavoriteRecipe {
-  id        String   @id @default(uuid())
-  userId    String
-  recipeId  String
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  recipeId  String   @map("recipe_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
 
-  user   User   @relation(fields: [userId], references: [id])
-  recipe Recipe @relation(fields: [recipeId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@unique([userId, recipeId])
+  @@map("favorite_recipes")
 }
