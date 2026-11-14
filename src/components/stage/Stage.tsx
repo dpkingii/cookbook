@@ -1,0 +1,99 @@
+"use client";
+
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useId, useMemo, useState } from "react";
+import type { Recipe } from "@/lib/recipe/types";
+import { COUNTER, sceneAt, type Scene, type Vessel } from "./contents";
+import { StageContext } from "./context";
+import { clamp01 } from "./palette";
+import { Backdrop, Defs, Grain, H, W } from "./Paper";
+import { Board } from "./stations/Board";
+import { Fallback } from "./stations/Fallback";
+import { Pan } from "./stations/Pan";
+import { Plate } from "./stations/Plate";
+import { Pot } from "./stations/Pot";
+
+export interface StageProps {
+  recipe: Recipe;
+  stepIndex: number;
+  /** Fraction of this step's timer elapsed, 0–1. null when there is no timer or it has not started. */
+  progress: number | null;
+  className?: string;
+}
+
+function SceneFor({ scene }: { scene: Scene }) {
+  switch (scene.vessel) {
+    case "board":
+      return <Board scene={scene} />;
+    case "pan":
+      return <Pan scene={scene} />;
+    case "pot":
+      return <Pot scene={scene} />;
+    case "plate":
+      return <Plate scene={scene} />;
+    default:
+      return <Fallback scene={scene} />;
+  }
+}
+
+const slide = {
+  enter: ({ dir, still }: { dir: number; still: boolean }) => ({ x: still ? 0 : dir * W * 0.8, opacity: 0 }),
+  center: { x: 0, opacity: 1 },
+  exit: ({ dir, still }: { dir: number; still: boolean }) => ({ x: still ? 0 : -dir * W * 0.8, opacity: 0 }),
+};
+
+function label(scene: Scene): string {
+  const heat = scene.heat ? ` over ${scene.heat} heat` : "";
+  const what = scene.uses.map((u) => u.name).join(", ");
+  return `${scene.technique}${heat}${what ? `: ${what}` : ""}`;
+}
+
+export function Stage({ recipe, stepIndex, progress, className }: StageProps) {
+  const still = useReducedMotion() ?? false;
+  const uid = `st${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const p = progress == null || Number.isNaN(progress) ? null : clamp01(progress);
+  const scene = useMemo(
+    () => (recipe.steps.length ? sceneAt(recipe, stepIndex, p) : null),
+    [recipe, stepIndex, p],
+  );
+  const env = useMemo(() => ({ uid, still }), [uid, still]);
+
+  const vessel = scene?.vessel ?? "board";
+  const [shown, setShown] = useState<Vessel>(vessel);
+  const [dir, setDir] = useState(1);
+  if (shown !== vessel) {
+    setDir(COUNTER.indexOf(vessel) >= COUNTER.indexOf(shown) ? 1 : -1);
+    setShown(vessel);
+  }
+
+  return (
+    <StageContext.Provider value={env}>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className={className}
+        style={{ display: "block", width: "100%", height: "auto", overflow: "hidden" }}
+        role="img"
+        aria-label={scene ? label(scene) : "Empty stage"}
+      >
+        <Defs uid={uid} />
+        <Backdrop uid={uid} />
+        <AnimatePresence initial={false} custom={{ dir, still }}>
+          {scene && (
+          <motion.g
+            key={scene.vessel}
+            custom={{ dir, still }}
+            variants={slide}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: still ? 0.2 : 0.7, ease: [0.6, 0, 0.2, 1] }}
+          >
+            <SceneFor scene={scene} />
+          </motion.g>
+          )}
+        </AnimatePresence>
+        <Grain />
+      </svg>
+    </StageContext.Provider>
+  );
+}
