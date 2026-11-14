@@ -157,3 +157,14 @@
   height: 0;
   width: 0;
 }
+
+/* Two-ink risograph palette used by the stage and player. */
+:root {
+  --paper: #f4ecdc;
+  --paper-deep: #e9dec7;
+  --ink: #1f2430;
+  --ink-soft: #5b6072;
+  --tomato: #d8412f;
+  --tomato-deep: #a82c1f;
+  --gold: #e0a93b;
+}
