@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cookbook
 
-## Getting Started
+Recipes you play, one step at a time.
 
-First, run the development server:
+Cooking mode puts a single step on screen with an animation that shows the motion, the heat and what "done" looks like. Timers keep running in a dock while you move on to the next step. Every cook is recorded as a log of events, and the skills page is computed from what you actually cooked.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## What it does
+
+- **Cooking mode.** A mise en place checklist, then one step per screen: the animated scene, the amounts that step uses, a doneness cue and a timer. Tap the right side of the scene for next, the left for back, or use the arrow keys. The screen stays awake, and a finished timer chimes and vibrates.
+- **Animated scenes for any recipe.** Each step has a technique (chop, whisk, sauté, simmer, roast and fifteen more). The technique picks one of six hand-drawn SVG stations: board, bowl, pan, pot, oven or plate. Ingredients are drawn from the recipe's own data, so a recipe someone types in is animated without any extra work.
+- **Timers that overlap.** A timer stores the time it ends, so it survives a reload or a sleeping phone. Background timers move to a dock and keep counting across steps.
+- **Import.** Paste a recipe as text or give a link to a page with schema.org recipe data. The importer works out ingredients, techniques, heat, timers and doneness cues, then opens the result in an editor with a live preview of each step's animation.
+- **History and skills.** Finished cooks appear in your history with a step-by-step timeline. The skills page shows which techniques you have practised, cuisine proficiency, a weekly streak and recipes that would teach you something new.
+- **Accounts.** You can cook as a guest. Signing up moves the guest's history, recipes and favourites to the new account.
+
+## How it works
+
+```mermaid
+flowchart LR
+  subgraph Browser
+    UI[Cooking screens] --> R[Player reducer]
+    R --> LS[(localStorage)]
+    R --> OB[Outbox]
+  end
+  OB -- "POST events (idempotent)" --> API[/api/sessions/]
+  subgraph Server
+    API --> EV[(session_events)]
+    API -- "on finish: replay" --> R2[Same reducer]
+    R2 --> SUM[(cooking_sessions summary)]
+    SUM --> ST[Stats] --> PG[History and skills pages]
+  end
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **One reducer, two places.** `src/lib/player` is a pure function, `(state, event) => state`, with no clock and no I/O. The browser runs it live. When a session finishes, the server replays the stored events through the same code and writes the summary itself, so it never trusts totals sent by the client.
+- **Events are append-only.** Each event gets its id in the browser. Sending a batch twice inserts nothing new, so retries after a dropped connection are safe. A reload replays the events and puts you back on the same step with the timers intact.
+- **History does not change.** A session stores a snapshot of the recipe it was cooked from, so editing or deleting a recipe later leaves past cooks as they were.
+- **Skills are derived.** A session only counts if it took a plausible share of the recipe's timer time, so tapping through a recipe earns nothing.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Path | What is there |
+|---|---|
+| `src/lib/player` | Event types, reducer, commands, selectors |
+| `src/components/stage` | The animated stations and ingredient tokens |
+| `src/components/cook` | Cooking mode screens and the session hook |
+| `src/lib/import` | Text and schema.org parsing into structured steps |
+| `src/lib/sessions`, `src/lib/stats` | Event ingestion, replay, and the numbers on the skills page |
+| `src/lib/db` | Recipe queries and the mapping between rows and app types |
+| `src/lib/auth` | Better Auth setup, guest users and account hand-over |
+| `prisma` | Schema, migrations and seed |
+| `scripts` | Bulk import of a site's recipes into a local database |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Running it locally
 
-## Learn More
+You need Node 22 and Postgres 16. `docker compose up -d` starts a Postgres if you don't have one.
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+cp .env.example .env.local      # then set DATABASE_URL and BETTER_AUTH_SECRET
+npx prisma migrate deploy
+npx prisma db seed
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open http://localhost:3000. The seed adds eleven public recipes and a demo account; its email and development password are constants at the top of `prisma/seed.ts`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`/stage-lab` shows every animated scene at each stage of progress.
 
-## Deploy on Vercel
+| Command | What it does |
+|---|---|
+| `npm run dev` | Development server |
+| `npm test` | Unit and integration tests (integration tests use a `cookbook_test` database and skip if it is unreachable) |
+| `npm run typecheck` | TypeScript |
+| `npm run lint` | ESLint |
+| `npm run build` | Production build |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+If the development server crashes with "Next.js package not found", delete the `.next` folder and start it again.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Stack
+
+Next.js 16 (App Router), React 19, TypeScript, Tailwind 4, Motion, Prisma 6, Postgres, Better Auth, Zod, Vitest.
+
+## Recipe credits
+
+Eight of the seeded recipes are adapted from [Made With Lau](https://www.madewithlau.com/), with quantities from the originals and steps rewritten for the player. Each one links to its source page. Imported recipes are private to the account that imported them.
+
+## Plan
+
+`PLAN.md` has the design reasoning and the milestone list.
