@@ -1,9 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { IngredientToken, Stage } from "@/components/stage";
 import { DEMO_RECIPE } from "@/lib/recipe/demo";
-import { TECHNIQUES, TECHNIQUE_STATION, type Recipe, type Technique } from "@/lib/recipe/types";
+import { SEED_RECIPES } from "@/lib/recipe/seed-recipes";
+import {
+  stationOf,
+  TECHNIQUES,
+  TECHNIQUE_STATION,
+  type Heat,
+  type Ingredient,
+  type Recipe,
+  type Technique,
+} from "@/lib/recipe/types";
 
 const recipe = DEMO_RECIPE;
 const SAMPLE_USES: Record<string, string[]> = {
@@ -15,28 +24,123 @@ const SAMPLE_USES: Record<string, string[]> = {
   rest: ["parmesan"],
 };
 
-function single(technique: Technique): Recipe {
+/** Extra pantry for the lab, so each bowl and oven technique gets something it would really hold. */
+const LAB_INGREDIENTS: Ingredient[] = [
+  { id: "eggs", name: "eggs", quantity: 3, unit: null, token: { shape: "round", color: "#f2c94c" } },
+  { id: "soy", name: "soy sauce", quantity: 2, unit: "tbsp", token: { shape: "liquid", color: "#3b2418" } },
+  { id: "yoghurt", name: "yoghurt", quantity: 200, unit: "g", token: { shape: "liquid", color: "#f6f2e6" } },
+  { id: "flour", name: "flour", quantity: 300, unit: "g", token: { shape: "grain", color: "#efe3c4" } },
+  { id: "water", name: "water", quantity: 180, unit: "ml", token: { shape: "liquid", color: "#a9cfe0" } },
+  { id: "chicken", name: "chicken thighs", quantity: 400, unit: "g", token: { shape: "cube", color: "#e8c3a0" } },
+];
+const NEW_TECHNIQUES: Technique[] = ["whisk", "fold", "knead", "marinate", "roast", "bake", "broil"];
+const LAB_USES: Partial<Record<Technique, string[]>> = {
+  whisk: ["eggs", "soy", "salt"],
+  fold: ["yoghurt", "tomatoes"],
+  knead: ["flour", "water"],
+  marinate: ["chicken", "soy"],
+  roast: ["tomatoes", "garlic", "onion"],
+  bake: ["flour", "eggs"],
+  broil: ["chicken"],
+};
+const HEATS: Heat[] = ["low", "medium", "high"];
+
+function single(technique: Technique, heat?: Heat): Recipe {
   const station = TECHNIQUE_STATION[technique];
-  const uses = technique === "season" ? ["salt"] : technique === "simmer" ? ["tomatoes"] : SAMPLE_USES[station];
+  const uses = LAB_USES[technique] ?? (technique === "season" ? ["salt"] : technique === "simmer" ? ["tomatoes"] : SAMPLE_USES[station]);
   const heated = station === "pan" || station === "pot" || station === "oven";
+  const fallbackHeat = technique === "boil" || technique === "broil" ? "high" : "medium";
   return {
     ...recipe,
     id: `lab-${technique}`,
+    ingredients: [...recipe.ingredients, ...LAB_INGREDIENTS],
     steps: [
       {
         text: technique,
         technique,
-        heat: heated && technique !== "drain" ? (technique === "boil" ? "high" : "medium") : undefined,
+        heat: heated && technique !== "drain" ? (heat ?? fallbackHeat) : undefined,
         uses: uses.map((ingredientId) => ({ ingredientId })),
       },
     ],
   };
 }
 
+const SEED_STEPS = SEED_RECIPES.flatMap((r) =>
+  r.steps.flatMap((st, k) => (stationOf(st) === "bowl" || stationOf(st) === "oven" ? [{ r, k, st }] : [])),
+);
+
+function Frame({ r, k, p, children }: { r: Recipe; k: number; p: number | null; children?: React.ReactNode }) {
+  return (
+    <div>
+      <div className="overflow-hidden rounded-md border border-[var(--ink-soft)]">
+        <Stage recipe={r} stepIndex={k} progress={p} />
+      </div>
+      {children && <p className="mt-1 text-xs">{children}</p>}
+    </div>
+  );
+}
+
+function NewStations({ narrow = false }: { narrow?: boolean }) {
+  const cols = narrow ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-3";
+  return (
+    <>
+      <section className="mt-12">
+        <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Bowl and oven at 0, 50 and 100%</h2>
+        <div className="flex flex-col gap-5">
+          {NEW_TECHNIQUES.map((t) => {
+            const r = single(t);
+            return (
+              <div key={t}>
+                <p className="mb-1 text-sm font-semibold">
+                  {t} <span className="font-normal text-[var(--ink-soft)]">· {LAB_USES[t]?.join(", ")}</span>
+                </p>
+                <div className={`grid gap-2 ${cols}`}>
+                  {[0, 0.5, 1].map((p) => (
+                    <Frame key={p} r={r} k={0} p={p} />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <section className="mt-12">
+        <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Oven heat: low, medium, high</h2>
+        {(["roast", "broil"] as const).map((t) => (
+          <div key={t} className={`mb-4 grid gap-2 ${cols}`}>
+            {HEATS.map((h) => (
+              <Frame key={h} r={single(t, h)} k={0} p={0.5}>
+                {t} · {h}
+              </Frame>
+            ))}
+          </div>
+        ))}
+      </section>
+
+      <section className="mt-12">
+        <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Seed recipes at the bowl and oven</h2>
+        <div className={`grid gap-3 ${narrow ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-4"}`}>
+          {SEED_STEPS.map(({ r, k, st }) => (
+            <Frame key={`${r.id}-${k}`} r={r} k={k} p={st.timer ? 0.5 : null}>
+              {st.technique} <span className="text-[var(--ink-soft)]">· {r.title} #{k + 1}</span>
+            </Frame>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+const noSubscribe = () => () => {};
+/** ?only=new renders just the bowl and oven sections for screenshots; ?only=narrow does it 360px wide. */
+const onlyParam = () => new URLSearchParams(window.location.search).get("only");
+
 export default function StageLab() {
   const [i, setI] = useState(0);
   const [pct, setPct] = useState(0);
   const [noTimer, setNoTimer] = useState(false);
+  const only = useSyncExternalStore(noSubscribe, onlyParam, () => null);
   const step = recipe.steps[i];
   const last = recipe.steps.length - 1;
   const gallery = useMemo(() => TECHNIQUES.map((t) => ({ t, r: single(t) })), []);
@@ -52,6 +156,16 @@ export default function StageLab() {
   }, [last]);
 
   const progress = noTimer || !step.timer ? null : pct / 100;
+
+  if (only === "new" || only === "narrow") {
+    return (
+      <main className="min-h-screen bg-[var(--paper)] px-4 py-2 text-[var(--ink)] sm:px-8">
+        <div className={only === "narrow" ? "w-[360px]" : "mx-auto max-w-5xl"}>
+          <NewStations narrow={only === "narrow"} />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-[var(--paper)] px-4 py-8 text-[var(--ink)] sm:px-8">
@@ -159,9 +273,7 @@ export default function StageLab() {
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   {[0, 0.5, 1].map((p) => (
-                    <div key={p} className="overflow-hidden rounded-md border border-[var(--ink-soft)]">
-                      <Stage recipe={recipe} stepIndex={k} progress={p} />
-                    </div>
+                    <Frame key={p} r={recipe} k={k} p={p} />
                   ))}
                 </div>
               </div>
@@ -173,17 +285,14 @@ export default function StageLab() {
           <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Every technique, alone</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {gallery.map(({ t, r }) => (
-              <div key={t}>
-                <div className="overflow-hidden rounded-md border border-[var(--ink-soft)]">
-                  <Stage recipe={r} stepIndex={0} progress={0.5} />
-                </div>
-                <p className="mt-1 text-xs">
-                  {t} <span className="text-[var(--ink-soft)]">· {TECHNIQUE_STATION[t]}</span>
-                </p>
-              </div>
+              <Frame key={t} r={r} k={0} p={0.5}>
+                {t} <span className="text-[var(--ink-soft)]">· {TECHNIQUE_STATION[t]}</span>
+              </Frame>
             ))}
           </div>
         </section>
+
+        <NewStations />
       </div>
     </main>
   );

@@ -1,14 +1,16 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useId, useMemo, useState } from "react";
 import type { Recipe } from "@/lib/recipe/types";
 import { COUNTER, sceneAt, type Scene, type Vessel } from "./contents";
-import { StageContext } from "./context";
+import { StageContext, usePrefersStill } from "./context";
 import { clamp01 } from "./palette";
 import { Backdrop, Defs, Grain, H, W } from "./Paper";
 import { Board } from "./stations/Board";
+import { Bowl } from "./stations/Bowl";
 import { Fallback } from "./stations/Fallback";
+import { Oven } from "./stations/Oven";
 import { Pan } from "./stations/Pan";
 import { Plate } from "./stations/Plate";
 import { Pot } from "./stations/Pot";
@@ -25,10 +27,14 @@ function SceneFor({ scene }: { scene: Scene }) {
   switch (scene.vessel) {
     case "board":
       return <Board scene={scene} />;
+    case "bowl":
+      return <Bowl scene={scene} />;
     case "pan":
       return <Pan scene={scene} />;
     case "pot":
       return <Pot scene={scene} />;
+    case "oven":
+      return <Oven scene={scene} />;
     case "plate":
       return <Plate scene={scene} />;
     default:
@@ -49,7 +55,7 @@ function label(scene: Scene): string {
 }
 
 export function Stage({ recipe, stepIndex, progress, className }: StageProps) {
-  const still = useReducedMotion() ?? false;
+  const still = usePrefersStill();
   const uid = `st${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const p = progress == null || Number.isNaN(progress) ? null : clamp01(progress);
   const scene = useMemo(

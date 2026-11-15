@@ -82,10 +82,13 @@ export function sceneAt(recipe: Recipe, stepIndex: number, progress: number | nu
     vessel = vesselFor(steps, j, loc);
     const current = j === i;
 
-    if (vessel === "plate" && prevVessel && prevVessel !== "plate") {
+    // "Roast on the upper rack" names nothing: whatever was just dressed is what goes in.
+    const ovenEmpty =vessel === "oven" && ![...loc.values()].includes("oven");
+    const slideIn = ovenEmpty && step.uses.length === 0 && prevVessel !== "oven";
+    if (prevVessel && ((vessel === "plate" && prevVessel !== "plate") || slideIn)) {
       for (const [id, v] of loc) {
         if (v === prevVessel) {
-          loc.set(id, "plate");
+          loc.set(id, vessel);
           since.set(id, j);
         }
       }

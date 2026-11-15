@@ -84,6 +84,21 @@ function Cutting({ ing, technique, cut, rock }: { ing: Ingredient; technique: Te
   );
 }
 
+export function BoardTop() {
+  return (
+    <g>
+      <path d={EDGE} fill={mix(HEX.gold, HEX.tomatoDeep, 0.3)} transform={`translate(${MIS.x} ${MIS.y})`} />
+      <path d={TOP} fill={mix(mix(HEX.gold, HEX.paper, 0.3), HEX.tomatoDeep, 0.1)} transform={`translate(${MIS.x} ${MIS.y})`} />
+      {GRAIN_LINES.map((d) => (
+        <path key={d} d={d} fill="none" stroke={mix(HEX.gold, HEX.ink, 0.45)} strokeWidth={1.8} strokeLinecap="round" />
+      ))}
+      <path d={TOP} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
+      <path d={EDGE} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
+      <ellipse cx={318} cy={164} rx={8} ry={4.5} fill={INK.paperDeep} stroke={INK.ink} strokeWidth={2.5} />
+    </g>
+  );
+}
+
 export function Board({ scene }: { scene: Scene }) {
   const { still } = useStage();
   const { technique, items, progress } = scene;
@@ -101,14 +116,7 @@ export function Board({ scene }: { scene: Scene }) {
 
   return (
     <g>
-      <path d={EDGE} fill={mix(HEX.gold, HEX.tomatoDeep, 0.3)} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={TOP} fill={mix(mix(HEX.gold, HEX.paper, 0.3), HEX.tomatoDeep, 0.1)} transform={`translate(${MIS.x} ${MIS.y})`} />
-      {GRAIN_LINES.map((d) => (
-        <path key={d} d={d} fill="none" stroke={mix(HEX.gold, HEX.ink, 0.45)} strokeWidth={1.8} strokeLinecap="round" />
-      ))}
-      <path d={TOP} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
-      <path d={EDGE} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
-      <ellipse cx={318} cy={164} rx={8} ry={4.5} fill={INK.paperDeep} stroke={INK.ink} strokeWidth={2.5} />
+      <BoardTop />
 
       <AnimatePresence>
         {piles.map((it, k) => (

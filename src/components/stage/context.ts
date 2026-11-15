@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 
 export interface StageEnv {
   /** Prefix that keeps clipPath and pattern ids unique per Stage on the page. */
@@ -12,6 +12,23 @@ export const StageContext = createContext<StageEnv>({ uid: "stage", still: false
 
 export function useStage(): StageEnv {
   return useContext(StageContext);
+}
+
+const REDUCE = "(prefers-reduced-motion: reduce)";
+
+function onReduceChange(cb: () => void) {
+  const m = window.matchMedia(REDUCE);
+  m.addEventListener("change", cb);
+  return () => m.removeEventListener("change", cb);
+}
+
+/**
+ * The user's reduced-motion setting. Reads false during hydration, like the server did,
+ * then switches; motion's own hook reads the real value on the first client render and
+ * makes every `still` branch a hydration mismatch.
+ */
+export function usePrefersStill(): boolean {
+  return useSyncExternalStore(onReduceChange, () => window.matchMedia(REDUCE).matches, () => false);
 }
 
 /** Motion props for an ingredient landing in a vessel: dropped from above when new, else simply there. */
