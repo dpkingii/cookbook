@@ -3,16 +3,16 @@ import { IngredientToken } from "@/components/stage";
 import { HeroStage } from "@/components/cook/HeroStage";
 import { formatAmount } from "@/components/cook/format";
 import { notFound } from "next/navigation";
-import { findRecipe, SEED_RECIPES } from "@/lib/recipe/seed-recipes";
-
-export const generateStaticParams = () => SEED_RECIPES.map((r) => ({ id: r.id }));
+import { getRecipe } from "@/lib/db/recipes";
 
 export async function generateMetadata({ params }: PageProps<"/recipes/[id]">) {
-  return { title: findRecipe((await params).id)?.title };
+  const viewerId = null;
+  return { title: (await getRecipe((await params).id, viewerId))?.title };
 }
 
 export default async function RecipePage({ params }: PageProps<"/recipes/[id]">) {
-  const recipe = findRecipe((await params).id);
+  const viewerId = null;
+  const recipe = await getRecipe((await params).id, viewerId);
   if (!recipe) notFound();
 
   return (
