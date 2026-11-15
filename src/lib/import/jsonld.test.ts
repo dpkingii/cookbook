@@ -110,15 +110,37 @@ describe("draftFromJsonLd", () => {
       recipeIngredient: Array.from({ length: 19 }, (_, i) => `${i + 1} cup thing${i}`),
     });
     expect(many.difficulty).toBe("hard");
-    const steps = Array.from({ length: 14 }, (_, i) => `Chop item ${i}.`);
+    const steps = Array.from({ length: 14 }, (_, i) => `Boil item ${i} for 2 minutes.`);
     expect(draftFromJsonLd({ ...recipe, recipeInstructions: steps }).difficulty).toBe("hard");
-    const mid = Array.from({ length: 10 }, (_, i) => `Chop item ${i}.`);
+    const mid = Array.from({ length: 10 }, (_, i) => `Boil item ${i} for 2 minutes.`);
     expect(draftFromJsonLd({ ...recipe, recipeInstructions: mid }).difficulty).toBe("medium");
   });
 
   it("gives unique ids to duplicate ingredient names", () => {
     const d = draftFromJsonLd({ ...recipe, recipeIngredient: ["1 tbsp soy sauce", "2 tbsp soy sauce", "1 tsp soy sauce"] });
     expect(d.ingredients.map((i) => i.id)).toEqual(["soy-sauce", "soy-sauce-2", "soy-sauce-3"]);
+  });
+
+  it("keeps repeated ingredient lines apart with a note saying which step they belong to", () => {
+    const d = draftFromJsonLd({
+      ...recipe,
+      recipeIngredient: ["1 tbsp soy sauce", "2 tbsp water", "2 tbsp soy sauce, light", "1 cup water"],
+      recipeInstructions: [
+        "Stir the first soy sauce and the first water together in a bowl.",
+        "Bring a pot to a boil, then add the second soy sauce and water.",
+      ],
+    });
+    const notes = Object.fromEntries(d.ingredients.map((i) => [i.id, i.note]));
+    expect(notes["soy-sauce"]).toBe("for step 1");
+    expect(notes["water"]).toBe("for step 1");
+    expect(notes["soy-sauce-2"]).toBe("light, for step 2");
+    expect(notes["water-2"]).toBe("for step 2");
+    expect(validateDraft(d)).toEqual([]);
+  });
+
+  it("leaves ingredient notes alone when names are not repeated", () => {
+    const d = draftFromJsonLd({ ...recipe, recipeIngredient: ["2 tbsp soy sauce, light", "1 tsp sugar"] });
+    expect(d.ingredients.map((i) => i.note)).toEqual(["light", undefined]);
   });
 
   it("never throws on garbage", () => {

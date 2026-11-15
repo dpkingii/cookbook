@@ -1,5 +1,5 @@
 import { TECHNIQUE_STATION } from "@/lib/recipe/types";
-import type { Ingredient, Step, Technique } from "@/lib/recipe/types";
+import type { Ingredient, Step, StepUse, Technique } from "@/lib/recipe/types";
 import { analyzeTechnique, detectHeat, type TechniqueMatch } from "./technique";
 import { detectTimer } from "./timer";
 import { linkIngredients } from "./uses";
@@ -11,6 +11,8 @@ export interface StepContext {
   count: number;
   /** Technique of the latest step cooked on a pan, pot or oven. */
   last?: Technique;
+  /** Ingredients the latest combining step put into one bowl, which a later "the sauce" refers back to. */
+  mix?: string[];
 }
 
 export function createStepContext(): StepContext {
@@ -78,6 +80,7 @@ export function isInstruction(sentence: string): boolean {
 }
 
 const TIP = /^(?:chef'?s\s+|pro\s+|quick\s+|helpful\s+)?(?:tip|note|hint|variation|reminder|why)\b/i;
+const ASIDE = /^(?:take (?:a|one) (?:moment|second|minute|breath) to|feel free|be (?:careful|gentle|patient|mindful)|don'?t worry|try (?:to|not)|do (?:this|that|it) (?:\w+ )?(?:thoroughly|well|carefully|gently|slowly)|call |watch (?:out|your)|look at)\b/i;
 const OPTIONAL = /^(?:if (?:you|your|you're|you've|we|i)\b|(?:you (?:can|may|could) )?also\b|you (?:can|may|could)\b)/i;
 const HEAT_LABEL = /^(?:heat off|(?:high|medium[- ]high|medium[- ]low|medium|low)(?: heat)?)\s*[—–]\s*/i;
 const TIME_MARKER = /\s*[—–]\s*~?\d[^.!?]*?(?:seconds?|secs?|minutes?|mins?|hours?)\s*$/i;
@@ -150,7 +153,7 @@ function toSentences(paragraph: string): Sentence[] {
   const out: Sentence[] = [];
   for (const raw of splitSentences(paragraph)) {
     if (TIP.test(raw)) break;
-    if (!isInstruction(raw.replace(HEAT_LABEL, ""))) continue;
+    if (!isInstruction(raw.replace(HEAT_LABEL, "")) || ASIDE.test(raw.replace(HEAT_LABEL, ""))) continue;
     const text = tidy(raw);
     if (text.length <= MAX_CHARS) {
       out.push(makeSentence(raw, text));
@@ -286,6 +289,32 @@ function techniqueOf(group: Group): TechniqueMatch | null {
   return group.sentences.find((s) => s.kind === "major" && s.match)?.match ?? group.sentences.find((s) => s.match)?.match ?? null;
 }
 
+const GROUP_WORD = /\b(?:the|this|that|our|your|remaining|reserved|prepared|leftover)\s+(?:(?:remaining|reserved|prepared|leftover)\s+)?(sauce|marinade|seasonings?|slurry|batter|glaze|dressing|syrup|rub|spice mix|mixture)\b/gi;
+const COMBINING: Technique[] = ["whisk", "marinate", "fold", "season"];
+
+function groupMembers(text: string, ingredients: Ingredient[], context: StepContext): string[] {
+  const ids = new Set<string>();
+  for (const m of text.matchAll(GROUP_WORD)) {
+    const word = m[1].toLowerCase().replace(/s$/, "");
+    for (const ing of ingredients) if (ing.note && new RegExp(`\\b${word}`, "i").test(ing.note)) ids.add(ing.id);
+    for (const id of context.mix ?? []) ids.add(id);
+  }
+  return [...ids];
+}
+
+function addGroup(uses: StepUse[], text: string, ingredients: Ingredient[], context: StepContext): StepUse[] {
+  const have = new Set(uses.map((u) => u.ingredientId));
+  const extra = groupMembers(text, ingredients, context).filter((id) => !have.has(id));
+  if (!extra.length) return uses;
+  const added = ingredients
+    .filter((i) => extra.includes(i.id))
+    .map((i): StepUse => (context.used.has(i.id) ? { ingredientId: i.id, portion: 0 } : { ingredientId: i.id }));
+  for (const u of added) context.used.add(u.ingredientId);
+  const order = new Map(ingredients.map((i, n) => [i.id, n]));
+  return [...uses, ...added].sort((a, b) => order.get(a.ingredientId)! - order.get(b.ingredientId)!);
+}
+
+const PREP: Technique[] = ["chop", "mince", "slice", "season", "plate"];
 const COOKING: Technique[] = ["sear", "fry", "saute", "roast", "bake", "broil", "simmer", "boil"];
 
 export function structureStep(text: string, ingredients: Ingredient[], context: StepContext, name?: string): Step[] {
@@ -303,7 +332,9 @@ export function structureStep(text: string, ingredients: Ingredient[], context: 
   return buildGroups(sentences).map((group): Step => {
     const { text: stepText, raw: shownRaw } = shown(group);
     const raw = group.sentences.map((s) => s.raw).join(" ");
-    const match = techniqueOf(group);
+    let match = techniqueOf(group);
+    const timedMatch = group.sentences.find((x) => x.hasTimer)?.match;
+    if (match && PREP.includes(match.technique) && timedMatch && !timedMatch.generic && (!timedMatch.weak || timedMatch.cook)) match = timedMatch;
 
     let technique: Technique | undefined = match?.technique;
     if (match?.generic && context.last) technique = context.last;
@@ -321,26 +352,36 @@ export function structureStep(text: string, ingredients: Ingredient[], context: 
     const timed = group.sentences.find((x) => x.hasTimer);
     const timer = detectTimer(timed ? timed.raw : raw, technique);
     const cue = detectCue(shownRaw);
+    const groupText = group.sentences.map((x) => x.text).join(" ");
+    const uses = addGroup(linkIngredients(groupText, ingredients, context.used), groupText, ingredients, context);
+    if (COMBINING.includes(technique)) {
+      const fresh = uses.filter((u) => u.portion !== 0 && ingredients.find((i) => i.id === u.ingredientId)?.token.shape !== "cube");
+      if (fresh.length >= 3) context.mix = fresh.map((u) => u.ingredientId);
+    }
     return {
       text: stepText,
       technique,
       ...(heat && { heat }),
       ...(timer && { timer }),
       ...(cue && { cue }),
-      uses: linkIngredients(group.sentences.map((s) => s.text).join(" "), ingredients, context.used),
+      uses,
     };
   });
 }
 
+const SEASONING_WORD = /\b(?:flavou?rs?|seasonings?|spices|marinade|dry ingredients|wet ingredients)\b/i;
+
 export function attachUnusedIngredients(steps: Step[], ingredients: Ingredient[], context: StepContext): void {
   if (!steps.length) return;
   const passive: Technique[] = ["whisk", "marinate", "season"];
+  const named = steps.findIndex((s) => SEASONING_WORD.test(s.text));
   const preferred = steps.findIndex((s) => passive.includes(s.technique));
-  const target = preferred >= 0 ? preferred : 0;
+  const target = named >= 0 ? named : preferred >= 0 ? preferred : 0;
   for (const ing of ingredients) {
     if (context.used.has(ing.id)) continue;
     steps[target].uses.push({ ingredientId: ing.id });
     context.used.add(ing.id);
+    if (named >= 0) continue;
     context.warnings.push(`"${ing.name}" isn't mentioned in any step, so it was added to step ${target + 1}.`);
   }
 }

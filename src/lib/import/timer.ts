@@ -33,10 +33,14 @@ function unitSeconds(unit: string): number {
   return 3600;
 }
 
+const AFTER_BEFORE = /\bafter\s+(?:about\s+|around\s+|roughly\s+|~\s*)?$/i;
+const A_SECOND_OK = /\b(?:for|about|within|in|just|only|another)\s+$/i;
+
 interface Candidate {
   seconds: number;
   index: number;
   forPhrase: boolean;
+  after: boolean;
 }
 
 function candidates(text: string): Candidate[] {
@@ -46,9 +50,11 @@ function candidates(text: string): Candidate[] {
   const ok = (index: number) => !LIMIT_BEFORE.test(text.slice(Math.max(0, index - 30), index));
   const push = (seconds: number, index: number, end: number) => {
     taken.push([index, end]);
-    if (ok(index)) {
-      found.push({ seconds, index, forPhrase: FOR_BEFORE.test(text.slice(Math.max(0, index - 30), index)) });
-    }
+    if (!ok(index)) return;
+    const before = text.slice(Math.max(0, index - 30), index);
+    const after = AFTER_BEFORE.test(before);
+    if (after && seconds < 30) return;
+    found.push({ seconds, index, forPhrase: FOR_BEFORE.test(before), after });
   };
 
   for (const m of text.matchAll(CROSS)) {
@@ -58,6 +64,8 @@ function candidates(text: string): Candidate[] {
   }
   for (const m of text.matchAll(SIMPLE)) {
     if (overlaps(m.index, m.index + m[0].length) || m[3]) continue;
+    const singleSecond = !m[2] && /^(?:an?|one)$/i.test(m[1]) && /^sec/i.test(m[4]);
+    if (singleSecond && (!A_SECOND_OK.test(text.slice(Math.max(0, m.index - 12), m.index)) || /^\s+(?:time|ladle|bag|batch|round|pass|layer|coat)/i.test(text.slice(m.index + m[0].length)))) continue;
     const lo = numberOf(m[1]);
     const hi = m[2] ? numberOf(m[2]) : lo;
     push(((lo + hi) / 2 + (m[5] ? 0.5 : 0)) * unitSeconds(m[4]), m.index, m.index + m[0].length);
@@ -129,7 +137,7 @@ function labelFor(text: string, technique: Technique): string {
 
 export function detectTimer(text: string, technique: Technique): StepTimer | undefined {
   const list = candidates(text);
-  const pick = list.find((c) => c.forPhrase) ?? list[0];
+  const pick = list.find((c) => c.forPhrase) ?? list.find((c) => !c.after) ?? list[0];
   if (!pick) return undefined;
   const seconds = Math.round(pick.seconds);
   if (seconds <= 0) return undefined;

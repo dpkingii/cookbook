@@ -25,7 +25,7 @@ const GROUPS: (Rule[] | typeof COOK_HERE)[] = [
   [["marinate", /\b(?:marinat(?:e|ed|es|ing)|massage(?= [^.]*\b(?:marinade|sauce|meat|pork|beef|chicken|lamb|fish|salmon|shrimp|tofu|steak|ribs)\b))\b/]],
   [["knead", /\bknead(?:ed|ing)?\b/]],
   [["fold", /\bfold(?:ed|ing)?\b/]],
-  [["whisk", /\b(?:whisk(?:ing)?|beat(?:ing)?|(?<!\b(?:the|a|an|your) (?:[a-z-]+ ){0,1})mix(?:es|ing)?|combine|blend(?:ing)?|mash)\b|\bstir(?= (?:together|well|until|to combine|thoroughly))/]],
+  [["whisk", /\b(?:whisk(?:ing)?|beat(?:ing)?|(?<!\b(?:the|a|an|your) (?:[a-z-]+ ){0,1})mix(?:es|ing)?|combin(?:e|es|ed|ing)|blend(?:ing)?|mash)\b|\b(?:prepare|create|make) (?:the |a |our |your )?(?:[a-z]+ ){0,2}(?:sauce|marinade|glaze|slurry|dressing|batter|seasoning)\b|\badd\b[^.;]*\b(?:to|into) (?:a|the|another|an|your) (?:[a-z-]+ ){0,2}bowl\b|\bcrack(?:ed|ing|s)?\b[^.;]*\bbowl\b|\bsmash(?:ed|ing)?\b[^.;]*\bpaste\b|\bstir(?= (?:together|well|until|to combine|thoroughly))/]],
   [[
     "plate",
     new RegExp(
@@ -36,14 +36,14 @@ const GROUPS: (Rule[] | typeof COOK_HERE)[] = [
   [
     ["chop", /\b(?:chop(?:ping)?|dic(?:e|ing))\b/],
     ["mince", /\b(?:minc(?:e|ing)|crush(?:ing)?|grat(?:e|ing))\b/],
-    ["slice", /\b(?:slic(?:e|es|ing)|cut(?:ting)?|trim(?:ming)?|julienne|shred(?:ding)?|carve|peel(?:ing)?)\b/],
+    ["slice", /\b(?:slic(?:e|es|ing)|cut(?:ting)?|trim(?:ming)?|julienne|shred(?:ding)?|carve|(?<!\b(?:mandarin|orange|tangerine|citrus|lemon|lime|grapefruit|dried|fruit) )peel(?:ing)?)\b/],
   ],
   [["drain", /\b(?:drain(?:ing)?|wash(?:ing)?|rins(?:e|ing)|soak(?:ing)?|strain(?:ing)?|pat dry)\b/]],
   [[
     "season",
     /\b(?:season(?:ing|s)?|sprinkle|coat|dredge|rub|dust|taste)\b|\badd (?:the |some |a bit of |more )?(?:\w+ )?(?:salt|pepper)\b/,
   ]],
-  [["chill", /\b(?:refrigerat(?:e|ing)|chill(?:ing)?|freez(?:e|ing))\b|\bin the (?:fridge|refrigerator|freezer)\b/]],
+  [["chill", /\b(?:refrigerat(?:e|ing)|chill(?:ing)?|freez(?:e|ing))\b|\bin (?:the |your )?(?:fridge|refrigerator|freezer)\b/]],
   [["rest", /\bset\b[^.,;]{0,25}\baside\b|\bcool(?:ing)?\b|\blet (?:it |them |the \w+ )?(?:stand|sit|rest|cool)\b|\brest(?:ing)?\b(?! of\b)/]],
 ];
 
@@ -69,8 +69,12 @@ export interface TechniqueMatch {
   generic?: boolean;
 }
 
+const NEGATED = /\b(?:do not|don['’]t|never|avoid|without|no need to)\s+(?:\w+ing\s+|\w+\s+)?/g;
+const VESSEL_OUT = /\b(?:take|remove|lift|transfer|move|dump|empty|pour|scoop|slide)\b[^.;]*\b(?:out of|from|off|out)\b[^.;]*\b(?:wok|pan|pot|skillet|oven|steamer|lid)\b|\b(?:take|lift|remove)\b[^.;]*\b(?:bowl|plate|dish)\b[^.;]*\b(?:out of|from|off)\b/;
+
 function withoutClauses(text: string): string {
   return text
+    .replace(NEGATED, " ")
     .replace(/\buntil\b[^,.;]*/g, " ")
     .replace(/\bbefore\b[^,.;]*/g, " ")
     .replace(/\b(?:to (?:ensures?|help|prevent|avoid|allow|make sure|be \w+)|so that|so (?:you|they|it)(?:'re|'ll|'s| can| will| don't| won't| are| is)|in order to|which (?:helps|allows|means|will|makes|ensures)|because)\b[^.;]*/g, " ");
@@ -91,6 +95,7 @@ function matchText(t: string): TechniqueMatch | null {
     }
     if (best) return { technique: best.technique, weak: false };
   }
+  if (VESSEL_OUT.test(t)) return { technique: /\b(?:water|liquid|oil|broth|stock)\b/.test(t) ? "drain" : "rest", weak: true };
   for (const [technique, pattern] of WEAK) {
     if (pattern.test(t)) return { technique, weak: true };
   }

@@ -1,15 +1,35 @@
 import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
+import { auth } from "../src/lib/auth/server";
+import { prisma as authPrisma } from "../src/lib/db/client";
 import { SEED_RECIPES } from "../src/lib/recipe/seed-recipes";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  await prisma.user.upsert({
-    where: { email: "demo@cookbook.local" },
+const DEMO_EMAIL = "demo@cookbook.local";
+// Development-only credential for the local demo account. Never reuse it anywhere real.
+const DEMO_PASSWORD = "cookbook-demo-2026";
+
+async function seedDemoUser() {
+  const user = await prisma.user.upsert({
+    where: { email: DEMO_EMAIL },
     update: {},
-    create: { email: "demo@cookbook.local", username: "demo", name: "Demo Cook" },
+    create: { email: DEMO_EMAIL, username: "demo", name: "Demo Cook", emailVerified: true },
   });
+  const credential = await prisma.account.findFirst({ where: { userId: user.id, providerId: "credential" } });
+  if (credential) return;
+
+  const ctx = await auth.$context;
+  await ctx.internalAdapter.linkAccount({
+    userId: user.id,
+    providerId: "credential",
+    accountId: user.id,
+    password: await ctx.password.hash(DEMO_PASSWORD),
+  });
+}
+
+async function main() {
+  await seedDemoUser();
 
   const cuisineIds = new Map<string, string>();
   for (const name of new Set(SEED_RECIPES.map((r) => r.cuisine))) {
@@ -86,4 +106,4 @@ main()
     console.error(e);
     process.exit(1);
   })
-  .finally(() => prisma.$disconnect());
+  .finally(() => Promise.all([prisma.$disconnect(), authPrisma.$disconnect()]));

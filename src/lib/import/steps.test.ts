@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { Ingredient } from "@/lib/recipe/types";
 import { attachUnusedIngredients, createStepContext, detectCue, splitSentences, structureStep } from "./steps";
 
-const ing = (id: string, name: string, note?: string): Ingredient => ({
+const ing = (id: string, name: string, note?: string, shape: Ingredient["token"]["shape"] = "round"): Ingredient => ({
   id,
   name,
   quantity: 1,
   unit: null,
-  token: { shape: "round", color: "#cccccc" },
+  token: { shape, color: "#cccccc" },
   ...(note && { note }),
 });
 
@@ -65,6 +65,67 @@ describe("structureStep", () => {
     const list = [ing("soy", "soy sauce"), ing("oyster", "oyster sauce")];
     const [s] = structureStep("Stir in the oyster sauce.", list, createStepContext());
     expect(s.uses.map((u) => u.ingredientId)).toEqual(["oyster"]);
+  });
+
+  describe("named ingredient groups", () => {
+    const list = [
+      ing("beef", "beef", undefined, "cube"),
+      ing("soy", "soy sauce"),
+      ing("sugar", "sugar"),
+      ing("vinegar", "rice vinegar"),
+      ing("ginger", "ginger"),
+      ing("pepper", "white pepper"),
+    ];
+
+    it("links every ingredient of a bowl that was just mixed when a later step says 'the sauce'", () => {
+      const ctx = createStepContext();
+      structureStep("Whisk together the soy sauce, sugar and rice vinegar in a small bowl.", list, ctx);
+      const [pour] = structureStep("Pour the sauce into the hot pan and stir.", list, ctx);
+      expect(pour.uses).toEqual([
+        { ingredientId: "soy", portion: 0 },
+        { ingredientId: "sugar", portion: 0 },
+        { ingredientId: "vinegar", portion: 0 },
+      ]);
+    });
+
+    it("works for the marinade and ignores the protein that was marinated", () => {
+      const ctx = createStepContext();
+      structureStep("Mix the beef with the soy sauce, sugar and white pepper, and marinate.", list, ctx);
+      const [again] = structureStep("Drain off the marinade and sear the beef.", list, ctx);
+      expect(again.uses.map((u) => u.ingredientId).sort()).toEqual(["beef", "pepper", "soy", "sugar"]);
+    });
+
+    it("uses ingredient notes naming the group when no bowl was mixed", () => {
+      const noted = [ing("s", "soy sauce", "for the sauce"), ing("g", "ginger", "for the sauce"), ing("b", "beef")];
+      const [step] = structureStep("Stir the sauce into the beef.", noted, createStepContext());
+      expect(step.uses.map((u) => u.ingredientId).sort()).toEqual(["b", "g", "s"]);
+    });
+
+    it("does not treat a specific sauce name as a group", () => {
+      const ctx = createStepContext();
+      structureStep("Whisk together the soy sauce, sugar and rice vinegar in a small bowl.", list, ctx);
+      const [step] = structureStep("Stir in the white pepper.", list, ctx);
+      expect(step.uses.map((u) => u.ingredientId)).toEqual(["pepper"]);
+    });
+  });
+
+  it("types a prep step by the timed action when the timer belongs to a soak", () => {
+    const list = [ing("m", "dried mushrooms")];
+    const [step] = structureStep("Soak the dried mushrooms in warm water for 20 minutes. Slice them thinly.", list, createStepContext());
+    expect(step.technique).toBe("drain");
+    expect(step.timer?.seconds).toBe(1200);
+    expect(step.timer?.label).toMatch(/soak/i);
+  });
+
+  it("leaves out asides that are not actions", () => {
+    const list = [ing("onion", "yellow onion")];
+    const steps = structureStep(
+      "Sauté the onion until soft. Take a moment to enjoy the smell. Be careful, the pan is hot. Do this thoroughly. Feel free to add more.",
+      list,
+      createStepContext(),
+    );
+    expect(steps).toHaveLength(1);
+    expect(steps[0].text).toBe("Sauté the onion until soft.");
   });
 
   it("consumes duplicate ingredient lines one mention at a time", () => {
@@ -299,6 +360,19 @@ describe("attachUnusedIngredients", () => {
     attachUnusedIngredients(steps, ingredients, ctx);
     expect(steps[1].uses.map((u) => u.ingredientId).sort()).toEqual(["a", "b"]);
     expect(ctx.warnings.filter((w) => w.includes("salt") || w.includes("flour"))).toHaveLength(2);
+  });
+
+  it("prefers a step that mentions the seasonings and does not warn about it", () => {
+    const ingredients = [ing("e", "egg"), ing("a", "salt"), ing("b", "sugar")];
+    const ctx = createStepContext();
+    const steps = [
+      ...structureStep("Whisk the egg until smooth.", ingredients, ctx),
+      ...structureStep("Toss the cubes with the flavors for a minute.", ingredients, ctx),
+    ];
+    attachUnusedIngredients(steps, ingredients, ctx);
+    expect(steps[0].uses.map((u) => u.ingredientId)).toEqual(["e"]);
+    expect(steps[1].uses.map((u) => u.ingredientId).sort()).toEqual(["a", "b"]);
+    expect(ctx.warnings.filter((w) => w.includes("salt") || w.includes("sugar"))).toHaveLength(0);
   });
 
   it("falls back to the first step", () => {

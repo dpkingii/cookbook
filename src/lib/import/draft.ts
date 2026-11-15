@@ -1,6 +1,7 @@
 import type { Difficulty, Ingredient, Recipe, Step } from "@/lib/recipe/types";
 import { guessToken } from "./tokens";
 import { parseIngredientLine } from "./ingredient";
+import { consolidate } from "./consolidate";
 import { attachUnusedIngredients, createStepContext, structureStep } from "./steps";
 import type { RecipeDraft } from "./types";
 
@@ -53,6 +54,25 @@ export function buildIngredients(lines: string[]): Ingredient[] {
   return out;
 }
 
+function noteRepeatedIngredients(ingredients: Ingredient[], steps: Step[]): void {
+  const groups = new Map<string, Ingredient[]>();
+  for (const ing of ingredients) {
+    const key = ing.name.toLowerCase();
+    groups.set(key, [...(groups.get(key) ?? []), ing]);
+  }
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    const at = group.map((ing) => {
+      const fresh = steps.findIndex((s) => s.uses.some((u) => u.ingredientId === ing.id && u.portion !== 0));
+      return fresh >= 0 ? fresh : steps.findIndex((s) => s.uses.some((u) => u.ingredientId === ing.id));
+    });
+    if (at.includes(-1) || new Set(at).size !== group.length) continue;
+    group.forEach((ing, i) => {
+      ing.note = ing.note ? `${ing.note}, for step ${at[i] + 1}` : `for step ${at[i] + 1}`;
+    });
+  }
+}
+
 export function summarise(description: string): string {
   const d = description.replace(/\s+/g, " ").trim();
   if (d.length <= 200) return d;
@@ -75,13 +95,14 @@ export function buildDraft(input: DraftInput): RecipeDraft {
   const ctx = createStepContext();
   ctx.warnings.push(...(input.warnings ?? []));
 
-  const steps: Step[] = input.steps.flatMap((s) => structureStep(s.text, ingredients, ctx, s.name));
+  const steps: Step[] = consolidate(input.steps.flatMap((s) => structureStep(s.text, ingredients, ctx, s.name)));
   if (!steps.length) {
     ctx.warnings.push("No steps were found, so a placeholder step was added.");
     steps.push({ text: "Follow the original recipe.", technique: "rest", uses: [] });
   }
   if (!ingredients.length) ctx.warnings.push("No ingredients were found.");
   attachUnusedIngredients(steps, ingredients, ctx);
+  noteRepeatedIngredients(ingredients, steps);
 
   const timerMinutes = Math.round(steps.reduce((sum, s) => sum + (s.timer?.seconds ?? 0), 0) / 60);
   let prep = input.prepMinutes ?? null;

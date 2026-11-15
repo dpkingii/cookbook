@@ -62,11 +62,20 @@ function round(n: number): number {
 }
 
 function normalise(line: string): string {
-  let s = line.replace(/[®™©\u200b-\u200d\ufeff]/g, "").replace(/ /g, " ");
+  let s = line.replace(/[\u200b-\u200d\ufeff]/g, "").replace(/ /g, " ");
   s = s.replace(/(\d)\s*([½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])/g, (_, d, f) => `${d} ${UNICODE_FRACTIONS[f]}`);
   s = s.replace(/[½⅓⅔¼¾⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]/g, (f) => UNICODE_FRACTIONS[f]);
   s = s.replace(/^([\d.]+(?:\s*[-–—]\s*[\d.]+)?)(?=[a-zA-Z])/, "$1 ");
   return s.replace(/\s+/g, " ").trim();
+}
+
+const BRAND = /^(?:[A-Z][\w'&.-]*\s+)*[A-Z][\w'&.-]*[®™]\s*(?=[a-z])/i;
+
+function withoutBrand(name: string): string {
+  const stripped = name.replace(BRAND, "");
+  if (stripped === name) return name.replace(/[®™©]/g, "");
+  const clean = stripped.replace(/[®™©]/g, "").trim();
+  return clean.split(" ").every((w) => /^[A-Z]/.test(w)) ? clean.toLowerCase() : clean;
 }
 
 export function parseIngredientLine(line: string): ParsedIngredient {
@@ -74,7 +83,7 @@ export function parseIngredientLine(line: string): ParsedIngredient {
   let s = normalise(line);
 
   s = s.replace(/\(([^)]*)\)/g, (_, inner: string) => {
-    if (inner.trim()) notes.push(inner.trim());
+    if (inner.trim()) notes.push(inner.replace(/[®™©]/g, "").trim());
     return " ";
   });
   s = s.replace(/\s+/g, " ").trim();
@@ -82,7 +91,7 @@ export function parseIngredientLine(line: string): ParsedIngredient {
   const comma = s.indexOf(",");
   if (comma >= 0) {
     const tail = s.slice(comma + 1).trim();
-    if (tail) notes.push(tail);
+    if (tail) notes.push(tail.replace(/[®™©]/g, ""));
     s = s.slice(0, comma).trim();
   }
 
@@ -128,6 +137,6 @@ export function parseIngredientLine(line: string): ParsedIngredient {
 
   if (unit || quantity !== null) s = s.replace(/^of\s+/i, "");
 
-  const name = s.replace(/\s+/g, " ").trim();
+  const name = withoutBrand(s.replace(/\s+/g, " ").trim());
   return { quantity, unit, name, ...(notes.length && { note: notes.join(", ") }) };
 }

@@ -21,6 +21,8 @@ const TABLE: [shape: TokenShape, color: string, keywords: string][] = [
   ["liquid", "#e8d36a", "lemon juice|lime juice|juice"],
   ["liquid", "#a9cfe0", "water|ice|club soda|sparkling water"],
   ["liquid", "#6b3a1e", "coffee|espresso|tea"],
+  ["liquid", "#b3261e", "food coloring|food colouring|food color"],
+  ["liquid", "#8a3b24", "doubanjiang|toban djan|bean paste|fermented bean curd|maltose|malt syrup|caramel"],
   ["liquid", "#c9a35a", "mustard|mayonnaise|mayo|dressing|sauce|marinade|slurry|paste|tahini|miso|vanilla extract|extract"],
 
   ["grain", WHITE, "garlic powder|onion powder|ginger powder|garlic salt|onion salt|celery salt|sea salt|kosher salt|salt"],
@@ -33,12 +35,13 @@ const TABLE: [shape: TokenShape, color: string, keywords: string][] = [
   ["grain", WHITE, "baking soda|baking powder|cornstarch|corn starch|potato starch|tapioca|starch|powdered sugar|icing sugar|confectioners|sugar|flour|panko|breadcrumb|bread crumb|cocoa|cornmeal|semolina|gelatin"],
   ["grain", "#eadfc4", "jasmine rice|basmati rice|sushi rice|brown rice|glutinous rice|sticky rice|rice|quinoa|couscous|oats|oat|barley|millet|bulgur|lentil|sesame seed|sesame|chia|flax|seeds|rice cup"],
   ["grain", "#e8c34a", "corn kernel|sweetcorn|corn"],
+  ["grain", WHITE, "desiccated coconut|shredded coconut|coconut flakes"],
   ["grain", "#b8864e", "peanut|almond|cashew|walnut|pecan|pistachio|hazelnut|nuts|pine nut"],
 
   ["strand", "#f3ead6", "rice noodle|egg noodle|noodle|spaghetti|linguine|fettuccine|tagliatelle|vermicelli|ramen|udon|soba|pasta|macaroni|penne|fusilli|rigatoni|lo mein|chow mein|angel hair|bucatini|orzo|glass noodle|cellophane"],
-  ["strand", "#efe6c8", "bean sprout|sprouts|enoki|rice stick|bean thread"],
+  ["strand", "#efe6c8", "bean sprout|beansprout|sprouts|enoki|rice stick|bean thread|chow fun|ho fun|mei fun|yee mein|e-fu|e fu|noodles"],
 
-  ["leaf", GREEN, "basil|cilantro|coriander|parsley|mint|thyme|rosemary|oregano|sage|dill|chive|tarragon|bay leaf|curry leaf|herb|spinach|kale|lettuce|arugula|rocket|bok choy|pak choi|choy sum|gai lan|napa|cabbage|chard|watercress|collard|romaine|greens|basil leaves|lemongrass|kaffir"],
+  ["leaf", GREEN, "basil|cilantro|coriander|parsley|mint|thyme|rosemary|oregano|sage|dill|chive|tarragon|bay leaf|curry leaf|herb|spinach|kale|lettuce|arugula|rocket|bok choy|pak choi|choy sum|gai lan|napa|cabbage|chard|watercress|collard|romaine|greens|basil leaves|lemongrass|kaffir|ong choy|water spinach|tong ho|leaves|seaweed|nori|kombu|laver|wakame"],
 
   ["wedge", "#d9b36a", "ginger|galangal"],
   ["wedge", "#f3e7c3", "garlic"],
@@ -48,7 +51,7 @@ const TABLE: [shape: TokenShape, color: string, keywords: string][] = [
 
   ["bulb", "#e8c98a", "yellow onion|white onion|red onion|onion|shallot|pearl onion"],
   ["bulb", "#5a8f3d", "broccoli|broccolini|cauliflower|romanesco"],
-  ["bulb", "#cfd8a8", "fennel|kohlrabi|turnip|radish|daikon|beet|beetroot"],
+  ["bulb", "#cfd8a8", "fennel|kohlrabi|turnip|radish|daikon|beet|beetroot|jicama|lily bulb|daylily"],
 
   ["long", "#5d9440", "scallion|green onion|spring onion|leek|asparagus|green bean|snake bean|long bean|celery|chive stem|garlic chive|chinese chive"],
   ["long", "#e8832a", "carrot|sweet potato|yam|parsnip"],
@@ -56,10 +59,10 @@ const TABLE: [shape: TokenShape, color: string, keywords: string][] = [
   ["long", "#c23b22", "chili|chilli|chile|jalapeno|jalapeño|serrano|thai pepper|red pepper|green pepper"],
   ["long", "#f0d96a", "banana|plantain|lotus root|bamboo shoot"],
 
-  ["cube", "#f3ead6", "tofu|bean curd|tempeh|paneer"],
+  ["cube", "#f3ead6", "tofu|bean curd|beancurd|tempeh|paneer"],
   ["cube", "#f2d27a", "cheddar|mozzarella|parmesan|parmigiano|feta|gouda|gruyere|brie|ricotta|mascarpone|halloumi|cheese|cream cheese|butter|margarine"],
   ["cube", "#d9c3a0", "bread|toast|bun|bagel|tortilla|cracker|crouton|pita|naan|baguette|brioche"],
-  ["cube", "#f0a58c", "salmon|tuna|cod|halibut|tilapia|trout|snapper|sea bass|bass|fish|fillet|mackerel|sardine|anchovy|squid|scallop|clam|mussel|oyster"],
+  ["cube", "#f0a58c", "abalone|conch|sea cucumber|jellyfish|fish ball|salmon|tuna|cod|halibut|tilapia|trout|snapper|sea bass|bass|fish|fillet|mackerel|sardine|anchovy|squid|scallop|clam|mussel|oyster"],
   ["cube", "#9c3b34", "beef|steak|brisket|short rib|ribeye|sirloin|flank|chuck|veal|lamb|mutton|venison|ground beef"],
   ["cube", "#c4675a", "pork|bacon|ham|sausage|chorizo|pancetta|prosciutto|spam|char siu|ribs|belly|salami"],
   ["cube", "#edc9a8", "chicken|turkey|duck|goose|poultry|meat|thigh|breast|drumstick|wing|mince|liver"],
@@ -67,14 +70,14 @@ const TABLE: [shape: TokenShape, color: string, keywords: string][] = [
   ["round", "#d63a2b", "tomato"],
   ["round", "#f2e3b8", "egg|yolk|egg white"],
   ["round", "#c9a56a", "potato|taro|cassava"],
-  ["round", "#9a7b5a", "mushroom|shiitake|portobello|cremini|champignon|oyster mushroom|truffle"],
+  ["round", "#9a7b5a", "mushroom|fungus|shiitake|portobello|cremini|champignon|oyster mushroom|truffle"],
   ["round", "#3f9a5a", "pea|snow pea|edamame|zucchini flower"],
   ["round", "#8b4a2b", "bean|chickpea|garbanzo|black bean|kidney bean|pinto"],
   ["round", "#d84a3a", "bell pepper|capsicum|pepper|apple|cherry|strawberry|raspberry|cranberry|pomegranate"],
-  ["round", "#6a3f8f", "grape|blueberry|plum|olive|fig|prune|raisin|date"],
+  ["round", "#6a3f8f", "grape|blueberry|plum|olive|fig|prune|raisin|date|jujube|goji|wolfberry|lotus seed|longan|lychee"],
   ["round", "#e8832a", "peach|apricot|pumpkin|squash|persimmon"],
   ["round", "#6a9a45", "avocado|pear|kiwi|brussels sprout"],
-  ["round", "#f4f0e6", "dumpling|wonton|bao|meatball|gnocchi"],
+  ["round", "#f4f0e6", "dumpling|wonton|wrapper|bao|meatball|gnocchi"],
 ];
 
 const ROWS = TABLE.map(([shape, color, keywords]) => ({

@@ -32,6 +32,14 @@ describe("detectTimer seconds and mode", () => {
     ["Baste every 5 minutes.", "roast", undefined, undefined],
     ["Do not marinate for more than 24 hours.", "marinate", undefined, undefined],
     ["Heat the oven to 350°F.", "bake", undefined, undefined],
+    ["Rinse the pieces a second time and drain.", "drain", undefined, undefined],
+    ["Take a second to smell the steam, then serve.", "plate", undefined, undefined],
+    ["Add another ladle of oil, then a second ladle.", "fry", undefined, undefined],
+    ["Count to one second, then flip.", "fry", undefined, undefined],
+    ["Hold it under the tap for a second.", "fry", 1, "stay"],
+    ["Stir-fry, then lower the heat after ~10-15 sec and keep going.", "fry", undefined, undefined],
+    ["Fry the garlic for 20 seconds and lower the heat after 10 seconds.", "fry", 20, "stay"],
+    ["After 2 minutes of frying, flip the pieces.", "fry", 120, "stay"],
   ];
   it.each(cases)("%s", (text, technique, seconds, mode) => {
     const t = detectTimer(text, technique);
