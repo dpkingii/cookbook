@@ -163,7 +163,7 @@ export function StepScreen({
         </div>
       )}
 
-      <div className="sticky bottom-4 mt-auto flex gap-3 pt-6">
+      <div className="sticky bottom-0 -mx-4 mt-auto flex gap-3 bg-[var(--paper)] px-4 pb-4 pt-4 sm:-mx-6 sm:px-6">
         <button
           type="button"
           onClick={onBack}

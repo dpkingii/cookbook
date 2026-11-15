@@ -70,7 +70,7 @@ export function FinishScreen({
           className="mt-2 rounded-2xl border-2 border-[var(--ink)] bg-[var(--paper)] p-3 text-lg placeholder:text-[var(--ink-soft)]/70"
         />
 
-        <div className="sticky bottom-4 mt-auto flex gap-3 pt-6">
+        <div className="sticky bottom-0 -mx-4 mt-auto flex gap-3 bg-[var(--paper)] px-4 pb-4 pt-4 sm:-mx-6 sm:px-6">
           <button
             type="button"
             onClick={onBackToSteps}
