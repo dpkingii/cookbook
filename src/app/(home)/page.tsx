@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { getViewer } from "@/lib/auth/viewer";
 import { Stage } from "@/components/stage";
 import { listCuisines, listRecipes } from "@/lib/db/recipes";
 import type { Difficulty, Recipe } from "@/lib/recipe/types";
@@ -31,7 +33,7 @@ function chipClass(active: boolean) {
 const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
 export default async function Home({ searchParams }: PageProps<"/">) {
-  const viewerId = null;
+  const viewerId = (await getViewer())?.id ?? null;
   const params = await searchParams;
   const cuisine = first(params.cuisine) || undefined;
   const difficultyParam = first(params.difficulty);
@@ -47,6 +49,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
 
   return (
     <div className="min-h-dvh bg-[var(--paper)] text-[var(--ink)]">
+      <SiteHeader />
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 md:py-14">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--tomato-deep)]">
           Cookbook

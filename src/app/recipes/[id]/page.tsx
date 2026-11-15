@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { SiteHeader } from "@/components/site/SiteHeader";
+import { getViewer } from "@/lib/auth/viewer";
 import { IngredientToken } from "@/components/stage";
 import { HeroStage } from "@/components/cook/HeroStage";
 import { formatAmount } from "@/components/cook/format";
@@ -6,17 +8,18 @@ import { notFound } from "next/navigation";
 import { getRecipe } from "@/lib/db/recipes";
 
 export async function generateMetadata({ params }: PageProps<"/recipes/[id]">) {
-  const viewerId = null;
+  const viewerId = (await getViewer())?.id ?? null;
   return { title: (await getRecipe((await params).id, viewerId))?.title };
 }
 
 export default async function RecipePage({ params }: PageProps<"/recipes/[id]">) {
-  const viewerId = null;
+  const viewerId = (await getViewer())?.id ?? null;
   const recipe = await getRecipe((await params).id, viewerId);
   if (!recipe) notFound();
 
   return (
     <div className="min-h-dvh bg-[var(--paper)] text-[var(--ink)]">
+      <SiteHeader />
       <main className="mx-auto grid max-w-5xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-2 md:items-center md:py-16">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--tomato-deep)]">
