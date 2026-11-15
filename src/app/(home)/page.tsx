@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Pager, paginate } from "@/components/site/Pager";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { getViewer } from "@/lib/auth/viewer";
 import { Stage } from "@/components/stage";
@@ -42,10 +43,11 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const filters: Filters = { cuisine, difficulty, q };
   const filtered = Boolean(cuisine || difficulty || q);
 
-  const [recipes, cuisines] = await Promise.all([
+  const [all, cuisines] = await Promise.all([
     listRecipes({ viewerId, scope: "catalogue", cuisine, difficulty, q }),
     listCuisines(),
   ]);
+  const { items: recipes, page, pages } = paginate(all, first(params.page));
 
   return (
     <div className="min-h-dvh bg-[var(--paper)] text-[var(--ink)]">
@@ -146,6 +148,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             </li>
           ))}
         </ul>
+        <Pager page={page} pages={pages} params={{ cuisine, difficulty, q }} />
       </main>
     </div>
   );

@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/site/SiteHeader";
 import { primaryButton } from "@/components/editor/ui";
 import { getViewer } from "@/lib/auth/viewer";
 import { listRecipes, type StoredRecipe } from "@/lib/db/recipes";
+import { Pager, paginate } from "@/components/site/Pager";
 import { RecipeCard } from "./RecipeCard";
 
 export const metadata = { title: "My recipes" };
@@ -31,7 +32,7 @@ function Grid({ recipes, showVisibility }: { recipes: StoredRecipe[]; showVisibi
   );
 }
 
-export default async function MyRecipesPage() {
+export default async function MyRecipesPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const viewer = await getViewer();
   const member = viewer && !viewer.isGuest ? viewer : null;
   const [mine, favorites] = member
@@ -40,6 +41,7 @@ export default async function MyRecipesPage() {
         listRecipes({ viewerId: member.id, scope: "favorites" }),
       ])
     : [[], []];
+  const shown = paginate(mine, (await searchParams).page);
 
   return (
     <div className="min-h-dvh bg-[var(--paper)] text-[var(--ink)]">
@@ -76,7 +78,10 @@ export default async function MyRecipesPage() {
                 Your recipes
               </h2>
               {mine.length ? (
-                <Grid recipes={mine} showVisibility />
+                <>
+                  <Grid recipes={shown.items} showVisibility />
+                  <Pager page={shown.page} pages={shown.pages} params={{}} />
+                </>
               ) : (
                 <Empty title="Nothing here yet." href="/recipes/new" action="Paste a recipe">
                   Paste a recipe to turn it into a cook-along.
