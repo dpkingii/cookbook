@@ -6,6 +6,9 @@ import { HeroStage } from "@/components/cook/HeroStage";
 import { formatAmount } from "@/components/cook/format";
 import { notFound } from "next/navigation";
 import { getRecipe } from "@/lib/db/recipes";
+import { DeleteRecipe } from "@/components/editor/DeleteRecipe";
+import { FavoriteButton } from "@/components/editor/FavoriteButton";
+import { secondaryButton } from "@/components/editor/ui";
 
 export async function generateMetadata({ params }: PageProps<"/recipes/[id]">) {
   const viewerId = (await getViewer())?.id ?? null;
@@ -16,6 +19,9 @@ export default async function RecipePage({ params }: PageProps<"/recipes/[id]">)
   const viewerId = (await getViewer())?.id ?? null;
   const recipe = await getRecipe((await params).id, viewerId);
   if (!recipe) notFound();
+  const viewer = await getViewer();
+  const isOwner = Boolean(viewer && recipe.ownerId === viewer.id);
+  const isMember = Boolean(viewer && !viewer.isGuest);
 
   return (
     <div className="min-h-dvh bg-[var(--paper)] text-[var(--ink)]">
@@ -61,6 +67,23 @@ export default async function RecipePage({ params }: PageProps<"/recipes/[id]">)
           >
             Cook this
           </Link>
+
+          {(isMember || isOwner) && (
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              {isMember && <FavoriteButton recipeId={recipe.id} initial={recipe.favorited} />}
+              {isOwner && (
+                <>
+                  <Link href={`/recipes/${recipe.id}/edit`} className={secondaryButton}>
+                    Edit
+                  </Link>
+                  <DeleteRecipe recipeId={recipe.id} title={recipe.title} />
+                </>
+              )}
+            </div>
+          )}
+          {isOwner && !recipe.isPublic && (
+            <p className="mt-3 text-base text-[var(--ink-soft)]">Private: only you can see this recipe.</p>
+          )}
         </div>
 
         <HeroStage recipe={recipe} />
