@@ -14,8 +14,8 @@ const lora = Lora({
 });
 
 export const metadata: Metadata = {
-  title: "Recipe Box",
-  description: "A personal recipe tracker",
+  title: "Cookbook",
+  description: "Recipes you play, one animated step at a time",
 };
 
 export default function RootLayout({

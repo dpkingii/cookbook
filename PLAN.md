@@ -141,10 +141,10 @@ Each one ends with something you can cook from.
 
 ### M0 — Clear the deck
 
-- [ ] Commit or park the uncommitted work (see "State of the repo")
-- [ ] Rewrite the schema as above; one fresh migration
-- [ ] Fix the seed (see below) and seed three real recipes with structured steps
-- [ ] Remove unused auth packages; add Vitest
+- [x] Commit or park the uncommitted work (see "State of the repo")
+- [x] Rewrite the schema as above; one fresh migration
+- [x] Fix the seed (see below) and seed three real recipes with structured steps
+- [x] Remove unused auth packages; add Vitest
 
 **Done when**: `prisma migrate reset` gives a clean database with three fully structured recipes.
 
@@ -152,12 +152,12 @@ Each one ends with something you can cook from.
 
 No database, no login. One recipe as a typed constant.
 
-- [ ] Player reducer and event types, test-first
-- [ ] Stage with three stations (board, pan, pot) and about six techniques
-- [ ] Ingredient tokens and the mise en place screen
-- [ ] Step navigation: tap zones, keyboard, progress rail
-- [ ] Timer dock, wake lock, sound and vibration
-- [ ] Finish screen
+- [x] Player reducer and event types, test-first
+- [x] Stage with three stations (board, pan, pot) and about six techniques
+- [x] Ingredient tokens and the mise en place screen
+- [x] Step navigation: tap zones, keyboard, progress rail
+- [x] Timer dock, wake lock, sound and vibration
+- [x] Finish screen
 - [ ] Deploy
 
 **Done when**: you cook a real dinner from it on a phone without touching the laptop.
