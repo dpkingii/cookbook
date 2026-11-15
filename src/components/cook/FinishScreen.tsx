@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { authClient } from "@/lib/auth/client";
 import type { Recipe } from "@/lib/recipe/types";
 import { summary, type PlayerState } from "@/lib/player";
 import { formatDuration } from "./format";
-
-const RATINGS = ["Not again", "It was fine", "Good", "Really good", "Best yet"];
+import { RATINGS } from "./ratings";
 
 export function FinishScreen({
   recipe,
@@ -22,6 +23,8 @@ export function FinishScreen({
 }) {
   const [rating, setRating] = useState(0);
   const [note, setNote] = useState("");
+  const { data: auth, isPending } = authClient.useSession();
+  const guest = !isPending && (!auth || auth.user.isAnonymous === true);
 
   if (state.phase !== "finished") {
     return (
@@ -134,6 +137,21 @@ export function FinishScreen({
           {state.note}
         </p>
       )}
+
+      <div className="mt-6 text-lg">
+        <Link href="/history" className="font-semibold underline underline-offset-4">
+          See your history
+        </Link>
+        {guest && (
+          <p className="mt-2 text-[var(--ink-soft)]">
+            You are cooking as a guest.{" "}
+            <Link href="/signup" className="font-semibold text-[var(--ink)] underline underline-offset-4">
+              Sign up
+            </Link>{" "}
+            to keep your history and skills.
+          </p>
+        )}
+      </div>
 
       <div className="sticky bottom-4 mt-auto pt-6">
         <button

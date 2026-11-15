@@ -223,6 +223,7 @@ model CookingSession {
   techniques      Technique[]
   cuisineName     String?     @map("cuisine_name")
   difficulty      Difficulty?
+  plausible       Boolean     @default(false)
   rating          Int?
   note            String?
 
@@ -240,12 +241,13 @@ model SessionEvent {
   type       String
   stepIndex  Int?     @map("step_index")
   at         DateTime
+  seq        Int      @default(0)
   payload    Json?
   receivedAt DateTime @default(now()) @map("received_at")
 
   session CookingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  @@index([sessionId, at])
+  @@index([sessionId, at, seq])
   @@map("session_events")
 }
 
