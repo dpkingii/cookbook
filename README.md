@@ -68,6 +68,7 @@ Open http://localhost:3000. The seed adds eleven public recipes and a demo accou
 |---|---|
 | `npm run dev` | Development server |
 | `npm test` | Unit and integration tests (integration tests use a `cookbook_test` database and skip if it is unreachable) |
+| `npm run e2e` | End-to-end tests in your installed Chrome, against a production build and the local database |
 | `npm run typecheck` | TypeScript |
 | `npm run lint` | ESLint |
 | `npm run build` | Production build |

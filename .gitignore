@@ -44,3 +44,7 @@ next-env.d.ts
 
 # cached pages fetched by import scripts
 /.cache/
+
+# playwright
+/test-results/
+/playwright-report/

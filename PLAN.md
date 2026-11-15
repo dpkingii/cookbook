@@ -164,43 +164,43 @@ No database, no login. One recipe as a typed constant.
 
 ### M2 — Memory
 
-- [ ] Recipes load from Postgres; recipe list and detail pages
-- [ ] Event ingestion endpoint with idempotent writes and a local queue
-- [ ] Resume a session after reload
-- [ ] Session summary on finish; rating and note
-- [ ] History page
-- [ ] Guest sessions (no account yet)
+- [x] Recipes load from Postgres; recipe list and detail pages
+- [x] Event ingestion endpoint with idempotent writes and a local queue
+- [x] Resume a session after reload
+- [x] Session summary on finish; rating and note
+- [x] History page
+- [x] Guest sessions
 
 **Done when**: closing the tab mid-cook and reopening it puts you back on the same step with timers intact.
 
 ### M3 — Getting recipes in
 
-- [ ] Parser: pasted text → ingredients (quantity, unit, name) and steps, test-first
-- [ ] Technique and timer detection from step text ("simmer for 8–10 minutes" → `simmer`, 540 s, background)
-- [ ] URL import by reading the page's `schema.org/Recipe` data
-- [ ] Step composer: edit the draft with a live preview of each step's animation
-- [ ] Remaining stations (bowl, oven, rest) and the rest of the technique library
-- [ ] Serving scaler
+- [x] Parser: pasted text → ingredients (quantity, unit, name) and steps, test-first
+- [x] Technique and timer detection from step text ("simmer for 8–10 minutes" → `simmer`, 540 s, background)
+- [x] URL import by reading the page's `schema.org/Recipe` data
+- [x] Step composer: edit the draft with a live preview of each step's animation
+- [x] Remaining stations (bowl, oven, rest) and the rest of the technique library
+- [x] Serving scaler
 
 **Done when**: pasting a recipe from any major recipe site gives a playable, animated cook-along in under a minute of fixing up.
 
 ### M4 — Accounts and skill
 
-- [ ] Sign up, log in, protected routes; guest sessions attach to the new account
-- [ ] My recipes, favorites, edit, delete
-- [ ] Technique map, cuisine proficiency, weekly streak, pace
-- [ ] "Next up" suggestions
-- [ ] Profile page
+- [x] Sign up, log in, protected routes; guest sessions attach to the new account
+- [x] My recipes, favorites, edit, delete
+- [x] Technique map, cuisine proficiency, weekly streak, pace
+- [x] "Next up" suggestions
+- [x] Profile page
 
 **Done when**: after five cooked sessions the dashboard tells you something true that you didn't already know.
 
 ### M5 — Ship it
 
-- [ ] Landing page that is the player: a recipe starts playing with no sign-up
-- [ ] Reduced motion, keyboard and screen-reader pass
-- [ ] Loading, empty and error states
-- [ ] One Playwright test that cooks a recipe end to end
-- [ ] README with an architecture diagram and a short demo recording
+- [x] Landing page that is the player: a recipe starts playing with no sign-up
+- [x] Reduced motion, keyboard and screen-reader pass
+- [x] Loading, empty and error states
+- [x] One Playwright test that cooks a recipe end to end
+- [x] README with an architecture diagram and a short demo recording
 
 **Done when**: a stranger with the link is watching a step animate within ten seconds.
 
@@ -208,7 +208,16 @@ No database, no login. One recipe as a typed constant.
 
 Voice control ("next", "start timer") · cooking two recipes at once on a merged timeline · finished-dish photo · public share links · unit conversion · nutrition, using USDA FoodData Central.
 
-## State of the repo
+## Status on 2026-11-15
+
+Milestones 0 to 5 are built on `main`. Still open:
+
+- [ ] Deploy (Vercel and a hosted Postgres). The new schema has only been applied to the local database.
+- [ ] Try it on a real phone: chime, vibration, wake lock and touch.
+- [ ] Wok and steamer scenes. Stir-frying is drawn in the skillet and steaming in a pot.
+- [ ] Importer accuracy. Across 198 imported recipes the median is 11 steps; some steps still get the wrong technique (stirring on the heat read as whisking) and 61 recipes carry a warning.
+
+## State of the repo before this work
 
 Found while reviewing, on 2026-11-14:
 
