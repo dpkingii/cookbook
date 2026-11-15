@@ -82,6 +82,7 @@ export interface Recipe {
   servings: number;
   prepMinutes: number;
   cookMinutes: number;
+  source?: { name: string; url: string };
   ingredients: Ingredient[];
   steps: Step[];
 }

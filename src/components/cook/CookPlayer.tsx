@@ -60,7 +60,7 @@ export function CookPlayer({ recipe }: { recipe: Recipe }) {
     <div className="flex min-h-dvh flex-col bg-[var(--paper)] text-[var(--ink)]">
       <header className="flex items-center justify-between gap-3 px-4 pt-3 sm:px-6">
         <Link
-          href="/"
+          href={`/recipes/${recipe.id}`}
           className="font-serif text-lg font-semibold tracking-tight underline-offset-4 hover:underline"
         >
           {recipe.title}

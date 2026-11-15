@@ -1,4 +1,5 @@
 import { DEMO_RECIPE } from "./demo";
+import { LAU_RECIPES } from "./lau";
 import type { Recipe } from "./types";
 
 const FRIED_RICE: Recipe = {
@@ -241,4 +242,6 @@ const SHEET_PAN: Recipe = {
   ],
 };
 
-export const SEED_RECIPES: Recipe[] = [DEMO_RECIPE, FRIED_RICE, SHEET_PAN];
+export const SEED_RECIPES: Recipe[] = [DEMO_RECIPE, FRIED_RICE, SHEET_PAN, ...LAU_RECIPES];
+
+export const findRecipe = (id: string) => SEED_RECIPES.find((r) => r.id === id);

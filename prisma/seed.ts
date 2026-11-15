@@ -34,6 +34,8 @@ async function main() {
         cookMinutes: recipe.cookMinutes,
         servings: recipe.servings,
         isPublic: true,
+        sourceName: recipe.source?.name,
+        sourceUrl: recipe.source?.url,
         cuisineId: cuisineIds.get(recipe.cuisine),
         ingredients: {
           create: recipe.ingredients.map((ing, position) => ({
