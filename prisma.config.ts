@@ -1,4 +1,7 @@
-import "dotenv/config";
+import { config } from "dotenv";
+
+// .env.local wins, as it does in Next.js; dotenv never overrides a variable that is already set.
+config({ path: [".env.local", ".env"], quiet: true });
 import { defineConfig } from "prisma/config";
 
 export default defineConfig({
