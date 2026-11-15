@@ -8,7 +8,7 @@ async function main() {
   await prisma.user.upsert({
     where: { email: "demo@cookbook.local" },
     update: {},
-    create: { email: "demo@cookbook.local", username: "demo", fullName: "Demo Cook" },
+    create: { email: "demo@cookbook.local", username: "demo", name: "Demo Cook" },
   });
 
   const cuisineIds = new Map<string, string>();
