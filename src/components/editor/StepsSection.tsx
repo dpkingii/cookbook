@@ -1,10 +1,9 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { moveItem } from "@/lib/recipes/edit";
 import { blankStep, type FormState, type StepForm } from "@/lib/recipes/form";
 import { StepCard } from "./StepCard";
-import { panel, secondaryButton } from "./ui";
+import { errorClass, hintClass, secondaryButton, section, sectionTitle } from "./ui";
 
 export function StepsSection({
   form,
@@ -35,15 +34,15 @@ export function StepsSection({
   };
 
   return (
-    <section aria-labelledby="steps-heading" className={panel}>
-      <h2 id="steps-heading" className="font-serif text-3xl font-semibold">
+    <section aria-labelledby="steps-heading" className={section}>
+      <h2 id="steps-heading" className={sectionTitle}>
         Steps
       </h2>
-      <p className="mt-1 text-[var(--ink-soft)]">
+      <p className={`mt-1 ${hintClass}`}>
         The preview shows the step you are editing. Change the technique, heat or ingredients and watch it update.
       </p>
 
-      <ol className="mt-4 grid gap-4">
+      <ol className="mt-4 border-b border-[var(--rule)]">
         {steps.map((step, index) => (
           <StepCard
             key={step.key}
@@ -66,19 +65,19 @@ export function StepsSection({
       </ol>
 
       {error("add-step") && (
-        <p className="mt-3 text-base font-semibold text-[var(--tomato-deep)]">{error("add-step")}</p>
+        <p className={`mt-3 ${errorClass}`}>{error("add-step")}</p>
       )}
       <button
         id="add-step"
         type="button"
-        className={`${secondaryButton} mt-4`}
+        className={`${secondaryButton} mt-5`}
         onClick={() => {
           focusAfter(`step-${steps.length}-text`);
           setForm((f) => ({ ...f, steps: [...f.steps, blankStep()] }));
           setActiveStep(steps.length);
         }}
       >
-        <Plus aria-hidden size={20} /> Add step
+        Add step
       </button>
     </section>
   );

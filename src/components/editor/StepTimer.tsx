@@ -1,6 +1,6 @@
 import type { StepForm } from "@/lib/recipes/form";
 import { Field } from "./Field";
-import { inputClass } from "./ui";
+import { checkbox, inputClass } from "./ui";
 
 export function StepTimer({
   index,
@@ -17,18 +17,18 @@ export function StepTimer({
   return (
     <fieldset className="min-w-0">
       <legend className="sr-only">Timer</legend>
-      <label htmlFor={`${at}-on`} className="flex min-h-11 items-center gap-3 text-lg font-semibold">
+      <label htmlFor={`${at}-on`} className="flex min-h-11 items-center gap-3 text-base font-medium">
         <input
           id={`${at}-on`}
           type="checkbox"
           checked={step.timerOn}
           onChange={(event) => onChange({ ...step, timerOn: event.target.checked })}
-          className="size-6 accent-[var(--tomato)]"
+          className={checkbox}
         />
         This step has a timer
       </label>
       {step.timerOn && (
-        <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="mt-2 grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Field id={`${at}-minutes`} label="Minutes" error={error}>
             {(props) => (
               <input
