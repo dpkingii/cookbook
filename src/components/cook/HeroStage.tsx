@@ -20,10 +20,13 @@ export function HeroStage({ recipe }: { recipe: Recipe }) {
   const step = recipe.steps[stepIndex];
 
   return (
-    <figure className="rounded-3xl border-2 border-[var(--ink)] bg-[var(--paper-deep)] p-3 shadow-[6px_6px_0_var(--tomato)]">
+    <figure className="border border-[var(--rule)] bg-white">
       <Stage recipe={recipe} stepIndex={stepIndex} progress={step.timer ? (tick % 12) / 11 : null} />
-      <figcaption className="px-2 pb-1 pt-2 text-lg">
-        <span className="font-semibold">{stepIndex + 1}.</span> {step.text}
+      <figcaption className="border-t border-[var(--rule)] px-4 py-3">
+        <span className="label-caps">
+          Step {stepIndex + 1} of {recipe.steps.length}
+        </span>
+        <span className="mt-1 block font-serif text-xl font-medium leading-snug">{step.text}</span>
       </figcaption>
     </figure>
   );
