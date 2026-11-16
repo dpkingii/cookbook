@@ -2,7 +2,8 @@ import { expect, test } from "@playwright/test";
 
 test("a guest cooks a recipe end to end and a reload resumes mid-cook", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("link", { name: /Garlic & Basil Pomodoro/ }).click();
+  await expect(page.getByRole("navigation", { name: "Main" })).toBeVisible();
+  await page.getByRole("link", { name: /Garlic & Basil Pomodoro/ }).first().click();
   await expect(page.getByRole("heading", { level: 1, name: "Garlic & Basil Pomodoro" })).toBeVisible();
   await page.getByRole("link", { name: "Cook this" }).click();
 
@@ -35,7 +36,9 @@ test("a guest cooks a recipe end to end and a reload resumes mid-cook", async ({
   await page.getByRole("radio", { name: /Really good/ }).click();
   await page.getByLabel("One note for next time").fill("More basil.");
   await page.getByRole("button", { name: "Save this cook" }).click();
-  await expect(page.getByText("Techniques you practised")).toBeVisible();
+  await expect(page.getByText("Session logged")).toBeVisible();
+  await expect(page.getByText(/reads as a walkthrough/)).toBeVisible();
+  await page.getByRole("button", { name: "Next", exact: true }).click();
 
   await page.getByRole("link", { name: "See your history" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("What you have cooked");
@@ -50,6 +53,8 @@ test("a member imports a pasted recipe, saves it, and deletes it", async ({ page
   await page.getByLabel(/email/i).fill(email);
   await page.getByLabel(/password/i).fill("e2e-only-password-1");
   await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto("/profile");
   await expect(page.getByRole("button", { name: "Log out" })).toBeVisible();
 
   await page.goto("/recipes/new");
@@ -102,4 +107,24 @@ test.describe("with reduced motion", () => {
       .toBe(0);
     expect(errors).toEqual([]);
   });
+});
+
+test("tapping a technique explains it, and the bottom bar reaches Cook and Profile", async ({ page }) => {
+  await page.goto("/cook");
+  await expect(page.getByRole("heading", { level: 1, name: "What are you making?" })).toBeVisible();
+  await page.getByRole("searchbox").fill("pomodoro");
+  await page.keyboard.press("Enter");
+  await page.getByRole("link", { name: /Garlic & Basil Pomodoro/ }).first().click();
+  await page.getByRole("link", { name: "Cook this" }).click();
+  await page.getByRole("button", { name: /^Start cooking/ }).click();
+
+  await page.getByRole("button", { name: /^Boil/ }).click();
+  const sheet = page.getByRole("dialog", { name: "Boil" });
+  await expect(sheet).toContainText("bubbling hard");
+  await sheet.getByRole("button", { name: "Got it" }).click();
+  await expect(sheet).toBeHidden();
+
+  await page.goto("/profile");
+  await expect(page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Profile" })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByText("Techniques", { exact: true }).first()).toBeVisible();
 });
