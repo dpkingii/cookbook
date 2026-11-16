@@ -2,6 +2,7 @@
 
 import type { Recipe } from "@/lib/recipe/types";
 import { dockTimers, remainingMs, ringingTimers, type PlayerState } from "@/lib/player";
+import { focusRing } from "./focus";
 import { formatClock } from "./format";
 
 export function TimerDock({
@@ -20,37 +21,30 @@ export function TimerDock({
   if (ringing.length === 0 && running.length === 0) return null;
 
   return (
-    <aside
-      aria-label="Timers"
-      className="sticky bottom-0 border-t-2 border-[var(--ink)] bg-[var(--ink)] px-4 py-3 text-[var(--paper)] sm:px-6"
-    >
-      <ul className="mx-auto flex max-w-3xl flex-wrap gap-2">
+    <aside aria-label="Timers" className="border-t border-[var(--rule)] bg-white">
+      <ul className="mx-auto w-full max-w-xl divide-y divide-[var(--rule)] px-5">
         {ringing.map((t) => (
-          <li key={t.id} className="w-full">
+          <li key={t.id}>
             <button
               type="button"
               onClick={() => onAcknowledge(t.id)}
-              className="flex w-full animate-pulse items-center justify-between gap-3 rounded-2xl bg-[var(--tomato)] px-4 py-3 text-left text-xl font-bold"
+              className={`my-2 flex min-h-14 w-full items-center justify-between gap-3 border-l-4 border-[var(--accent)] pl-3 text-left ${focusRing}`}
             >
               <span>
-                {t.label} is ready
-                <span className="block text-base font-normal">
-                  Step {t.stepIndex + 1}: {recipe.steps[t.stepIndex].cue ?? "check it now"}
+                <span className="label-caps block !text-[var(--accent)]">Ready · Step {t.stepIndex + 1}</span>
+                <span className="block font-serif text-xl font-medium leading-tight">{t.label} is ready</span>
+                <span className="block text-base text-[var(--mute)]">
+                  {recipe.steps[t.stepIndex].cue ?? "Check it now."}
                 </span>
               </span>
-              <span className="rounded-full border-2 border-[var(--paper)] px-4 py-1 text-base">
-                Got it
-              </span>
+              <span className="shrink-0 border border-[var(--ink)] px-4 py-2 text-base font-medium">Got it</span>
             </button>
           </li>
         ))}
         {running.map((t) => (
-          <li
-            key={t.id}
-            className="flex items-center gap-3 rounded-full border-2 border-[var(--paper)]/40 px-4 py-1.5"
-          >
+          <li key={t.id} className="flex min-h-11 items-center justify-between gap-3 py-1">
             <span className="text-base">{t.label}</span>
-            <span className="font-mono text-xl font-bold tabular-nums">
+            <span className="font-serif text-2xl font-medium tabular-nums">
               {formatClock(remainingMs(t, now))}
             </span>
           </li>
