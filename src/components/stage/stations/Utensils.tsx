@@ -1,4 +1,4 @@
-import { INK, MIS } from "../palette";
+import { HEX, LINE } from "../palette";
 
 const WIRES = [26, 17, 8].map(
   (w) => `M0 -78C${-w} -60 ${-w * 1.05} -14 0 0C${w * 1.05} -14 ${w} -60 0 -78`,
@@ -10,13 +10,12 @@ export function Whisk({ x, y, angle }: { x: number; y: number; angle: number }) 
   return (
     <g aria-hidden transform={`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${angle.toFixed(1)}) scale(1.3)`}>
       {WIRES.map((d) => (
-        <path key={d} d={d} fill="none" stroke={INK.ink} strokeWidth={2.6} strokeLinejoin="round" />
+        <path key={d} d={d} fill="none" stroke={HEX.ink} strokeWidth={1.6} strokeLinejoin="round" />
       ))}
-      <path d="M0 -78V-6" stroke={INK.ink} strokeWidth={2} />
-      <rect x={-7.5} y={-90} width={15} height={10} rx={2} fill={INK.paperDeep} stroke={INK.ink} strokeWidth={2.6} />
-      <path d={WHISK_HANDLE} fill={INK.tomato} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={WHISK_HANDLE} fill="none" stroke={INK.ink} strokeWidth={3} strokeLinejoin="round" />
-      <circle cx={0} cy={-121} r={2.4} fill={INK.ink} />
+      <path d="M0 -78V-6" stroke={HEX.ink} strokeWidth={1.3} />
+      <rect x={-7.5} y={-90} width={15} height={10} rx={2} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.detail} />
+      <path d={WHISK_HANDLE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main / 1.3} strokeLinejoin="round" />
+      <circle cx={0} cy={-121} r={2.4} fill={HEX.ink} />
     </g>
   );
 }
@@ -29,11 +28,9 @@ export function Spatula({ x, y, angle, turn }: { x: number; y: number; angle: nu
   const sx = Math.max(0.35, Math.abs(Math.cos(turn * Math.PI)));
   return (
     <g aria-hidden transform={`translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${angle.toFixed(1)})`}>
-      <path d={SPATULA_HANDLE} fill={INK.ink} />
+      <path d={SPATULA_HANDLE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
       <g transform={`scale(${sx.toFixed(2)} 1)`}>
-        <path d={BLADE} fill={INK.tomato} transform={`translate(${MIS.x} ${MIS.y})`} />
-        <path d={BLADE} fill="none" stroke={INK.ink} strokeWidth={3} strokeLinejoin="round" />
-        <path d="M-10 -30Q-11 -16 -9 -6" fill="none" stroke={INK.paper} strokeWidth={2.6} strokeLinecap="round" />
+        <path d={BLADE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
       </g>
     </g>
   );

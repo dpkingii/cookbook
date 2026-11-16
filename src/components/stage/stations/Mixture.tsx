@@ -1,6 +1,6 @@
 import type { Item } from "../contents";
 import { placements } from "../food";
-import { HEX, INK, mix } from "../palette";
+import { HEX, mix } from "../palette";
 import { blob, rng, seedOf, smooth, type Pt } from "../rough";
 
 export interface Surface {
@@ -48,13 +48,13 @@ export function Swirl({ f, items, blend, final, deg }: { f: Surface; items: Item
           key={r}
           d={arc(f.rx * r, i * Math.PI + 0.4, 2.2)}
           fill="none"
-          stroke={mix(final, HEX.paper, 0.45)}
+          stroke={mix(final, HEX.white, 0.45)}
           strokeWidth={2.4}
           strokeLinecap="round"
           vectorEffect="non-scaling-stroke"
         />
       ))}
-      <path d={arc(f.rx * 0.16, 0, 4.4)} fill="none" stroke={INK.ink} strokeWidth={2} strokeLinecap="round" opacity={0.55} vectorEffect="non-scaling-stroke" />
+      <path d={arc(f.rx * 0.16, 0, 4.4)} fill="none" stroke={HEX.ink} strokeWidth={2} strokeLinecap="round" opacity={0.55} vectorEffect="non-scaling-stroke" />
     </g>
   );
 }
@@ -79,9 +79,9 @@ export function Patches({ f, items, blend, final }: { f: Surface; items: Item[];
           return (
             <g key={`${i}-${j}`}>
               <path d={d} fill={color} />
-              <path d={d} fill="none" stroke={INK.ink} strokeWidth={yolk ? 2.2 : 1.6} opacity={yolk ? 1 : 0.6} />
+              <path d={d} fill="none" stroke={HEX.ink} strokeWidth={yolk ? 2 : 1.6} opacity={yolk ? 1 : 0.6} />
               {yolk && (
-                <path d={`M${x - rx * 0.45} ${spot.y - ry * 0.1}q${rx * 0.2} ${-ry * 0.5} ${rx * 0.55} ${-ry * 0.45}`} fill="none" stroke={INK.paper} strokeWidth={2} strokeLinecap="round" />
+                <path d={`M${x - rx * 0.45} ${spot.y - ry * 0.1}q${rx * 0.2} ${-ry * 0.5} ${rx * 0.55} ${-ry * 0.45}`} fill="none" stroke={HEX.white} strokeWidth={2} strokeLinecap="round" />
               )}
             </g>
           );
@@ -106,7 +106,7 @@ export function Specks({ f, items, blend }: { f: Surface; items: Item[]; blend: 
             height={3.2}
             rx={0.5}
             fill={it.ingredient.token.color}
-            stroke={INK.ink}
+            stroke={HEX.ink}
             strokeWidth={0.9}
             transform={`rotate(${p.seed % 90} ${p.x} ${p.y})`}
           />
@@ -140,7 +140,7 @@ export function Marble({ f, color, final, p, deg, id }: { f: Surface; color: str
       {ribbons.map((d, i) => (
         <g key={i}>
           <path d={d} fill="none" stroke={ink} strokeWidth={width} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-          <path d={d} fill="none" stroke={mix(ink, HEX.paper, 0.35)} strokeWidth={width * 0.3} strokeLinecap="round" strokeDasharray="14 9" vectorEffect="non-scaling-stroke" />
+          <path d={d} fill="none" stroke={mix(ink, HEX.white, 0.35)} strokeWidth={width * 0.3} strokeLinecap="round" strokeDasharray="14 9" vectorEffect="non-scaling-stroke" />
         </g>
       ))}
     </g>

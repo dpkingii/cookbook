@@ -6,7 +6,7 @@ import type { Item, Scene } from "../contents";
 import { landing, useClock, useStage } from "../context";
 import { Scattered } from "../food";
 import { blendOf } from "../mixing";
-import { HEX, INK, MIS, mix } from "../palette";
+import { HEX, LINE, mix } from "../palette";
 import { blob, ellipse } from "../rough";
 import s from "../stage.module.css";
 import { Knead } from "./Knead";
@@ -33,23 +33,17 @@ function Vessel({ children }: { children: React.ReactNode }) {
   const clip = `${uid}-bowl`;
   return (
     <g>
-      <path d={ellipse(CX, 270, 124, 13)} fill={INK.ink} opacity={0.12} />
-      <path d={FOOT} fill={INK.tomatoDeep} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={FOOT} fill="none" stroke={INK.ink} strokeWidth={3} strokeLinejoin="round" />
-      <path d={BODY} fill={INK.paper} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d="M74 186Q196 240 318 186" fill="none" stroke={INK.tomato} strokeWidth={9} />
-      <path d="M86 208Q196 256 306 208" fill="none" stroke={INK.tomato} strokeWidth={3.5} />
-      <path d={BODY} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
-      <path d="M92 196Q104 226 132 242" fill="none" stroke={INK.inkSoft} strokeWidth={2} strokeLinecap="round" strokeDasharray="1 7" />
-      <path d={ellipse(CX, RIM.y, RIM.rx, RIM.ry)} fill={INK.paper} />
-      <path d={ellipse(CX, RIM.y + 1, LIP.rx, LIP.ry)} fill={INK.paperDeep} />
-      <path d={ellipse(CX, RIM.y + 1, LIP.rx, LIP.ry)} fill={`url(#${uid}-dots)`} opacity={0.14} />
+      <path d={FOOT} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
+      <path d={BODY} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
+      <path d="M78 192Q196 244 314 192" fill="none" stroke={HEX.ink} strokeWidth={LINE.detail} />
+      <path d={ellipse(CX, RIM.y, RIM.rx, RIM.ry)} fill={HEX.white} />
+      <path d={ellipse(CX, RIM.y + 1, LIP.rx, LIP.ry)} fill={HEX.light} />
       <clipPath id={clip}>
         <path d={ellipse(CX, RIM.y + 1, LIP.rx, LIP.ry)} />
       </clipPath>
       <g clipPath={`url(#${clip})`}>{children}</g>
-      <path d={ellipse(CX, RIM.y + 1, LIP.rx, LIP.ry)} fill="none" stroke={INK.ink} strokeWidth={1.8} />
-      <path d={ellipse(CX, RIM.y, RIM.rx, RIM.ry)} fill="none" stroke={INK.ink} strokeWidth={3.5} />
+      <path d={ellipse(CX, RIM.y + 1, LIP.rx, LIP.ry)} fill="none" stroke={HEX.ink} strokeWidth={LINE.detail} />
+      <path d={ellipse(CX, RIM.y, RIM.rx, RIM.ry)} fill="none" stroke={HEX.ink} strokeWidth={LINE.main} />
     </g>
   );
 }
@@ -86,7 +80,7 @@ function Arrivals({ items }: { items: Item[] }) {
             height={4.4}
             rx={0.8}
             fill={it.ingredient.token.color}
-            stroke={INK.ink}
+            stroke={HEX.ink}
             strokeWidth={1.2}
             initial={{ y: -150, opacity: 0 }}
             animate={{ y: [-150, 0, 0], opacity: [0, 1, 0] }}
@@ -109,7 +103,7 @@ function Mixing({ scene }: { scene: Scene }) {
   const sauce = items.filter((it) => !pieces.includes(it));
   const fresh = sauce.filter((it) => it.fresh);
   const old = sauce.filter((it) => !it.fresh);
-  const final = blendOf(sauce) ?? HEX.paperDeep;
+  const final = blendOf(sauce) ?? HEX.light;
   const p = progress ?? (whisk ? 0.7 : fold ? 0.5 : 0.35);
 
   const running = !still && (whisk || fold) && items.length > 0;
@@ -137,8 +131,7 @@ function Mixing({ scene }: { scene: Scene }) {
       <Vessel>
         {sauce.length > 0 && (
           <motion.g key="mix" {...landing(old.length === 0, still, 0, -24)}>
-            <path d={surfD} fill={surfColor} transform={`translate(${MIS.x} ${MIS.y})`} />
-            <path d={surfD} fill="none" stroke={INK.ink} strokeWidth={2.4} />
+            <path d={surfD} fill={surfColor} stroke={HEX.ink} strokeWidth={2} />
             {whisk && <Swirl f={f} items={sauce} blend={p} final={final} deg={spin} />}
             {whisk && <Patches f={f} items={added} blend={p} final={final} />}
             {fold && added.length > 0 && (
@@ -153,7 +146,7 @@ function Mixing({ scene }: { scene: Scene }) {
                   style={{ animationDuration: "4.8s", animationDelay: `${-i * 1.6}s` }}
                   d={`M${f.cx - 70 + i * 52} ${f.cy + 8 - (i % 2) * 14}q9 -4 18 0`}
                   fill="none"
-                  stroke={mix(final, HEX.paper, 0.55)}
+                  stroke={mix(final, HEX.white, 0.55)}
                   strokeWidth={2.4}
                   strokeLinecap="round"
                 />
@@ -188,13 +181,13 @@ function Mixing({ scene }: { scene: Scene }) {
       {whisk && sauce.length > 0 && (
         <g>
           <Whisk x={tip.x} y={tip.y} angle={26 + Math.cos(a) * 8} />
-          <ellipse cx={tip.x} cy={tip.y - 3} rx={19} ry={5.5} fill={surfColor} stroke={INK.ink} strokeWidth={2} />
+          <ellipse cx={tip.x} cy={tip.y - 3} rx={19} ry={5.5} fill={surfColor} stroke={HEX.ink} strokeWidth={2} />
         </g>
       )}
       {fold && sauce.length > 0 && (
         <g>
           <Spatula x={tip.x} y={tip.y + 2} angle={18 + Math.sin(a) * 22} turn={(Math.sin(a) + 1) / 2} />
-          <ellipse cx={tip.x} cy={tip.y - 1} rx={20} ry={5} fill={surfColor} stroke={INK.ink} strokeWidth={2} />
+          <ellipse cx={tip.x} cy={tip.y - 1} rx={20} ry={5} fill={surfColor} stroke={HEX.ink} strokeWidth={2} />
         </g>
       )}
       {!still && <Arrivals items={fresh} />}
