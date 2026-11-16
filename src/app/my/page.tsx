@@ -1,108 +1,93 @@
 import Link from "next/link";
-import { SiteHeader } from "@/components/site/SiteHeader";
-import { primaryButton } from "@/components/editor/ui";
+import { AppShell } from "@/components/site/AppShell";
+import { BackLink } from "@/components/site/BackLink";
+import { Pager } from "@/components/site/Pager";
+import { RecipeList } from "@/components/site/RecipeList";
+import { buttonGhost, buttonPrimary, textLink } from "@/components/ui/styles";
 import { getViewer } from "@/lib/auth/viewer";
-import { listRecipes, type StoredRecipe } from "@/lib/db/recipes";
-import { Pager, paginate } from "@/components/site/Pager";
-import { RecipeCard } from "./RecipeCard";
+import { listFavouriteRows, listRecipePage } from "@/lib/db/browse";
 
 export const metadata = { title: "My recipes" };
 
-function Empty({ title, children, href, action }: { title: string; children: string; href: string; action: string }) {
+function Empty({ href, action, children }: { href: string; action: string; children: string }) {
   return (
-    <div className="mt-4 max-w-xl rounded-3xl border-2 border-dashed border-[var(--ink)] p-6">
-      <p className="font-serif text-2xl font-semibold">{title}</p>
-      <p className="mt-2 text-lg text-[var(--ink-soft)]">{children}</p>
-      <Link href={href} className="mt-4 inline-block min-h-11 py-2 text-lg font-semibold underline underline-offset-4">
+    <p className="border-t border-[var(--rule)] pt-4 text-base text-[var(--mute)]">
+      {children}{" "}
+      <Link href={href} className={`${textLink} text-[var(--ink)]`}>
         {action}
       </Link>
-    </div>
-  );
-}
-
-function Grid({ recipes, showVisibility }: { recipes: StoredRecipe[]; showVisibility?: boolean }) {
-  return (
-    <ul className="mt-4 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {recipes.map((recipe) => (
-        <li key={recipe.id}>
-          <RecipeCard recipe={recipe} showVisibility={showVisibility} />
-        </li>
-      ))}
-    </ul>
+    </p>
   );
 }
 
 export default async function MyRecipesPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const viewer = await getViewer();
   const member = viewer && !viewer.isGuest ? viewer : null;
-  const [mine, favorites] = member
+  const [mine, favourites] = member
     ? await Promise.all([
-        listRecipes({ viewerId: member.id, scope: "mine" }),
-        listRecipes({ viewerId: member.id, scope: "favorites" }),
+        listRecipePage({ viewerId: member.id, scope: "mine", page: (await searchParams).page }),
+        listFavouriteRows(member.id),
       ])
-    : [[], []];
-  const shown = paginate(mine, (await searchParams).page);
+    : [null, []];
 
   return (
-    <div className="min-h-dvh bg-[var(--paper)] text-[var(--ink)]">
-      <SiteHeader />
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 md:py-14">
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h1 className="font-serif text-5xl font-semibold leading-[1.05]">My recipes</h1>
-          {member && (
-            <Link href="/recipes/new" className={primaryButton}>
-              New recipe
-            </Link>
-          )}
-        </div>
-
-        {!member ? (
-          <div className="mt-8 max-w-xl rounded-3xl border-2 border-dashed border-[var(--ink)] p-6 sm:p-8">
-            <h2 className="font-serif text-3xl font-semibold leading-tight">Log in to keep your own recipes</h2>
-            <p className="mt-3 text-xl text-[var(--ink-soft)]">
-              Paste a recipe or a link, fix the steps, and cook it like any other. You need an account to save it.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/login" className={primaryButton}>
-                Log in
-              </Link>
-              <Link href="/signup" className="inline-flex min-h-11 items-center px-3 text-lg font-semibold underline underline-offset-4">
-                Create an account
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <>
-            <section aria-labelledby="mine-heading" className="mt-10">
-              <h2 id="mine-heading" className="font-serif text-3xl font-semibold">
-                Your recipes
-              </h2>
-              {mine.length ? (
-                <>
-                  <Grid recipes={shown.items} showVisibility />
-                  <Pager page={shown.page} pages={shown.pages} params={{}} />
-                </>
-              ) : (
-                <Empty title="Nothing here yet." href="/recipes/new" action="Paste a recipe">
-                  Paste a recipe to turn it into a cook-along.
-                </Empty>
-              )}
-            </section>
-            <section aria-labelledby="favorites-heading" className="mt-14">
-              <h2 id="favorites-heading" className="font-serif text-3xl font-semibold">
-                Favourites
-              </h2>
-              {favorites.length ? (
-                <Grid recipes={favorites} />
-              ) : (
-                <Empty title="No favourites yet." href="/" action="Browse recipes">
-                  Tap Favourite on any recipe page and it will wait for you here.
-                </Empty>
-              )}
-            </section>
-          </>
+    <AppShell>
+      <BackLink />
+      <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
+        <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">My recipes</h1>
+        {member && (
+          <Link href="/recipes/new" className={buttonPrimary}>
+            New recipe
+          </Link>
         )}
-      </main>
-    </div>
+      </div>
+
+      {!mine ? (
+        <section className="mt-8 border-t border-[var(--rule)] pt-6">
+          <h2 className="font-serif text-2xl font-medium">Log in to keep your own recipes</h2>
+          <p className="mt-2 max-w-md text-base text-[var(--mute)]">
+            Paste a recipe or a link, fix the steps, and cook it like any other. You need an account to save it.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link href="/login" className={buttonPrimary}>
+              Log in
+            </Link>
+            <Link href="/signup" className={buttonGhost}>
+              Create an account
+            </Link>
+          </div>
+        </section>
+      ) : (
+        <>
+          <section aria-labelledby="mine-heading" className="mt-8">
+            <h2 id="mine-heading" className="label-caps mb-2">
+              Your recipes · {mine.total}
+            </h2>
+            {mine.rows.length ? (
+              <>
+                <RecipeList rows={mine.rows} showVisibility />
+                <Pager page={mine.page} pages={mine.pages} params={{}} />
+              </>
+            ) : (
+              <Empty href="/recipes/new" action="Paste a recipe">
+                Nothing here yet. Paste a recipe to turn it into a cook-along.
+              </Empty>
+            )}
+          </section>
+          <section aria-labelledby="favourites-heading" className="mt-10">
+            <h2 id="favourites-heading" className="label-caps mb-2">
+              Favourites · {favourites.length}
+            </h2>
+            {favourites.length ? (
+              <RecipeList rows={favourites} />
+            ) : (
+              <Empty href="/" action="Browse recipes">
+                No favourites yet. Tap Favourite on any recipe page and it will wait for you here.
+              </Empty>
+            )}
+          </section>
+        </>
+      )}
+    </AppShell>
   );
 }
