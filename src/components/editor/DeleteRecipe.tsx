@@ -1,6 +1,5 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { removeRecipe } from "@/lib/recipes/actions";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -13,8 +12,8 @@ export function DeleteRecipe({ recipeId, title }: { recipeId: string; title: str
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={`${secondaryButton} !border-[var(--tomato-deep)] !text-[var(--tomato-deep)]`}>
-        <Trash2 aria-hidden size={20} /> Delete
+      <button type="button" onClick={() => setOpen(true)} className={secondaryButton}>
+        Delete
       </button>
       <ConfirmDialog
         open={open}

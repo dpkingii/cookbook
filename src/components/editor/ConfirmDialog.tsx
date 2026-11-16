@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
-import { primaryButton, secondaryButton } from "./ui";
+import { errorClass, primaryButton, secondaryButton, sectionTitle } from "./ui";
 
 export function ConfirmDialog({
   open,
@@ -41,14 +41,14 @@ export function ConfirmDialog({
         event.preventDefault();
         if (!busy) onCancel();
       }}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-3xl border-2 border-[var(--ink)] bg-[var(--paper)] p-6 text-[var(--ink)] shadow-[6px_6px_0_var(--ink)] backdrop:bg-[var(--ink)]/50"
+      className="m-auto w-[calc(100%-2.5rem)] max-w-md border border-[var(--ink)] bg-white p-6 text-[var(--ink)] backdrop:bg-[var(--ink)]/40"
     >
-      <h2 id="confirm-title" className="font-serif text-3xl font-semibold leading-tight">
+      <h2 id="confirm-title" className={`${sectionTitle} leading-tight`}>
         {title}
       </h2>
-      <div className="mt-2 text-lg text-[var(--ink-soft)]">{children}</div>
+      <div className="mt-2 text-base text-[var(--mute)]">{children}</div>
       {error && (
-        <p role="alert" className="mt-3 text-base font-semibold text-[var(--tomato-deep)]">
+        <p role="alert" className={`mt-3 ${errorClass}`}>
           {error}
         </p>
       )}
