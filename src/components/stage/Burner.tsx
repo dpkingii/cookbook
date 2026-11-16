@@ -1,5 +1,5 @@
 import type { Heat } from "@/lib/recipe/types";
-import { INK } from "./palette";
+import { HEX, LINE } from "./palette";
 import s from "./stage.module.css";
 
 const SLOTS = 9;
@@ -10,7 +10,6 @@ const HEAT = {
 } as const;
 
 const FLAME = "M0 0C-7 0-9-8-5-14C-3-18-1-21 0-27C3-20 9-15 8-7C7-2 4 0 0 0Z";
-const CORE = "M0-1C-3.5-1-4.5-5-2.5-8.5C-1.5-10.5-0.5-12 0-15C1.5-11.5 4.5-9 4-5C3.5-2 2-1 0-1Z";
 
 /** Where the flame tongues stand. Slot k is lit if it is among the middle `count`. */
 function slot(k: number, cx: number, cy: number, rx: number, ry: number) {
@@ -37,8 +36,9 @@ export function Burner({
   const ry = rx * 0.24;
   return (
     <g aria-hidden>
-      <ellipse cx={cx} cy={cy + 3} rx={rx * 1.05} ry={ry * 1.05} fill="none" stroke={INK.ink} strokeWidth={5} />
-      <ellipse cx={cx} cy={cy + 3} rx={rx * 0.55} ry={ry * 0.55} fill={INK.ink} />
+      <ellipse cx={cx} cy={cy + 3} rx={rx * 1.05} ry={ry * 1.05} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} />
+      <ellipse cx={cx} cy={cy + 3} rx={rx * 0.9} ry={ry * 0.9} fill="none" stroke={HEX.ink} strokeWidth={LINE.detail} />
+      <ellipse cx={cx} cy={cy + 3} rx={rx * 0.55} ry={ry * 0.55} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} />
       {Array.from({ length: SLOTS }, (_, k) => {
         const lit = h ? Math.abs(k - (SLOTS - 1) / 2) <= (h.count - 1) / 2 : false;
         const p = slot(k, cx, cy, rx * (h?.ring ?? 0.8), ry * (h?.ring ?? 0.8));
@@ -50,9 +50,7 @@ export function Burner({
             style={{ transform: `translate(${p.x}px, ${p.y}px) scale(${sc})`, opacity: lit ? 1 : 0 }}
           >
             <g className={s.flicker} style={{ animationDelay: `${-k * 0.13}s` }}>
-              <path d={FLAME} fill={INK.tomato} transform="translate(1.2 0.8)" />
-              <path d={FLAME} fill="none" stroke={INK.ink} strokeWidth={1.8} strokeLinejoin="round" />
-              <path d={CORE} fill={INK.gold} transform="translate(-0.8 0.6)" />
+              <path d={FLAME} fill={HEX.ink} />
             </g>
           </g>
         );
@@ -74,13 +72,12 @@ export function Knob({ heat, x = 50, y = 262 }: { heat: Heat | null; x?: number;
           cx={Math.sin((a * Math.PI) / 180) * 19}
           cy={-Math.cos((a * Math.PI) / 180) * 19}
           r={i === 0 ? 1.6 : 1.4 + i * 0.7}
-          fill={i === 0 ? INK.inkSoft : INK.ink}
+          fill={i === 0 ? HEX.grey : HEX.ink}
         />
       ))}
-      <circle r={13} fill={heat ? INK.tomato : INK.paper} transform="translate(1.5 1)" />
-      <circle r={13} fill="none" stroke={INK.ink} strokeWidth={3} />
+      <circle r={13} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} />
       <g className={s.ease} style={{ transform: `rotate(${angle}deg)` }}>
-        <path d="M0 -10V-2" stroke={INK.ink} strokeWidth={4} strokeLinecap="round" />
+        <path d="M0 -10V-2" stroke={HEX.ink} strokeWidth={4} strokeLinecap="round" />
       </g>
     </g>
   );

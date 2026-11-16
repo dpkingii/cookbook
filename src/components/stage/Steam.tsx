@@ -1,4 +1,4 @@
-import { INK } from "./palette";
+import { HEX, LINE } from "./palette";
 import s from "./stage.module.css";
 
 const WISP = "M0 0C-6-6 6-12 0-18C-6-24 6-30 0-36";
@@ -31,10 +31,10 @@ export function Steam({
               className={s.rise}
               d={WISP}
               fill="none"
-              stroke={INK.inkSoft}
-              strokeWidth={3.2}
+              stroke={HEX.grey}
+              strokeWidth={2.2}
               strokeLinecap="round"
-              opacity={0.55}
+              opacity={0.8}
               style={{
                 animationDuration: `${3.6 - amount * 1.6}s`,
                 animationDelay: `${-i * 0.71}s`,
@@ -47,7 +47,7 @@ export function Steam({
   );
 }
 
-/** Bubbles swelling and popping on a liquid surface. */
+/** Bubbles swelling and popping on a liquid surface, drawn as rings. */
 export function Bubbles({
   cx,
   cy,
@@ -56,7 +56,6 @@ export function Bubbles({
   n,
   r,
   period,
-  fill,
   seed = 1,
 }: {
   cx: number;
@@ -66,7 +65,6 @@ export function Bubbles({
   n: number;
   r: number;
   period: number;
-  fill: string;
   seed?: number;
 }) {
   return (
@@ -83,9 +81,7 @@ export function Bubbles({
               className={s.bubble}
               style={{ animationDuration: `${period * (0.8 + (i % 3) * 0.2)}s`, animationDelay: `${(-i * period) / n}s` }}
             >
-              <ellipse rx={br} ry={br * 0.8} fill={fill} transform="translate(0.8 0.6)" />
-              <ellipse rx={br} ry={br * 0.8} fill="none" stroke={INK.ink} strokeWidth={1.8} />
-              <path d={`M${-br * 0.45} ${-br * 0.15}Q${-br * 0.3} ${-br * 0.5} 0 ${-br * 0.5}`} fill="none" stroke={INK.paper} strokeWidth={1.4} strokeLinecap="round" />
+              <ellipse rx={br} ry={br * 0.8} fill="none" stroke={HEX.ink} strokeWidth={LINE.detail} />
             </g>
           </g>
         );
@@ -121,8 +117,8 @@ export function Sizzle({
             <path
               className={s.sizzle}
               d="M-5 -2L-7 -9M0 -3V-11M5 -2L7 -9"
-              stroke={INK.ink}
-              strokeWidth={2.2}
+              stroke={HEX.ink}
+              strokeWidth={2}
               strokeLinecap="round"
               style={{ animationDelay: `${-i * 0.23}s`, animationDuration: `${0.9 - amount * 0.35}s` }}
             />

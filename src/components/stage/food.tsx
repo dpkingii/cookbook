@@ -1,8 +1,10 @@
 import type { Ingredient, TokenShape } from "@/lib/recipe/types";
 import type { Item } from "./contents";
-import { clamp01, HEX, INK, mix } from "./palette";
+import { clamp01, HEX, mix } from "./palette";
 import { blob, rng, seedOf, smooth, type Pt } from "./rough";
 import { TokenArt } from "./tokens";
+
+const REDUCED = "#a82c1f";
 
 /** What heat does to each kind of ingredient, as a colour. */
 export function cookedColor(ing: Ingredient, cooked: number): string {
@@ -10,11 +12,11 @@ export function cookedColor(ing: Ingredient, cooked: number): string {
   const d = clamp01(cooked);
   switch (ing.token.shape) {
     case "bulb":
-      return mix(mix(c, HEX.paper, 0.55), "#d9962a", d);
+      return mix(mix(c, HEX.white, 0.5), "#d9962a", d);
     case "wedge":
-      return mix(mix(c, HEX.paper, 0.3), "#e2bf6a", d * 0.75);
+      return mix(mix(c, HEX.white, 0.28), "#e2bf6a", d * 0.75);
     case "round":
-      return mix(c, HEX.tomatoDeep, d * 0.75);
+      return mix(c, REDUCED, d * 0.75);
     case "strand":
       return mix(c, "#f0d79a", d * 0.5);
     case "leaf":
@@ -58,20 +60,19 @@ export function PiecePath({
     const d = `M${-r} ${r * 0.3}C${-r * 0.6} ${-r * 0.7} ${r * 0.5} ${-r * 0.9} ${r} ${-r * 0.4}C${r * 0.5} ${r * 0.6} ${-r * 0.4} ${r * 0.8} ${-r} ${r * 0.3}Z`;
     return (
       <g transform={`rotate(${(seed % 360) - 180})`}>
-        <path d={d} fill={color} transform="translate(1 0.8)" />
-        <path d={d} fill="none" stroke={INK.ink} strokeWidth={line} strokeLinejoin="round" />
-        <path d={`M${-r * 0.9} ${r * 0.3}Q0 ${-r * 0.1} ${r * 0.85} ${-r * 0.35}`} fill="none" stroke={INK.ink} strokeWidth={line * 0.6} />
+        <path d={d} fill={color} stroke={HEX.ink} strokeWidth={line} strokeLinejoin="round" />
+        <path d={`M${-r * 0.9} ${r * 0.3}Q0 ${-r * 0.1} ${r * 0.85} ${-r * 0.35}`} fill="none" stroke={HEX.ink} strokeWidth={line * 0.6} />
       </g>
     );
   }
   if (shape === "grain") {
-    return <rect x={-r} y={-r} width={r * 2} height={r * 2} rx={0.6} fill={color} stroke={INK.ink} strokeWidth={line * 0.6} transform={`rotate(${seed % 90})`} />;
+    return <rect x={-r} y={-r} width={r * 2} height={r * 2} rx={0.6} fill={color} stroke={HEX.ink} strokeWidth={line * 0.6} transform={`rotate(${seed % 90})`} />;
   }
   if (shape === "strand") {
     const d = `M${-r} 0Q0 ${seed % 2 ? -r : r} ${r} 0`;
     return (
       <g>
-        <path d={d} fill="none" stroke={INK.ink} strokeWidth={line * 2.4} strokeLinecap="round" />
+        <path d={d} fill="none" stroke={HEX.ink} strokeWidth={line * 2.4} strokeLinecap="round" />
         <path d={d} fill="none" stroke={color} strokeWidth={line * 1.1} strokeLinecap="round" />
       </g>
     );
@@ -84,9 +85,8 @@ export function PiecePath({
         : blob(0, 0, r, r * 0.8, seed, 0.3, 5, (seed % 7) / 2);
   return (
     <g>
-      <path d={d} fill={color} transform="translate(1.1 0.9)" />
-      <path d={d} fill="none" stroke={INK.ink} strokeWidth={line} strokeLinejoin="round" />
-      {shape === "long" && <ellipse rx={r * 0.4} ry={r * 0.28} fill="none" stroke={INK.ink} strokeWidth={line * 0.5} />}
+      <path d={d} fill={color} stroke={HEX.ink} strokeWidth={line} strokeLinejoin="round" />
+      {shape === "long" && <ellipse rx={r * 0.4} ry={r * 0.28} fill="none" stroke={HEX.ink} strokeWidth={line * 0.5} />}
     </g>
   );
 }
@@ -203,7 +203,7 @@ export function Tangle({
     <g>
       {paths.map((d, i) => (
         <g key={i}>
-          <path d={d} fill="none" stroke={INK.ink} strokeWidth={line * 2} strokeLinecap="round" />
+          <path d={d} fill="none" stroke={HEX.ink} strokeWidth={line * 2} strokeLinecap="round" />
           <path d={d} fill="none" stroke={color} strokeWidth={line} strokeLinecap="round" />
         </g>
       ))}
