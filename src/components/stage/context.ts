@@ -43,19 +43,15 @@ export function landing(fresh: boolean, still: boolean, order = 0, from = -110) 
   };
 }
 
-/** Seconds since mount, ticking at a stop-motion ~25fps. Zero while inactive. */
+/** Seconds since mount, updated every animation frame. Zero while inactive. */
 export function useClock(active: boolean): number {
   const [t, setT] = useState(0);
   useEffect(() => {
     if (!active) return;
     let raf = 0;
-    let last = 0;
     const start = performance.now();
     const tick = (now: number) => {
-      if (now - last > 40) {
-        last = now;
-        setT((now - start) / 1000);
-      }
+      setT((now - start) / 1000);
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);

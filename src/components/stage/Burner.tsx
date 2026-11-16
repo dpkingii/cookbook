@@ -64,7 +64,7 @@ export function Burner({
 const KNOB_ANGLE = { off: 0, low: 70, medium: 135, high: 200 } as const;
 
 /** A stove dial in the corner: a second, unmistakable read of the heat. */
-export function Knob({ heat, x = 34, y = 268 }: { heat: Heat | null; x?: number; y?: number }) {
+export function Knob({ heat, x = 50, y = 262 }: { heat: Heat | null; x?: number; y?: number }) {
   const angle = KNOB_ANGLE[heat ?? "off"];
   return (
     <g aria-hidden transform={`translate(${x} ${y})`}>

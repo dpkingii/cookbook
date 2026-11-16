@@ -43,10 +43,18 @@ function SceneFor({ scene }: { scene: Scene }) {
 }
 
 const slide = {
-  enter: ({ dir, still }: { dir: number; still: boolean }) => ({ x: still ? 0 : dir * W * 0.8, opacity: 0 }),
-  center: { x: 0, opacity: 1 },
-  exit: ({ dir, still }: { dir: number; still: boolean }) => ({ x: still ? 0 : -dir * W * 0.8, opacity: 0 }),
+  enter: ({ dir, still }: { dir: number; still: boolean }) => ({ x: still ? 0 : dir * W * 0.35, opacity: 0 }),
+  center: { x: 0, opacity: 1, transition: { duration: 0.32, ease: [0.2, 0.7, 0.2, 1] as const } },
+  exit: ({ dir, still }: { dir: number; still: boolean }) => ({
+    x: still ? 0 : -dir * W * 0.2,
+    opacity: 0,
+    transition: { duration: 0.16, ease: "easeIn" as const },
+  }),
 };
+
+/** How much each station is enlarged around the counter so the action fills the frame. */
+const ZOOM: Partial<Record<Vessel, number>> = { board: 1.2, pan: 1.14, pot: 1.12, bowl: 1.1, plate: 1.14 };
+const ZOOM_AT = { x: W / 2, y: 200 };
 
 function label(scene: Scene): string {
   const heat = scene.heat ? ` over ${scene.heat} heat` : "";
@@ -83,7 +91,7 @@ export function Stage({ recipe, stepIndex, progress, className }: StageProps) {
       >
         <Defs uid={uid} />
         <Backdrop uid={uid} />
-        <AnimatePresence initial={false} custom={{ dir, still }}>
+        <AnimatePresence initial={false} mode="wait" custom={{ dir, still }}>
           {scene && (
           <motion.g
             key={scene.vessel}
@@ -92,9 +100,12 @@ export function Stage({ recipe, stepIndex, progress, className }: StageProps) {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: still ? 0.2 : 0.7, ease: [0.6, 0, 0.2, 1] }}
           >
-            <SceneFor scene={scene} />
+            <g
+              transform={`translate(${ZOOM_AT.x} ${ZOOM_AT.y}) scale(${ZOOM[scene.vessel] ?? 1}) translate(${-ZOOM_AT.x} ${-ZOOM_AT.y})`}
+            >
+              <SceneFor scene={scene} />
+            </g>
           </motion.g>
           )}
         </AnimatePresence>

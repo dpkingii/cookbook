@@ -27,9 +27,9 @@ const DIR = { x: Math.cos(ANGLE), y: Math.sin(ANGLE) };
 const NORMAL = { x: Math.sin(ANGLE), y: -Math.cos(ANGLE) };
 
 const STYLE: Record<string, { period: number; amp: number; pieces: number; size: number; cycle: number }> = {
-  chop: { period: 0.55, amp: 13, pieces: 38, size: 1, cycle: 6 },
-  mince: { period: 0.26, amp: 8, pieces: 70, size: 0.7, cycle: 4.5 },
-  slice: { period: 0.9, amp: 18, pieces: 9, size: 1, cycle: 7 },
+  chop: { period: 0.62, amp: 22, pieces: 26, size: 1.4, cycle: 6 },
+  mince: { period: 0.3, amp: 12, pieces: 46, size: 0.95, cycle: 4.5 },
+  slice: { period: 0.95, amp: 26, pieces: 9, size: 1, cycle: 7 },
 };
 
 function Pile({ item, x, y }: { item: Item; x: number; y: number }) {
@@ -79,7 +79,7 @@ function Cutting({ ing, technique, cut, rock }: { ing: Ingredient; technique: Te
           <TokenArt shape={ing.token.shape} color={ing.token.color} stroke={3.4 / SCALE} />
         </g>
       </g>
-      <Knife x={kx} y={ky} angle={-62} lift={rock * st.amp} />
+      <Knife x={kx} y={ky} angle={-62} lift={rock * st.amp} rock={rock * st.amp * 0.7} />
     </g>
   );
 }
@@ -110,7 +110,9 @@ export function Board({ scene }: { scene: Scene }) {
   const t = useClock(running);
   const cut = progress ?? (running ? (t % st.cycle) / st.cycle : 0.5);
   const phase = (t % st.period) / st.period;
-  const rock = running ? Math.pow(Math.sin(Math.PI * phase), 1.6) : 0;
+  // Slow lift, fast fall: the blade spends 70% of the stroke rising and drops in the rest.
+  const stroke = phase < 0.7 ? (phase / 0.7) * 0.5 : 0.5 + ((phase - 0.7) / 0.3) * 0.5;
+  const rock = running ? Math.sin(Math.PI * stroke) : 0;
   const piles = items.filter((it) => it !== active && !usedIds.has(it.ingredient.id));
   const waiting = items.filter((it) => it !== active && usedIds.has(it.ingredient.id) && !season);
 

@@ -76,7 +76,7 @@ export function Bubbles({
         const rad = Math.sqrt(((i * 0.618 + seed * 0.1) % 1) * 0.8 + 0.1);
         const x = cx + Math.cos(a) * rx * rad;
         const y = cy + Math.sin(a) * ry * rad;
-        const br = Math.round(r * (0.65 + ((i * 53) % 10) / 14) * 10) / 10;
+        const br = Math.round(r * 1.45 * (0.65 + ((i * 53) % 10) / 14) * 10) / 10;
         return (
           <g key={i} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}>
             <g

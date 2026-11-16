@@ -7,11 +7,12 @@ const CONTACT = { x: 34, y: 4 };
 
 /**
  * Chef's knife, tip at its origin, blade along +x. Placed so the edge touches (x, y)
- * with the handle pointing at `angle` degrees; `lift` raises it off the food.
+ * with the handle pointing at `angle` degrees; `lift` raises it off the food and
+ * `rock` tips the heel up around the contact point, the way a chef's knife rocks.
  */
-export function Knife({ x, y, angle, lift }: { x: number; y: number; angle: number; lift: number }) {
+export function Knife({ x, y, angle, lift, rock = 0 }: { x: number; y: number; angle: number; lift: number; rock?: number }) {
   return (
-    <g aria-hidden transform={`translate(${x.toFixed(1)} ${(y - lift).toFixed(1)}) rotate(${angle}) scale(${SCALE}) translate(${-CONTACT.x} ${-CONTACT.y})`}>
+    <g aria-hidden transform={`translate(${x.toFixed(1)} ${(y - lift).toFixed(1)}) rotate(${(angle - rock).toFixed(1)}) scale(${SCALE}) translate(${-CONTACT.x} ${-CONTACT.y})`}>
       <path d={BLADE} fill={INK.paper} transform={`translate(${MIS.x} ${MIS.y})`} />
       <path d="M30 -2Q60 0 150 0" fill="none" stroke={INK.inkSoft} strokeWidth={2} />
       <path d="M60 -20Q100 -24 140 -24" fill="none" stroke={INK.paperDeep} strokeWidth={3} strokeLinecap="round" />
