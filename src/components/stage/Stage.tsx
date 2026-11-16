@@ -6,7 +6,7 @@ import type { Recipe } from "@/lib/recipe/types";
 import { COUNTER, sceneAt, type Scene, type Vessel } from "./contents";
 import { StageContext, usePrefersStill } from "./context";
 import { clamp01 } from "./palette";
-import { Backdrop, Defs, Grain, H, W } from "./Paper";
+import { Backdrop, H, W } from "./Backdrop";
 import { Board } from "./stations/Board";
 import { Bowl } from "./stations/Bowl";
 import { Fallback } from "./stations/Fallback";
@@ -89,8 +89,7 @@ export function Stage({ recipe, stepIndex, progress, className }: StageProps) {
         role="img"
         aria-label={scene ? label(scene) : "Empty stage"}
       >
-        <Defs uid={uid} />
-        <Backdrop uid={uid} />
+        <Backdrop />
         <AnimatePresence initial={false} mode="wait" custom={{ dir, still }}>
           {scene && (
           <motion.g
@@ -109,7 +108,6 @@ export function Stage({ recipe, stepIndex, progress, className }: StageProps) {
           </motion.g>
           )}
         </AnimatePresence>
-        <Grain />
       </svg>
     </StageContext.Provider>
   );
