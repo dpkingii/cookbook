@@ -5,7 +5,7 @@ import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { Burner, Knob } from "../Burner";
 import { cookedColor, poolOf, Scattered } from "../food";
-import { clamp01, HEX, INK, lerp, MIS, mix, WATER } from "../palette";
+import { clamp01, HEX, lerp, LINE, mix, WATER } from "../palette";
 import { ellipse, wall } from "../rough";
 import { Bubbles, Steam } from "../Steam";
 import s from "../stage.module.css";
@@ -16,6 +16,7 @@ const RIM = { y: 100, rx: 96, ry: 26 };
 const BASE = { y: 232, rx: 92, ry: 24 };
 const SURF = { cy: 112, rx: 82, ry: 17 };
 const PIVOT = { x: 200, y: 166 };
+const HANDLES = ["M106 120C82 114 80 142 106 144", "M294 120C318 114 320 142 294 144"];
 
 /** Spaghetti standing in the pot, leaning on the rim; `soft` bends it over and sinks it. */
 function Strands({ item, soft }: { item: Item; soft: number }) {
@@ -39,7 +40,7 @@ function Strands({ item, soft }: { item: Item; soft: number }) {
     <g>
       {paths.map((d, i) => (
         <g key={i}>
-          <path d={d} fill="none" stroke={INK.ink} strokeWidth={5.6} strokeLinecap="round" />
+          <path d={d} fill="none" stroke={HEX.ink} strokeWidth={5.6} strokeLinecap="round" />
           <path d={d} fill="none" stroke={color} strokeWidth={2.8} strokeLinecap="round" />
         </g>
       ))}
@@ -60,7 +61,7 @@ function Sprinkle({ color }: { color: string }) {
             height={4.8}
             rx={0.8}
             fill={color}
-            stroke={INK.ink}
+            stroke={HEX.ink}
             strokeWidth={1.3}
             style={{ animationDuration: "1.6s", animationDelay: `${-i * 0.23}s` }}
           />
@@ -77,7 +78,7 @@ export function Pot({ scene }: { scene: Scene }) {
   const boil = technique === "boil";
   const intensity = boil ? (scene.warmed ? 1 : Math.max(0.08, progress ?? 0.08)) : heat ? 0.3 : 0;
   const pool = water ? null : poolOf(items);
-  const surface = water ? WATER : (pool?.color ?? HEX.inkSoft);
+  const surface = water ? WATER : (pool?.color ?? HEX.grey);
   const strands = items.filter((it) => it.ingredient.token.shape === "strand");
   const grains = items.filter((it) => it.fresh && it.ingredient.token.shape === "grain");
   const floaters = items.filter((it) => !["strand", "grain", "liquid", "round"].includes(it.ingredient.token.shape));
@@ -98,23 +99,24 @@ export function Pot({ scene }: { scene: Scene }) {
           style={{ transform: drain ? "translate(72px, -26px) rotate(-40deg)" : "translate(0px, 0px) rotate(0deg)" }}
         >
           <g transform={`translate(${-PIVOT.x} ${-PIVOT.y})`}>
-            <path d="M106 120C82 114 80 142 106 144" fill="none" stroke={INK.ink} strokeWidth={8} strokeLinecap="round" />
-            <path d="M294 120C318 114 320 142 294 144" fill="none" stroke={INK.ink} strokeWidth={8} strokeLinecap="round" />
-            <path d={wall(CX, RIM, BASE, RIM.ry)} fill={INK.tomato} transform={`translate(${MIS.x} ${MIS.y})`} />
-            <path d={wall(CX, RIM, BASE, RIM.ry)} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
-            <path d="M124 146V206M138 150V176" stroke={INK.paper} strokeWidth={4} strokeLinecap="round" />
-            <path d={`M${CX - 95} 136Q${CX} 160 ${CX + 95} 136`} fill="none" stroke={INK.ink} strokeWidth={2} opacity={0.6} />
-            <path d={ellipse(CX, RIM.y, RIM.rx, RIM.ry)} fill={INK.tomatoDeep} transform={`translate(${MIS.x} ${MIS.y})`} />
+            {HANDLES.map((d) => (
+              <g key={d}>
+                <path d={d} fill="none" stroke={HEX.ink} strokeWidth={9} strokeLinecap="round" />
+                <path d={d} fill="none" stroke={HEX.white} strokeWidth={9 - LINE.main * 2} strokeLinecap="round" />
+              </g>
+            ))}
+            <path d={wall(CX, RIM, BASE, RIM.ry)} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
+            <path d={`M${CX - 95} 136Q${CX} 160 ${CX + 95} 136`} fill="none" stroke={HEX.ink} strokeWidth={LINE.detail} />
+            <path d={ellipse(CX, RIM.y, RIM.rx, RIM.ry)} fill={HEX.white} />
             <clipPath id={clip}>
               <ellipse cx={CX} cy={RIM.y + 1} rx={RIM.rx - 6} ry={RIM.ry - 4} />
             </clipPath>
-            <ellipse cx={CX} cy={RIM.y + 1} rx={RIM.rx - 6} ry={RIM.ry - 4} fill={INK.ink} />
+            <ellipse cx={CX} cy={RIM.y + 1} rx={RIM.rx - 6} ry={RIM.ry - 4} fill={HEX.light} stroke={HEX.ink} strokeWidth={LINE.detail} />
             <g clipPath={`url(#${clip})`} className={s.ease} style={{ opacity: drain ? 0 : 1 }}>
               {hasSurface && (
                 <>
                   <ellipse cx={CX} cy={SURF.cy} rx={SURF.rx + 8} ry={SURF.ry + 6} fill={surface} />
-                  <ellipse cx={CX} cy={SURF.cy} rx={SURF.rx + 8} ry={SURF.ry + 6} fill={`url(#${uid}-dots)`} opacity={water ? 0.12 : 0.25} />
-                  <path d={`M${CX - 90} ${SURF.cy - 14}Q${CX} ${SURF.cy - 26} ${CX + 90} ${SURF.cy - 14}`} fill="none" stroke={INK.ink} strokeWidth={2.4} />
+                  <path d={`M${CX - 90} ${SURF.cy - 14}Q${CX} ${SURF.cy - 26} ${CX + 90} ${SURF.cy - 14}`} fill="none" stroke={HEX.ink} strokeWidth={LINE.detail} />
                 </>
               )}
               <AnimatePresence>
@@ -133,12 +135,11 @@ export function Pot({ scene }: { scene: Scene }) {
                   n={3 + Math.round(intensity * 9)}
                   r={1.8 + intensity * 4.5}
                   period={boil ? 1.6 - intensity * 1.0 : 2.6}
-                  fill={mix(surface, HEX.paper, 0.5)}
                   seed={5}
                 />
               )}
             </g>
-            <ellipse cx={CX} cy={RIM.y} rx={RIM.rx} ry={RIM.ry} fill="none" stroke={INK.ink} strokeWidth={3.5} />
+            <ellipse cx={CX} cy={RIM.y} rx={RIM.rx} ry={RIM.ry} fill="none" stroke={HEX.ink} strokeWidth={LINE.main} />
             <AnimatePresence>
               {!drain &&
                 strands.map((it, k) => (
@@ -156,7 +157,7 @@ export function Pot({ scene }: { scene: Scene }) {
         <g aria-hidden>
           {[-1, 1, 0.4].map((dx, i) => (
             <g key={i} transform={`translate(${CX - 30 + i * 32} ${SURF.cy - 4})`}>
-              <circle className={s.splash} r={2.6} fill={WATER} stroke={INK.ink} strokeWidth={1.3} style={{ ["--dx" as string]: `${dx * 7}px`, animationDelay: `${-i * 0.31}s` }} />
+              <circle className={s.splash} r={2.6} fill={WATER} stroke={HEX.ink} strokeWidth={1.3} style={{ ["--dx" as string]: `${dx * 7}px`, animationDelay: `${-i * 0.31}s` }} />
             </g>
           ))}
         </g>
