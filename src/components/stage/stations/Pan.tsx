@@ -5,7 +5,7 @@ import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { Burner, Knob } from "../Burner";
 import { cookedColor, isPool, poolOf, Scattered, Tangle } from "../food";
-import { clamp01, HEX, INK, MIS, mix } from "../palette";
+import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse, wall } from "../rough";
 import { Bubbles, Sizzle, Steam } from "../Steam";
 import s from "../stage.module.css";
@@ -19,7 +19,7 @@ const HANDLE = "M300 176L382 148C394 144 401 152 397 161C394 168 389 170 384 171
 const HEAT_AMOUNT = { low: 0.35, medium: 0.65, high: 1 } as const;
 
 export function Pan({ scene }: { scene: Scene }) {
-  const { uid, still } = useStage();
+  const { still } = useStage();
   const { technique, heat, items } = scene;
   const amt = heat ? HEAT_AMOUNT[heat] : 0;
   const pool = poolOf(items);
@@ -54,27 +54,22 @@ export function Pan({ scene }: { scene: Scene }) {
       <Burner cx={CX} cy={242} rx={98} heat={heat} />
       <Knob heat={heat} />
       <g className={toss ? s.jolt : undefined} style={{ animationDuration: `${tossPeriod}s` }}>
-        <path d={HANDLE} fill={INK.ink} />
-        <circle cx={385} cy={158} r={4.5} fill={INK.paperDeep} />
-        <path d={wall(CX, RIM, BASE, RIM.ry)} fill={INK.tomato} transform={`translate(${MIS.x} ${MIS.y})`} />
-        <path d={ellipse(CX, RIM.y, RIM.rx, RIM.ry)} fill={INK.tomatoDeep} transform={`translate(${MIS.x} ${MIS.y})`} />
-        <path d={wall(CX, RIM, BASE, RIM.ry)} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
-        <path d="M92 214Q112 228 146 234" fill="none" stroke={INK.paper} strokeWidth={3} strokeLinecap="round" />
-        <ellipse cx={CX} cy={IN.cy} rx={IN.rx} ry={IN.ry} fill={INK.ink} />
-        <ellipse cx={CX} cy={IN.cy} rx={IN.rx} ry={IN.ry} fill={`url(#${uid}-paperdots)`} opacity={0.22} />
-        <ellipse cx={CX} cy={RIM.y} rx={RIM.rx} ry={RIM.ry} fill="none" stroke={INK.ink} strokeWidth={3.5} />
+        <path d={HANDLE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
+        <circle cx={385} cy={158} r={4.5} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.detail} />
+        <path d={wall(CX, RIM, BASE, RIM.ry)} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
+        <path d={ellipse(CX, RIM.y, RIM.rx, RIM.ry)} fill={HEX.white} />
+        <ellipse cx={CX} cy={IN.cy} rx={IN.rx} ry={IN.ry} fill={HEX.light} stroke={HEX.ink} strokeWidth={LINE.detail} />
+        <ellipse cx={CX} cy={RIM.y} rx={RIM.rx} ry={RIM.ry} fill="none" stroke={HEX.ink} strokeWidth={LINE.main} />
 
         <g className={toss ? s.toss : undefined} style={{ animationDuration: `${tossPeriod}s` }}>
           <AnimatePresence>
             {pool && (
               <motion.g key="pool" {...landing(Boolean(freshPool), still, 0, -20)}>
-                <path d={poolD} fill={pool.color} transform={`translate(${MIS.x} ${MIS.y})`} />
-                {pool.done > 0.05 && <path d={poolD} fill={`url(#${uid}-dots)`} opacity={0.3 * pool.done} />}
-                <path d={poolD} fill="none" stroke={INK.ink} strokeWidth={2.4} />
+                <path d={poolD} fill={pool.color} stroke={HEX.ink} strokeWidth={2} />
                 {pool.sauce
                   ? Array.from({ length: Math.round(6 * (1 - pool.done)) }, (_, i) => (
                       <g key={i} transform={`translate(${FOOD.cx - 60 + i * 23} ${FOOD.cy - 8 + ((i * 7) % 3) * 8})`}>
-                        <path d={blob(0, 0, 8 - pool.done * 4, 6 - pool.done * 3, 900 + i, 0.25, 6)} fill={mix(pool.sauce!.ingredient.token.color, HEX.paper, 0.18)} stroke={INK.ink} strokeWidth={1.6} />
+                        <path d={blob(0, 0, 8 - pool.done * 4, 6 - pool.done * 3, 900 + i, 0.25, 6)} fill={mix(pool.sauce!.ingredient.token.color, HEX.white, 0.18)} stroke={HEX.ink} strokeWidth={1.6} />
                       </g>
                     ))
                   : [0, 1, 2].map((i) => (
@@ -84,7 +79,7 @@ export function Pan({ scene }: { scene: Scene }) {
                         style={{ animationDelay: `${-i * 0.7}s` }}
                         d={`M${FOOD.cx - 50 + i * 38} ${FOOD.cy - 4 + i * 3}q8 -4 16 0`}
                         fill="none"
-                        stroke={INK.paper}
+                        stroke={HEX.white}
                         strokeWidth={2.4}
                         strokeLinecap="round"
                       />
@@ -117,12 +112,11 @@ export function Pan({ scene }: { scene: Scene }) {
             n={5}
             r={3.5 + pool.done * 3}
             period={1.4 + pool.done * 2}
-            fill={mix(pool.color, HEX.paper, 0.25)}
             seed={3}
           />
         )}
         {technique === "fry" && heat && (
-          <Bubbles cx={FOOD.cx} cy={FOOD.cy} rx={FOOD.rx} ry={FOOD.ry} n={9} r={2.4} period={0.5} fill={INK.paper} seed={9} />
+          <Bubbles cx={FOOD.cx} cy={FOOD.cy} rx={FOOD.rx} ry={FOOD.ry} n={9} r={2.4} period={0.5} seed={9} />
         )}
       </g>
       {freshPool && !still && (
