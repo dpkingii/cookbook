@@ -1,6 +1,5 @@
 "use client";
 
-import { X } from "lucide-react";
 import { useDeferredValue, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { saveRecipe } from "@/lib/recipes/actions";
@@ -13,7 +12,7 @@ import { IngredientsSection } from "./IngredientsSection";
 import { LivePreview } from "./LivePreview";
 import { LoginPrompt } from "./LoginPrompt";
 import { StepsSection } from "./StepsSection";
-import { primaryButton, secondaryButton } from "./ui";
+import { errorClass, linkButton, primaryButton, sectionTitle, smallButton } from "./ui";
 import { useLeaveGuard } from "./useLeaveGuard";
 
 export function RecipeEditor({
@@ -78,16 +77,16 @@ export function RecipeEditor({
   return (
     <form noValidate onSubmit={submit} aria-label={recipeId ? "Edit recipe" : "New recipe"}>
       {warnings.length > 0 && (
-        <section aria-labelledby="warnings-heading" className="mb-6 rounded-2xl border-2 border-[var(--ink)] bg-[#fbf0cf] p-4">
+        <section aria-labelledby="warnings-heading" className="mb-8 border border-[var(--ink)] p-4">
           <div className="flex items-start gap-3">
-            <h2 id="warnings-heading" className="flex-1 font-serif text-2xl font-semibold">
+            <h2 id="warnings-heading" className={`${sectionTitle} flex-1 text-xl`}>
               We weren&rsquo;t sure about these
             </h2>
-            <button type="button" onClick={() => setWarnings([])} aria-label="Dismiss these notes" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--ink)] hover:bg-[var(--paper-deep)]">
-              <X aria-hidden size={20} />
+            <button type="button" onClick={() => setWarnings([])} aria-label="Dismiss these notes" className={smallButton}>
+              Dismiss
             </button>
           </div>
-          <ul className="mt-2 list-disc pl-5 text-lg">
+          <ul className="mt-2 list-disc pl-5 text-base">
             {warnings.map((warning) => (
               <li key={warning}>{warning}</li>
             ))}
@@ -95,9 +94,9 @@ export function RecipeEditor({
         </section>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-12">
         <LivePreview recipe={previewRecipe} stepIndex={shownStep} />
-        <div className="grid gap-6 lg:col-start-1 lg:row-start-1">
+        <div className="grid gap-8 lg:col-start-1 lg:row-start-1">
           <DetailsSection form={form} onChange={patch} error={error} />
           <IngredientsSection
             form={form}
@@ -117,16 +116,16 @@ export function RecipeEditor({
         </div>
       </div>
 
-      <div className="sticky bottom-0 z-10 -mx-4 mt-6 border-t-2 border-[var(--ink)] bg-[var(--paper)] px-4 py-3 sm:mx-0 sm:rounded-2xl sm:border-2">
+      <div className="sticky bottom-0 z-10 -mx-5 mt-8 border-t border-[var(--ink)] bg-white px-5 py-3 sm:-mx-6 sm:px-6">
         <div aria-live="polite" className="empty:hidden">
           {attempted && issues.length > 0 && (
-            <p className="mb-2 text-base font-semibold text-[var(--tomato-deep)]">
+            <p className={`mb-2 ${errorClass}`}>
               {issues.length === 1 ? "1 thing to fix before saving:" : `${issues.length} things to fix before saving:`}{" "}
               {issues[0].message}.
             </p>
           )}
           {failure && !failure.needsLogin && (
-            <p role="alert" className="mb-2 text-base font-semibold text-[var(--tomato-deep)]">
+            <p role="alert" className={`mb-2 ${errorClass}`}>
               {failure.error}
             </p>
           )}
@@ -136,19 +135,19 @@ export function RecipeEditor({
             <LoginPrompt message={failure.error} />
           </div>
         )}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-1">
           <button type="submit" disabled={saving} className={primaryButton}>
             {saving ? "Saving…" : "Save recipe"}
           </button>
           {onStartOver && (
-            <button type="button" className={secondaryButton} onClick={() => guard.ask(onStartOver)}>
+            <button type="button" className={linkButton} onClick={() => guard.ask(onStartOver)}>
               Start over
             </button>
           )}
-          <Link href={recipeId ? `/recipes/${recipeId}` : "/my"} className={secondaryButton}>
+          <Link href={recipeId ? `/recipes/${recipeId}` : "/my"} className={linkButton}>
             Cancel
           </Link>
-          {dirty && <span className="text-sm text-[var(--ink-soft)]">Unsaved changes</span>}
+          {dirty && <span className="label-caps">Unsaved changes</span>}
         </div>
       </div>
 

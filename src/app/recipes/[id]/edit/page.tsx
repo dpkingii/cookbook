@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { RecipeEditor } from "@/components/editor/RecipeEditor";
-import { SiteHeader } from "@/components/site/SiteHeader";
+import Link from "next/link";
+import { display, textLink } from "@/components/ui/styles";
 import { getViewer } from "@/lib/auth/viewer";
 import { getRecipe } from "@/lib/db/recipes";
 import { editableOf } from "@/lib/recipes/form";
@@ -14,11 +15,13 @@ export default async function EditRecipePage({ params }: { params: Promise<{ id:
   if (!recipe || recipe.ownerId !== viewer.id) notFound();
 
   return (
-    <div className="min-h-dvh bg-[var(--paper)] text-[var(--ink)]">
-      <SiteHeader />
-      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 md:py-12">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--tomato-deep)]">Edit recipe</p>
-        <h1 className="mb-8 mt-2 font-serif text-4xl font-semibold leading-tight sm:text-5xl">{recipe.title}</h1>
+    <div className="min-h-dvh bg-white text-[var(--ink)]">
+      <main className="mx-auto max-w-5xl px-5 py-6 sm:px-6 md:py-10">
+        <Link href={`/recipes/${recipe.id}`} className={`${textLink} inline-flex min-h-11 items-center`}>
+          Back to recipe
+        </Link>
+        <p className="label-caps mt-6">Edit recipe</p>
+        <h1 className={`${display} mb-8 mt-2 text-3xl sm:text-4xl`}>{recipe.title}</h1>
         <RecipeEditor initial={editableOf(recipe)} recipeId={recipe.id} />
       </main>
     </div>
