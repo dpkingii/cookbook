@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { cookedColor, isPool, PiecePath, placements, poolOf, Scattered, Tangle } from "../food";
-import { clamp01, HEX, INK, MIS, mix } from "../palette";
+import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse } from "../rough";
 import { Steam } from "../Steam";
 import s from "../stage.module.css";
@@ -48,7 +48,7 @@ function Frost() {
         [70, 176],
       ].map(([x, y], i) => (
         <g key={i} transform={`translate(${x} ${y})`} className={s.shimmer} style={{ animationDelay: `${-i * 0.5}s` }}>
-          <path d="M0 -9V9M-8 -4.5L8 4.5M-8 4.5L8 -4.5" stroke={INK.inkSoft} strokeWidth={2.4} strokeLinecap="round" />
+          <path d="M0 -9V9M-8 -4.5L8 4.5M-8 4.5L8 -4.5" stroke={HEX.grey} strokeWidth={2} strokeLinecap="round" />
         </g>
       ))}
     </g>
@@ -74,11 +74,9 @@ export function Plate({ scene }: { scene: Scene }) {
 
   return (
     <g>
-      <path d={ellipse(P.x, P.y + 4, 166, 62)} fill={INK.ink} opacity={0.12} />
-      <path d={ellipse(P.x, P.y, 160, 58)} fill={INK.paper} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={ellipse(P.x, P.y, 160, 58)} fill="none" stroke={INK.ink} strokeWidth={3.5} />
-      <ellipse cx={P.x + MIS.x} cy={P.y + MIS.y} rx={141} ry={50} fill="none" stroke={INK.tomato} strokeWidth={6} />
-      <ellipse cx={P.x} cy={P.y + 2} rx={106} ry={37} fill={INK.paperDeep} stroke={INK.inkSoft} strokeWidth={2} />
+      <path d={ellipse(P.x, P.y, 160, 58)} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} />
+      <ellipse cx={P.x} cy={P.y} rx={141} ry={50} fill="none" stroke={HEX.ink} strokeWidth={1} />
+      <ellipse cx={P.x} cy={P.y + 2} rx={106} ry={37} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.detail} />
 
       <AnimatePresence>
         {strands.map((it, k) => {
@@ -93,12 +91,11 @@ export function Plate({ scene }: { scene: Scene }) {
         })}
         {pool && (
           <motion.g key="sauce" {...landing(false, still)}>
-            <path d={sauceD} fill={pool.color} transform={`translate(${MIS.x} ${MIS.y})`} />
-            <path d={sauceD} fill="none" stroke={INK.ink} strokeWidth={2.6} />
+            <path d={sauceD} fill={pool.color} stroke={HEX.ink} strokeWidth={2} />
             <path
               d={`M${TOPPING.cx - 18} ${TOPPING.cy - 5}q10 -5 20 -2`}
               fill="none"
-              stroke={mix(pool.color, HEX.paper, 0.6)}
+              stroke={mix(pool.color, HEX.white, 0.6)}
               strokeWidth={2.6}
               strokeLinecap="round"
             />
