@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { textLink } from "@/components/ui/styles";
 import type { RecipeDraft } from "@/lib/import";
 import type { EditableRecipe } from "@/lib/recipes/form";
 import { ImportPanel } from "./ImportPanel";
@@ -19,26 +20,28 @@ export function NewRecipeFlow({ canSave }: { canSave: boolean }) {
   return (
     <>
       {!canSave && (
-        <p className="mb-6 max-w-2xl border-l-4 border-[var(--gold)] pl-3 text-lg text-[var(--ink-soft)]">
+        <p className="mb-6 max-w-xl border-l-2 border-[var(--ink)] pl-3 text-base text-[var(--mute)]">
           You can try this without an account. To keep the recipe you will need to{" "}
-          <a href="/login" target="_blank" className="font-semibold text-[var(--ink)] underline underline-offset-4">
+          <a href="/login" target="_blank" className={textLink}>
             log in
           </a>{" "}
           or{" "}
-          <a href="/signup" target="_blank" className="font-semibold text-[var(--ink)] underline underline-offset-4">
+          <a href="/signup" target="_blank" className={textLink}>
             sign up
           </a>
           .
         </p>
       )}
       {stage.kind === "import" ? (
-        <ImportPanel
-          onDraft={(draft: RecipeDraft) => {
-            const { warnings, ...recipe } = draft;
-            setStage({ kind: "draft", recipe, warnings });
-          }}
-          onScratch={() => setStage({ kind: "scratch" })}
-        />
+        <div className="max-w-xl">
+          <ImportPanel
+            onDraft={(draft: RecipeDraft) => {
+              const { warnings, ...recipe } = draft;
+              setStage({ kind: "draft", recipe, warnings });
+            }}
+            onScratch={() => setStage({ kind: "scratch" })}
+          />
+        </div>
       ) : (
         <RecipeEditor
           key={round}

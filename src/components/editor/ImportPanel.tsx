@@ -4,7 +4,7 @@ import { useId, useRef, useState, useTransition, type KeyboardEvent } from "reac
 import { importFromText, importFromUrl } from "@/lib/recipes/actions";
 import type { RecipeDraft } from "@/lib/import";
 import { Field } from "./Field";
-import { inputClass, panel, primaryButton } from "./ui";
+import { inputClass, linkButton, primaryButton } from "./ui";
 
 const SAMPLE = `Garlic noodles
 
@@ -59,8 +59,8 @@ export function ImportPanel({ onDraft, onScratch }: { onDraft: (draft: RecipeDra
   }
 
   return (
-    <div className={panel}>
-      <div role="tablist" aria-label="How to add a recipe" className="flex flex-wrap gap-2" onKeyDown={onKeyDown}>
+    <div>
+      <div role="tablist" aria-label="How to add a recipe" className="flex gap-6 border-b border-[var(--rule)]" onKeyDown={onKeyDown}>
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -77,8 +77,10 @@ export function ImportPanel({ onDraft, onScratch }: { onDraft: (draft: RecipeDra
               setTab(t.id);
               setError(null);
             }}
-            className={`min-h-11 rounded-full border-2 border-[var(--ink)] px-5 py-2 text-lg font-semibold focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold)] ${
-              tab === t.id ? "bg-[var(--ink)] text-[var(--paper)]" : "hover:bg-[var(--paper)]"
+            className={`-mb-px min-h-11 border-b-2 text-base font-medium focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] ${
+              tab === t.id
+                ? "border-[var(--ink)] text-[var(--ink)]"
+                : "border-transparent text-[var(--mute)] hover:text-[var(--ink)]"
             }`}
           >
             {t.label}
@@ -91,7 +93,7 @@ export function ImportPanel({ onDraft, onScratch }: { onDraft: (draft: RecipeDra
         id={`${uid}-panel`}
         role="tabpanel"
         aria-labelledby={`${uid}-tab-${tab}`}
-        className="mt-5 grid gap-4"
+        className="mt-6 grid gap-5"
       >
         {tab === "text" ? (
           <Field
@@ -107,7 +109,7 @@ export function ImportPanel({ onDraft, onScratch }: { onDraft: (draft: RecipeDra
                 value={text}
                 onChange={(event) => setText(event.target.value)}
                 placeholder={SAMPLE}
-                className={`${inputClass} font-mono !text-base`}
+                className={`${inputClass} font-mono`}
               />
             )}
           </Field>
@@ -134,15 +136,11 @@ export function ImportPanel({ onDraft, onScratch }: { onDraft: (draft: RecipeDra
         <div aria-live="polite" className="sr-only">
           {busy ? "Reading the recipe" : ""}
         </div>
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <button type="submit" disabled={busy} className={primaryButton}>
             {busy ? "Reading the recipe…" : tab === "text" ? "Turn into steps" : "Fetch recipe"}
           </button>
-          <button
-            type="button"
-            onClick={onScratch}
-            className="min-h-11 text-lg font-semibold underline underline-offset-4 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold)]"
-          >
+          <button type="button" onClick={onScratch} className={linkButton}>
             Start from scratch
           </button>
         </div>
