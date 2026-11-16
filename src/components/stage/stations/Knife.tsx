@@ -1,4 +1,4 @@
-import { INK, MIS } from "../palette";
+import { HEX, LINE } from "../palette";
 
 const BLADE = "M0 0Q34 -30 150 -32L150 6L64 6Q22 6 0 0Z";
 const HANDLE = "M160 -27L234 -22Q246 -14 236 3L160 5Z";
@@ -13,15 +13,12 @@ const CONTACT = { x: 34, y: 4 };
 export function Knife({ x, y, angle, lift, rock = 0 }: { x: number; y: number; angle: number; lift: number; rock?: number }) {
   return (
     <g aria-hidden transform={`translate(${x.toFixed(1)} ${(y - lift).toFixed(1)}) rotate(${(angle - rock).toFixed(1)}) scale(${SCALE}) translate(${-CONTACT.x} ${-CONTACT.y})`}>
-      <path d={BLADE} fill={INK.paper} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d="M30 -2Q60 0 150 0" fill="none" stroke={INK.inkSoft} strokeWidth={2} />
-      <path d="M60 -20Q100 -24 140 -24" fill="none" stroke={INK.paperDeep} strokeWidth={3} strokeLinecap="round" />
-      <path d={BLADE} fill="none" stroke={INK.ink} strokeWidth={3.6} strokeLinejoin="round" />
-      <rect x={148} y={-33} width={13} height={40} rx={3} fill={INK.ink} />
-      <path d={HANDLE} fill={INK.tomato} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={HANDLE} fill="none" stroke={INK.ink} strokeWidth={3.6} strokeLinejoin="round" />
-      <circle cx={186} cy={-11} r={3.2} fill={INK.ink} />
-      <circle cx={214} cy={-10} r={3.2} fill={INK.ink} />
+      <path d={BLADE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main / SCALE} strokeLinejoin="round" />
+      <path d="M30 -2Q60 0 150 0" fill="none" stroke={HEX.grey} strokeWidth={LINE.detail / SCALE} />
+      <rect x={148} y={-33} width={13} height={40} rx={3} fill={HEX.ink} />
+      <path d={HANDLE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main / SCALE} strokeLinejoin="round" />
+      <circle cx={186} cy={-11} r={3.2} fill={HEX.ink} />
+      <circle cx={214} cy={-10} r={3.2} fill={HEX.ink} />
     </g>
   );
 }

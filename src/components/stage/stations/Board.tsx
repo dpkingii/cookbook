@@ -5,7 +5,7 @@ import type { Ingredient, Technique } from "@/lib/recipe/types";
 import type { Item, Scene } from "../contents";
 import { landing, useClock, useStage } from "../context";
 import { PiecePath, placements, Scattered } from "../food";
-import { HEX, INK, MIS, mix } from "../palette";
+import { HEX, LINE } from "../palette";
 import { TokenArt } from "../tokens";
 import s from "../stage.module.css";
 import { Knife } from "./Knife";
@@ -64,10 +64,7 @@ function Cutting({ ing, technique, cut, rock }: { ing: Ingredient; technique: Te
         return (
           <g key={p.seed} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}>
             {slices ? (
-              <g>
-                <ellipse rx={7} ry={HALF * 0.5} fill={ing.token.color} transform={`translate(${MIS.x} ${MIS.y}) rotate(-14)`} />
-                <ellipse rx={7} ry={HALF * 0.5} fill="none" stroke={INK.ink} strokeWidth={2.2} transform="rotate(-14)" />
-              </g>
+              <ellipse rx={7} ry={HALF * 0.5} fill={ing.token.color} stroke={HEX.ink} strokeWidth={2.2} transform="rotate(-14)" />
             ) : (
               <PiecePath shape={ing.token.shape === "strand" ? "long" : ing.token.shape} color={ing.token.color} seed={p.seed} size={st.size} />
             )}
@@ -87,14 +84,12 @@ function Cutting({ ing, technique, cut, rock }: { ing: Ingredient; technique: Te
 export function BoardTop() {
   return (
     <g>
-      <path d={EDGE} fill={mix(HEX.gold, HEX.tomatoDeep, 0.3)} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={TOP} fill={mix(mix(HEX.gold, HEX.paper, 0.3), HEX.tomatoDeep, 0.1)} transform={`translate(${MIS.x} ${MIS.y})`} />
+      <path d={EDGE} fill={HEX.light} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
+      <path d={TOP} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
       {GRAIN_LINES.map((d) => (
-        <path key={d} d={d} fill="none" stroke={mix(HEX.gold, HEX.ink, 0.45)} strokeWidth={1.8} strokeLinecap="round" />
+        <path key={d} d={d} fill="none" stroke={HEX.rule} strokeWidth={LINE.detail} strokeLinecap="round" />
       ))}
-      <path d={TOP} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
-      <path d={EDGE} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
-      <ellipse cx={318} cy={164} rx={8} ry={4.5} fill={INK.paperDeep} stroke={INK.ink} strokeWidth={2.5} />
+      <ellipse cx={318} cy={164} rx={8} ry={4.5} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.detail} />
     </g>
   );
 }

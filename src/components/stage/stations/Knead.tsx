@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import type { Scene } from "../contents";
 import { landing, useClock, useStage } from "../context";
 import { blendOf, DOUGH } from "../mixing";
-import { HEX, INK, lerp, MIS, mix } from "../palette";
+import { HEX, lerp, LINE, mix } from "../palette";
 import { blob, rng } from "../rough";
 import { BoardTop } from "./Board";
 
@@ -34,20 +34,17 @@ function motionAt(pose: number, turns: number) {
 function Hand({ x, y }: { x: number; y: number }) {
   return (
     <g aria-hidden transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}>
-      <path d={SLEEVE} fill={INK.tomato} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={SLEEVE} fill="none" stroke={INK.ink} strokeWidth={3.2} strokeLinejoin="round" />
-      <path d="M33-34L58-22" stroke={INK.paper} strokeWidth={6} />
-      <path d="M33-34L58-22" stroke={INK.ink} strokeWidth={1.6} transform="translate(0 -3.5)" />
+      <path d={SLEEVE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
+      <path d="M33-34L58-22" stroke={HEX.ink} strokeWidth={LINE.detail} transform="translate(0 -3.5)" />
       {FINGERS.map(([x0, y0, x1, y1]) => (
         <g key={y0}>
-          <path d={`M${x0} ${y0}L${x1} ${y1}`} stroke={INK.ink} strokeWidth={13} strokeLinecap="round" />
-          <path d={`M${x0} ${y0}L${x1} ${y1}`} stroke={INK.paper} strokeWidth={7.6} strokeLinecap="round" />
+          <path d={`M${x0} ${y0}L${x1} ${y1}`} stroke={HEX.ink} strokeWidth={12.6} strokeLinecap="round" />
+          <path d={`M${x0} ${y0}L${x1} ${y1}`} stroke={HEX.white} strokeWidth={8} strokeLinecap="round" />
         </g>
       ))}
-      <path d={PALM} fill={INK.paper} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={PALM} fill="none" stroke={INK.ink} strokeWidth={3.2} strokeLinejoin="round" />
-      <path d="M-4-22Q-2-12-6-2" fill="none" stroke={INK.ink} strokeWidth={1.6} strokeLinecap="round" />
-      <path d={THUMB} fill={INK.paper} stroke={INK.ink} strokeWidth={2.8} strokeLinejoin="round" />
+      <path d={PALM} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
+      <path d="M-4-22Q-2-12-6-2" fill="none" stroke={HEX.ink} strokeWidth={LINE.detail} strokeLinecap="round" />
+      <path d={THUMB} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
     </g>
   );
 }
@@ -75,35 +72,36 @@ export function Knead({ scene }: { scene: Scene }) {
   const dust = Array.from({ length: Math.round(3 + (1 - p) * 8) }, () => ({ x: (rand() - 0.5) * D.rx * 1.3, y: -D.ry * (1.2 + rand() * 0.6) }));
   const fresh = items.length > 0 && items.every((it) => it.fresh);
   const flour = items.filter((it) => it.fresh && it.ingredient.token.shape === "grain");
+  const dusting = items.find((it) => it.ingredient.token.shape === "grain")?.ingredient.token.color ?? HEX.light;
 
   return (
     <g>
       <BoardTop />
-      <path d={FLOUR} fill={INK.paper} opacity={0.92} />
+      <path d={FLOUR} fill={dusting} />
       {Array.from({ length: 22 }, (_, i) => (
-        <circle key={i} cx={78 + ((i * 53) % 250)} cy={206 + ((i * 29) % 38)} r={1.4 + (i % 3) * 0.5} fill={INK.paper} />
+        <circle key={i} cx={78 + ((i * 53) % 250)} cy={206 + ((i * 29) % 38)} r={1 + (i % 3) * 0.4} fill={HEX.grey} />
       ))}
       {items.length > 0 && (
         <motion.g {...landing(fresh, still, 0, -150)}>
           <g transform={`translate(${D.x} ${D.base}) scale(${sx.toFixed(3)} ${sy.toFixed(3)})`}>
-            <path d={body} fill={dough} transform={`translate(${MIS.x} ${MIS.y})`} />
-            <path d={`M${-D.rx * 0.8} ${-D.ry * 0.35}Q0 ${D.ry * 0.25} ${D.rx * 0.8} ${-D.ry * 0.35}`} fill="none" stroke={mix(dough, HEX.tomatoDeep, 0.28)} strokeWidth={9} strokeLinecap="round" opacity={0.55} />
-            <path d={body} fill="none" stroke={INK.ink} strokeWidth={3.5} strokeLinejoin="round" />
+            <path d={body} fill={dough} />
+            <path d={`M${-D.rx * 0.8} ${-D.ry * 0.35}Q0 ${D.ry * 0.25} ${D.rx * 0.8} ${-D.ry * 0.35}`} fill="none" stroke={mix(dough, "#a8742f", 0.3)} strokeWidth={9} strokeLinecap="round" opacity={0.55} />
+            <path d={body} fill="none" stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
             {lumps.map((l, i) => (
-              <circle key={i} cx={l.x} cy={l.y} r={l.r} fill={dough} stroke={INK.ink} strokeWidth={2.2} />
+              <circle key={i} cx={l.x} cy={l.y} r={l.r} fill={dough} stroke={HEX.ink} strokeWidth={2.2} />
             ))}
             <g transform={`translate(0 ${-D.ry * 1.25}) scale(1 0.42) rotate(${seam.toFixed(1)})`}>
-              <path d={`M${-D.rx * 0.55} 6Q0 ${D.rx * 0.32} ${D.rx * 0.55} 6`} fill="none" stroke={INK.ink} strokeWidth={2.6} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+              <path d={`M${-D.rx * 0.55} 6Q0 ${D.rx * 0.32} ${D.rx * 0.55} 6`} fill="none" stroke={HEX.ink} strokeWidth={2.6} strokeLinecap="round" vectorEffect="non-scaling-stroke" />
             </g>
-            <path d={`M${-D.rx * 0.62} ${-D.ry * 1.2}Q${-D.rx * 0.5} ${-D.ry * 1.75} ${-D.rx * (0.1 - p * 0.12)} ${-D.ry * 1.82}`} fill="none" stroke={INK.paper} strokeWidth={3.2} strokeLinecap="round" />
+            <path d={`M${-D.rx * 0.62} ${-D.ry * 1.2}Q${-D.rx * 0.5} ${-D.ry * 1.75} ${-D.rx * (0.1 - p * 0.12)} ${-D.ry * 1.82}`} fill="none" stroke={HEX.white} strokeWidth={3.2} strokeLinecap="round" />
             {dust.map((d, i) => (
-              <rect key={i} x={d.x} y={d.y} width={3} height={3} rx={0.6} fill={INK.paper} stroke={INK.ink} strokeWidth={0.8} />
+              <rect key={i} x={d.x} y={d.y} width={3} height={3} rx={0.6} fill={HEX.white} stroke={HEX.ink} strokeWidth={0.8} />
             ))}
           </g>
           <Hand x={D.x + 6} y={top + 6 - lift} />
           {press > 0.6 &&
             [-1, 1].map((side) => (
-              <ellipse key={side} cx={D.x + side * (D.rx * sx + 8)} cy={D.base - 6} rx={7 * press} ry={4.5 * press} fill={INK.paper} stroke={INK.ink} strokeWidth={1.6} opacity={press} />
+              <ellipse key={side} cx={D.x + side * (D.rx * sx + 8)} cy={D.base - 6} rx={7 * press} ry={4.5 * press} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.detail} opacity={press} />
             ))}
         </motion.g>
       )}
@@ -118,7 +116,7 @@ export function Knead({ scene }: { scene: Scene }) {
               height={4}
               rx={0.8}
               fill={it.ingredient.token.color}
-              stroke={INK.ink}
+              stroke={HEX.ink}
               strokeWidth={1}
               initial={{ y: -140, opacity: 0 }}
               animate={{ y: [-140, 0, 0], opacity: [0, 1, 0] }}
