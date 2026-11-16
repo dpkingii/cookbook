@@ -1,13 +1,14 @@
 import Link from "next/link";
+import { textLink } from "@/components/ui/styles";
 
 export function GuestNote() {
   return (
-    <p className="mt-4 max-w-xl border-l-4 border-[var(--gold)] pl-3 text-lg text-[var(--ink-soft)]">
-      You are cooking as a guest.{" "}
-      <Link href="/signup" className="font-semibold text-[var(--ink)] underline underline-offset-4">
+    <p className="mt-4 max-w-md text-base text-[var(--mute)]">
+      This history is kept on this device.{" "}
+      <Link href="/signup" className={`${textLink} text-[var(--ink)]`}>
         Sign up
       </Link>{" "}
-      to keep this history on every device.
+      to keep it on every device.
     </p>
   );
 }

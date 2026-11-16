@@ -1,14 +1,9 @@
 export function TechniqueChips({ techniques }: { techniques: readonly string[] }) {
   if (techniques.length === 0) return null;
   return (
-    <ul aria-label="Techniques" className="flex flex-wrap gap-2">
+    <ul aria-label="Techniques" className="flex flex-wrap gap-x-3 gap-y-1 text-sm capitalize text-[var(--mute)]">
       {techniques.map((t) => (
-        <li
-          key={t}
-          className="rounded-full border-2 border-[var(--ink)] bg-[var(--paper-deep)] px-3 py-0.5 text-base capitalize"
-        >
-          {t}
-        </li>
+        <li key={t}>{t}</li>
       ))}
     </ul>
   );

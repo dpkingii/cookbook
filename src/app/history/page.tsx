@@ -1,81 +1,73 @@
 import Link from "next/link";
-import { SiteHeader } from "@/components/site/SiteHeader";
 import { formatDuration } from "@/components/cook/format";
 import { RATINGS } from "@/components/cook/ratings";
-import { EmptyState } from "@/components/stats/EmptyState";
+import { AppShell } from "@/components/site/AppShell";
+import { BackLink } from "@/components/site/BackLink";
+import { ring } from "@/components/site/focus";
 import { TechniqueChips } from "@/components/stats/Chips";
+import { EmptyState } from "@/components/stats/EmptyState";
 import { GuestNote } from "@/components/stats/GuestNote";
 import { formatDate, formatTime } from "@/components/stats/format";
+import { buttonGhost } from "@/components/ui/styles";
 import { getViewer } from "@/lib/auth/viewer";
 import { listSessionGroups, type SessionEntry } from "@/lib/sessions/queries";
 
 export const metadata = { title: "History" };
 
-const label = "text-sm font-semibold uppercase tracking-[0.2em] text-[var(--tomato-deep)]";
-
-function Heading({ children, count }: { children: string; count: number }) {
+function Section({ id, title, count, children }: { id: string; title: string; count: number; children: React.ReactNode }) {
   return (
-    <h2 className="mt-12 font-serif text-3xl font-semibold">
-      {children} <span className="font-sans text-xl font-normal text-[var(--ink-soft)]">({count})</span>
-    </h2>
+    <section aria-labelledby={id} className="mt-10">
+      <h2 id={id} className="label-caps mb-2">
+        {title} · {count}
+      </h2>
+      <ul className="border-b border-[var(--rule)]">{children}</ul>
+    </section>
   );
 }
 
 function Finished({ entry }: { entry: SessionEntry }) {
   const when = entry.finishedAt!;
   return (
-    <li className="rounded-3xl border-2 border-[var(--ink)] bg-[var(--paper-deep)] p-4 shadow-[5px_5px_0_var(--ink)] sm:p-5">
-      <p className="text-base text-[var(--ink-soft)]">
+    <li className="border-t border-[var(--rule)] py-4">
+      <p className="text-sm text-[var(--mute)]">
         <time dateTime={when.toISOString()}>
           {formatDate(when)}, {formatTime(when)}
         </time>
         {" · "}
         {formatDuration(entry.durationSeconds ?? 0)}
       </p>
-      <h3 className="mt-1 font-serif text-2xl font-semibold leading-tight">
-        <Link href={`/history/${entry.id}`} className="underline-offset-4 hover:underline">
+      <h3 className="mt-1 font-serif text-xl font-medium leading-snug">
+        <Link href={`/history/${entry.id}`} className={`inline-block py-1 hover:underline hover:decoration-[var(--rule)] hover:underline-offset-4 ${ring}`}>
           {entry.recipe.title}
         </Link>
       </h3>
-      <p className="mt-2 text-lg">
-        {entry.rating ? `${RATINGS[entry.rating - 1]} (${entry.rating} of 5)` : "Not rated"}
-      </p>
+      <p className="text-base">{entry.rating ? `${RATINGS[entry.rating - 1]} (${entry.rating} of 5)` : "Not rated"}</p>
       {!entry.plausible && (
-        <p className="mt-2 border-l-4 border-[var(--gold)] pl-3 text-base text-[var(--ink-soft)]">
+        <p className="mt-2 text-sm text-[var(--mute)]">
           Walkthrough: faster than the timers allow, so it does not count towards your skills.
         </p>
       )}
-      <div className="mt-3">
+      <div className="mt-2">
         <TechniqueChips techniques={entry.techniques} />
       </div>
-      {entry.note && (
-        <p className="mt-3 border-l-4 border-[var(--tomato)] pl-3 font-serif text-xl italic">{entry.note}</p>
-      )}
+      {entry.note && <p className="mt-3 border-l border-[var(--ink)] pl-3 font-serif text-lg italic">{entry.note}</p>}
     </li>
   );
 }
 
 function Unfinished({ entry, live }: { entry: SessionEntry; live: boolean }) {
+  const resume = live && entry.recipeId;
   return (
-    <li className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border-2 border-[var(--ink)] px-4 py-3">
-      <div className="min-w-0 flex-1">
-        <p className="font-serif text-xl font-semibold leading-tight">{entry.recipe.title}</p>
-        <p className="text-base text-[var(--ink-soft)]">
+    <li className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[var(--rule)] py-3">
+      <div className="min-w-0">
+        <p className="font-serif text-xl font-medium leading-snug">{entry.recipe.title}</p>
+        <p className="text-sm text-[var(--mute)]">
           Started {formatDate(entry.startedAt)}, {formatTime(entry.startedAt)}
         </p>
       </div>
-      {live && entry.recipeId ? (
-        <Link
-          href={`/cook/${entry.recipeId}`}
-          className="rounded-full border-2 border-[var(--ink)] bg-[var(--tomato)] px-5 py-2 text-lg font-bold text-[var(--paper)]"
-        >
-          Back to cooking
-        </Link>
-      ) : (
-        <Link href={`/history/${entry.id}`} className="text-lg font-semibold underline underline-offset-4">
-          See what you did
-        </Link>
-      )}
+      <Link href={resume ? `/cook/${entry.recipeId}` : `/history/${entry.id}`} className={buttonGhost}>
+        {resume ? "Back to cooking" : "See what you did"}
+      </Link>
     </li>
   );
 }
@@ -87,52 +79,39 @@ export default async function HistoryPage() {
     : { total: 0, finished: [], inProgress: [], abandoned: [] };
 
   return (
-    <div className="min-h-dvh bg-[var(--paper)] text-[var(--ink)]">
-      <SiteHeader />
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 md:py-14">
-        <p className={label}>History</p>
-        <h1 className="mt-2 font-serif text-5xl font-semibold leading-[1.05]">What you have cooked</h1>
-        {viewer?.isGuest && total > 0 && <GuestNote />}
+    <AppShell>
+      <BackLink />
+      <p className="label-caps mt-2">History</p>
+      <h1 className="mt-2 font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">What you have cooked</h1>
+      {viewer?.isGuest && total > 0 && <GuestNote />}
 
-        {total === 0 && (
-          <EmptyState title="Nothing cooked yet">
-            Finish a recipe and it shows up here, with how long each step took and what you wrote down.
-          </EmptyState>
-        )}
+      {total === 0 && (
+        <EmptyState title="Nothing cooked yet">
+          Finish a recipe and it shows up here, with how long each step took and what you wrote down.
+        </EmptyState>
+      )}
 
-        {inProgress.length > 0 && (
-          <>
-            <Heading count={inProgress.length}>In progress</Heading>
-            <ul className="mt-4 grid gap-3">
-              {inProgress.map((e) => (
-                <Unfinished key={e.id} entry={e} live />
-              ))}
-            </ul>
-          </>
-        )}
-
-        {finished.length > 0 && (
-          <>
-            <Heading count={finished.length}>Finished</Heading>
-            <ul className="mt-4 grid gap-6">
-              {finished.map((e) => (
-                <Finished key={e.id} entry={e} />
-              ))}
-            </ul>
-          </>
-        )}
-
-        {abandoned.length > 0 && (
-          <>
-            <Heading count={abandoned.length}>Left unfinished</Heading>
-            <ul className="mt-4 grid gap-3">
-              {abandoned.map((e) => (
-                <Unfinished key={e.id} entry={e} live={false} />
-              ))}
-            </ul>
-          </>
-        )}
-      </main>
-    </div>
+      {inProgress.length > 0 && (
+        <Section id="progress" title="In progress" count={inProgress.length}>
+          {inProgress.map((e) => (
+            <Unfinished key={e.id} entry={e} live />
+          ))}
+        </Section>
+      )}
+      {finished.length > 0 && (
+        <Section id="finished" title="Finished" count={finished.length}>
+          {finished.map((e) => (
+            <Finished key={e.id} entry={e} />
+          ))}
+        </Section>
+      )}
+      {abandoned.length > 0 && (
+        <Section id="abandoned" title="Left unfinished" count={abandoned.length}>
+          {abandoned.map((e) => (
+            <Unfinished key={e.id} entry={e} live={false} />
+          ))}
+        </Section>
+      )}
+    </AppShell>
   );
 }
