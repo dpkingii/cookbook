@@ -7,7 +7,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
-  --font-serif: var(--font-lora);
+  --font-serif: var(--font-newsreader);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -159,13 +159,37 @@
   width: 0;
 }
 
-/* Two-ink risograph palette used by the stage and player. */
+/*
+ * Cookbook look: white, ink and hairlines, serif for what you read first, colour only in the food.
+ * See docs/design.md.
+ */
 :root {
-  --paper: #f4ecdc;
-  --paper-deep: #e9dec7;
-  --ink: #1f2430;
-  --ink-soft: #5b6072;
-  --tomato: #d8412f;
-  --tomato-deep: #a82c1f;
-  --gold: #e0a93b;
+  --bg: #ffffff;
+  --ink: #111111;
+  --mute: #6a6a6a;
+  --rule: #e2e2e2;
+  --wash: #f6f6f4;
+  --accent: #b4530a;
+  --saffron: #e9a23b;
+
+  /* Names from the previous look, kept until every screen is moved to the tokens above. */
+  --paper: var(--bg);
+  --paper-deep: var(--wash);
+  --ink-soft: var(--mute);
+  --tomato: var(--accent);
+  --tomato-deep: var(--accent);
+  --gold: var(--saffron);
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+@utility label-caps {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mute);
 }

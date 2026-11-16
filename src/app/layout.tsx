@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Lora } from "next/font/google";
+import { Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -7,9 +7,9 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const lora = Lora({
-  variable: "--font-lora",
-  weight: ["500", "600", "700"],
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  weight: ["500", "600"],
   subsets: ["latin"],
 });
 
@@ -25,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${lora.variable} antialiased`}>
+      <body className={`${inter.variable} ${newsreader.variable} antialiased`}>
         {children}
       </body>
     </html>
