@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { labelClass } from "./ui";
+import { errorClass, hintClass, labelClass } from "./ui";
 
 export interface FieldControlProps {
   id: string;
@@ -29,7 +29,7 @@ export function Field({
         {label}
       </label>
       {hint && (
-        <p id={`${id}-hint`} className="text-sm text-[var(--ink-soft)]">
+        <p id={`${id}-hint`} className={hintClass}>
           {hint}
         </p>
       )}
@@ -41,7 +41,7 @@ export function Field({
         })}
       </div>
       {error && (
-        <p id={`${id}-error`} className="mt-1 text-base font-semibold text-[var(--tomato-deep)]">
+        <p id={`${id}-error`} className={`mt-1 ${errorClass}`}>
           {error}
         </p>
       )}

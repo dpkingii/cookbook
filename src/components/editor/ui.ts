@@ -1,15 +1,29 @@
-const focus =
-  "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold)]";
+import { buttonGhost, buttonPrimary, display, input, textLink } from "@/components/ui/styles";
+import { cn } from "@/lib/utils";
 
-export const inputClass = `min-h-11 w-full rounded-xl border-2 border-[var(--ink)] bg-[var(--paper)] px-4 py-2 text-lg text-[var(--ink)] placeholder:text-[var(--ink-soft)]/70 aria-[invalid=true]:border-[var(--tomato-deep)] aria-[invalid=true]:bg-[#fbe9e4] disabled:opacity-60 ${focus}`;
+export const inputClass = cn(
+  input,
+  "min-h-11 aria-[invalid=true]:border-[var(--accent)] aria-[invalid=true]:outline-[var(--accent)] disabled:opacity-60",
+);
 
-export const primaryButton = `inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-2 border-[var(--ink)] bg-[var(--tomato)] px-7 py-2.5 text-lg font-bold text-[var(--paper)] shadow-[4px_4px_0_var(--ink)] transition-transform active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:cursor-wait disabled:opacity-70 ${focus}`;
+export const primaryButton = cn(buttonPrimary, "gap-2 disabled:cursor-wait");
 
-export const secondaryButton = `inline-flex min-h-11 items-center justify-center gap-2 rounded-full border-2 border-[var(--ink)] bg-transparent px-5 py-2 text-base font-semibold text-[var(--ink)] hover:bg-[var(--paper-deep)] disabled:cursor-not-allowed disabled:opacity-40 ${focus}`;
+export const secondaryButton = cn(buttonGhost, "gap-2");
 
-export const iconButton = `inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 border-[var(--ink)] bg-[var(--paper)] text-[var(--ink)] hover:bg-[var(--paper-deep)] disabled:cursor-not-allowed disabled:opacity-30 ${focus}`;
+/** Small ghost button for reorder and remove controls; give it visible text. */
+export const smallButton = cn(buttonGhost, "min-h-11 gap-1 px-3 text-sm");
 
-export const panel =
-  "rounded-3xl border-2 border-[var(--ink)] bg-[var(--paper-deep)] p-4 sm:p-6";
+export const linkButton = cn(textLink, "inline-flex min-h-11 items-center");
 
-export const labelClass = "block text-base font-semibold";
+/** A section of the editor, set off from the one above by a hairline. */
+export const section = "border-t border-[var(--rule)] pt-6";
+
+export const sectionTitle = cn(display, "text-2xl");
+
+export const labelClass = "block text-base font-medium";
+
+export const hintClass = "text-sm text-[var(--mute)]";
+
+export const errorClass = "text-sm font-medium text-[var(--accent)]";
+
+export const checkbox = "size-5 shrink-0 accent-[var(--ink)]";
