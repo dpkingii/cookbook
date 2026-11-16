@@ -1,27 +1,17 @@
+/** The stage's own colours: black line on white. Colour comes only from the food. */
 export const HEX = {
-  paper: "#f4ecdc",
-  paperDeep: "#e9dec7",
-  ink: "#1f2430",
-  inkSoft: "#5b6072",
-  tomato: "#d8412f",
-  tomatoDeep: "#a82c1f",
-  gold: "#e0a93b",
+  white: "#ffffff",
+  ink: "#111111",
+  grey: "#6a6a6a",
+  light: "#f6f6f4",
+  rule: "#e2e2e2",
 } as const;
 
-export const INK = {
-  paper: `var(--paper, ${HEX.paper})`,
-  paperDeep: `var(--paper-deep, ${HEX.paperDeep})`,
-  ink: `var(--ink, ${HEX.ink})`,
-  inkSoft: `var(--ink-soft, ${HEX.inkSoft})`,
-  tomato: `var(--tomato, ${HEX.tomato})`,
-  tomatoDeep: `var(--tomato-deep, ${HEX.tomatoDeep})`,
-  gold: `var(--gold, ${HEX.gold})`,
-} as const;
+/** Stroke weights in the 400×300 viewBox: vessel and tool outlines, then the detail inside them. */
+export const LINE = { main: 2.5, detail: 1.6 } as const;
 
-/** How far the colour plate is knocked off its key line, in viewBox units. */
-export const MIS = { x: 1.8, y: 1.3 } as const;
-
-export const WATER = "#d9d6cc";
+/** Light grey, one step darker than `light`, so water still reads on a pale vessel floor. */
+export const WATER = HEX.rule;
 
 export function clamp01(n: number): number {
   return n < 0 ? 0 : n > 1 ? 1 : n;
