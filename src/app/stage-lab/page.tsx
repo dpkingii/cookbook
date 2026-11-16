@@ -72,10 +72,10 @@ const SEED_STEPS = SEED_RECIPES.flatMap((r) =>
 function Frame({ r, k, p, children }: { r: Recipe; k: number; p: number | null; children?: React.ReactNode }) {
   return (
     <div>
-      <div className="overflow-hidden rounded-md border border-[var(--ink-soft)]">
+      <div className="overflow-hidden border border-[var(--rule)]">
         <Stage recipe={r} stepIndex={k} progress={p} />
       </div>
-      {children && <p className="mt-1 text-xs">{children}</p>}
+      {children && <p className="mt-1.5 text-xs text-[var(--ink)]">{children}</p>}
     </div>
   );
 }
@@ -85,14 +85,14 @@ function NewStations({ narrow = false }: { narrow?: boolean }) {
   return (
     <>
       <section className="mt-12">
-        <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Bowl and oven at 0, 50 and 100%</h2>
+        <h2 className="mb-4 font-serif text-xl font-medium">Bowl and oven at 0, 50 and 100%</h2>
         <div className="flex flex-col gap-5">
           {NEW_TECHNIQUES.map((t) => {
             const r = single(t);
             return (
               <div key={t}>
-                <p className="mb-1 text-sm font-semibold">
-                  {t} <span className="font-normal text-[var(--ink-soft)]">· {LAB_USES[t]?.join(", ")}</span>
+                <p className="label-caps mb-1.5">
+                  <span className="text-[var(--ink)]">{t}</span> · {LAB_USES[t]?.join(", ")}
                 </p>
                 <div className={`grid gap-2 ${cols}`}>
                   {[0, 0.5, 1].map((p) => (
@@ -106,7 +106,7 @@ function NewStations({ narrow = false }: { narrow?: boolean }) {
       </section>
 
       <section className="mt-12">
-        <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Oven heat: low, medium, high</h2>
+        <h2 className="mb-4 font-serif text-xl font-medium">Oven heat: low, medium, high</h2>
         {(["roast", "broil"] as const).map((t) => (
           <div key={t} className={`mb-4 grid gap-2 ${cols}`}>
             {HEATS.map((h) => (
@@ -119,11 +119,11 @@ function NewStations({ narrow = false }: { narrow?: boolean }) {
       </section>
 
       <section className="mt-12">
-        <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Seed recipes at the bowl and oven</h2>
+        <h2 className="mb-4 font-serif text-xl font-medium">Seed recipes at the bowl and oven</h2>
         <div className={`grid gap-3 ${narrow ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-4"}`}>
           {SEED_STEPS.map(({ r, k, st }) => (
             <Frame key={`${r.id}-${k}`} r={r} k={k} p={st.timer ? 0.5 : null}>
-              {st.technique} <span className="text-[var(--ink-soft)]">· {r.title} #{k + 1}</span>
+              {st.technique} <span className="text-[var(--mute)]">· {r.title} #{k + 1}</span>
             </Frame>
           ))}
         </div>
@@ -159,7 +159,7 @@ export default function StageLab() {
 
   if (only === "new" || only === "narrow") {
     return (
-      <main className="min-h-screen bg-[var(--paper)] px-4 py-2 text-[var(--ink)] sm:px-8">
+      <main className="min-h-screen bg-[var(--bg)] px-4 py-2 text-[var(--ink)] sm:px-8">
         <div className={only === "narrow" ? "w-[360px]" : "mx-auto max-w-5xl"}>
           <NewStations narrow={only === "narrow"} />
         </div>
@@ -168,15 +168,15 @@ export default function StageLab() {
   }
 
   return (
-    <main className="min-h-screen bg-[var(--paper)] px-4 py-8 text-[var(--ink)] sm:px-8">
+    <main className="min-h-screen bg-[var(--bg)] px-4 py-8 text-[var(--ink)] sm:px-8">
       <div className="mx-auto max-w-5xl">
         <header className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
-          <h1 className="font-[family-name:var(--font-lora)] text-3xl font-bold">Stage lab</h1>
-          <p className="text-sm text-[var(--ink-soft)]">{recipe.title} · arrow keys step through</p>
+          <h1 className="font-serif text-3xl font-medium tracking-[-0.02em]">Stage lab</h1>
+          <p className="label-caps">{recipe.title} · arrow keys step through</p>
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-          <div className="overflow-hidden rounded-xl border-2 border-[var(--ink)]">
+          <div className="overflow-hidden border border-[var(--rule)]">
             <Stage recipe={recipe} stepIndex={i} progress={progress} />
           </div>
 
@@ -186,36 +186,36 @@ export default function StageLab() {
                 type="button"
                 onClick={() => setI((n) => Math.max(0, n - 1))}
                 disabled={i === 0}
-                className="rounded-full border-2 border-[var(--ink)] px-4 py-2 font-semibold disabled:opacity-30"
+                className="h-11 border border-[var(--ink)] px-4 text-sm font-medium disabled:opacity-30"
               >
                 Prev
               </button>
-              <span className="tabular-nums text-sm text-[var(--ink-soft)]">
+              <span className="tabular-nums text-sm text-[var(--mute)]">
                 Step {i + 1} / {recipe.steps.length}
               </span>
               <button
                 type="button"
                 onClick={() => setI((n) => Math.min(last, n + 1))}
                 disabled={i === last}
-                className="rounded-full border-2 border-[var(--ink)] bg-[var(--tomato)] px-4 py-2 font-semibold text-[var(--paper)] disabled:opacity-30"
+                className="h-11 bg-[var(--ink)] px-4 text-sm font-medium text-[var(--bg)] disabled:opacity-30"
               >
                 Next
               </button>
             </div>
 
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--tomato-deep)]">
+              <p className="label-caps mb-1">
                 {step.technique}
                 {step.heat ? ` · ${step.heat} heat` : " · no heat"}
                 {step.timer ? ` · ${Math.round(step.timer.seconds / 60)} min` : ""}
               </p>
-              <p className="font-[family-name:var(--font-lora)] text-2xl font-semibold leading-snug">{step.text}</p>
-              {step.cue && <p className="mt-1 text-sm text-[var(--ink-soft)]">Look for: {step.cue}</p>}
+              <p className="font-serif text-2xl font-medium leading-snug">{step.text}</p>
+              {step.cue && <p className="mt-1 text-sm text-[var(--mute)]">Look for: {step.cue}</p>}
             </div>
 
-            <div className="rounded-lg bg-[var(--paper-deep)] p-3">
+            <div className="border-y border-[var(--rule)] py-3">
               <label className="flex items-center gap-3 text-sm">
-                <span className="w-16">Progress</span>
+                <span className="label-caps w-20">Progress</span>
                 <input
                   type="range"
                   min={0}
@@ -223,14 +223,14 @@ export default function StageLab() {
                   value={pct}
                   disabled={noTimer || !step.timer}
                   onChange={(e) => setPct(Number(e.target.value))}
-                  className="flex-1 accent-[var(--tomato)]"
+                  className="flex-1 accent-[var(--ink)]"
                 />
                 <span className="w-10 text-right tabular-nums">{progress == null ? "null" : `${pct}%`}</span>
               </label>
               <label className="mt-2 flex items-center gap-2 text-sm">
                 <input type="checkbox" checked={noTimer} onChange={(e) => setNoTimer(e.target.checked)} />
                 No timer (progress = null)
-                {!step.timer && <span className="text-[var(--ink-soft)]">· this step has no timer</span>}
+                {!step.timer && <span className="text-[var(--mute)]">· this step has no timer</span>}
               </label>
             </div>
 
@@ -249,7 +249,7 @@ export default function StageLab() {
         </section>
 
         <section className="mt-12">
-          <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Ingredient tokens</h2>
+          <h2 className="mb-4 font-serif text-xl font-medium">Ingredient tokens</h2>
           <div className="flex flex-wrap gap-5">
             {recipe.ingredients.map((ing) => (
               <div key={ing.id} className="flex w-20 flex-col items-center gap-1 text-center text-xs">
@@ -261,15 +261,15 @@ export default function StageLab() {
         </section>
 
         <section className="mt-12">
-          <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Every step at 0, 50 and 100%</h2>
+          <h2 className="mb-4 font-serif text-xl font-medium">Every step at 0, 50 and 100%</h2>
           <div className="flex flex-col gap-5">
             {recipe.steps.map((s, k) => (
               <div key={k}>
-                <p className="mb-1 text-sm">
-                  <button type="button" onClick={() => setI(k)} className="font-semibold underline decoration-[var(--tomato)]">
+                <p className="mb-1.5 text-sm">
+                  <button type="button" onClick={() => setI(k)} className="font-medium underline underline-offset-2">
                     {k + 1}. {s.technique}
                   </button>{" "}
-                  <span className="text-[var(--ink-soft)]">{s.text}</span>
+                  <span className="text-[var(--mute)]">{s.text}</span>
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   {[0, 0.5, 1].map((p) => (
@@ -282,11 +282,11 @@ export default function StageLab() {
         </section>
 
         <section className="mt-12">
-          <h2 className="mb-3 font-[family-name:var(--font-lora)] text-xl font-bold">Every technique, alone</h2>
+          <h2 className="mb-4 font-serif text-xl font-medium">Every technique, alone</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {gallery.map(({ t, r }) => (
               <Frame key={t} r={r} k={0} p={0.5}>
-                {t} <span className="text-[var(--ink-soft)]">· {TECHNIQUE_STATION[t]}</span>
+                {t} <span className="text-[var(--mute)]">· {TECHNIQUE_STATION[t]}</span>
               </Frame>
             ))}
           </div>
