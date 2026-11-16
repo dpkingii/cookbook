@@ -189,6 +189,12 @@ export function useSession(recipe: Recipe) {
     return () => clearInterval(id);
   }, [ready, record]);
 
+  /** Resolves true once the server has acknowledged every queued event, false if it could not be reached. */
+  const flush = useCallback(async () => {
+    const result = await getOutbox().flush();
+    return result === "done" && getOutbox().pending() === 0;
+  }, []);
+
   const run = useCallback(
     (command: (ctx: CommandContext) => PlayerEvent[]) => {
       const now = Date.now();
@@ -197,5 +203,7 @@ export function useSession(recipe: Recipe) {
     [recipe, record],
   );
 
-  return { state: session.player, now: session.now, ready, run, restart: startFresh };
+  const sessionId = useCallback(() => journal.current.id, []);
+
+  return { state: session.player, now: session.now, ready, run, restart: startFresh, flush, sessionId };
 }
