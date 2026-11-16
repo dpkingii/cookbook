@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
+import { buttonPrimary, display, input, textLink } from "@/components/ui/styles";
 import { authClient } from "@/lib/auth/client";
+import { cn } from "@/lib/utils";
 
 type Mode = "login" | "signup";
 
@@ -30,8 +32,7 @@ const COPY = {
   },
 } as const;
 
-const fieldClass =
-  "mt-1 w-full rounded-xl border-2 border-[var(--ink)] bg-white/60 px-4 py-3 text-lg text-[var(--ink)] outline-none focus-visible:ring-4 focus-visible:ring-[var(--gold)] disabled:opacity-60";
+const label = "block text-base font-medium";
 
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
@@ -61,20 +62,24 @@ export function AuthForm({ mode }: { mode: Mode }) {
     router.refresh();
   }
 
+  const fieldClass = cn(
+    input,
+    "mt-1 min-h-12 aria-[invalid=true]:border-[var(--accent)] aria-[invalid=true]:outline-[var(--accent)] disabled:opacity-60",
+  );
+  const invalid = error ? true : undefined;
+
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-4 py-10 text-[var(--ink)]">
-      <Link href="/" className="font-serif text-2xl font-bold">
+    <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col px-5 py-8 text-[var(--ink)]">
+      <Link href="/" className={cn(display, "inline-flex min-h-11 items-center self-start text-2xl")}>
         Cookbook
       </Link>
-      <p className="mt-8 text-sm font-semibold uppercase tracking-[0.2em] text-[var(--tomato-deep)]">
-        {copy.kicker}
-      </p>
-      <h1 className="mt-1 font-serif text-4xl font-semibold leading-tight">{copy.title}</h1>
-      <p className="mt-2 text-lg text-[var(--ink-soft)]">{copy.lead}</p>
+      <p className="label-caps mt-12">{copy.kicker}</p>
+      <h1 className={cn(display, "mt-2 text-3xl sm:text-4xl")}>{copy.title}</h1>
+      <p className="mt-2 text-base text-[var(--mute)]">{copy.lead}</p>
 
-      <form onSubmit={onSubmit} className="mt-6 space-y-4" aria-busy={submitting}>
+      <form onSubmit={onSubmit} className="mt-8 space-y-5" aria-busy={submitting}>
         {mode === "signup" && (
-          <label className="block text-base font-semibold">
+          <label className={label}>
             Name
             <input
               name="name"
@@ -86,7 +91,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             />
           </label>
         )}
-        <label className="block text-base font-semibold">
+        <label className={label}>
           Email
           <input
             name="email"
@@ -94,10 +99,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
             autoComplete="email"
             required
             disabled={submitting}
+            aria-invalid={invalid}
             className={fieldClass}
           />
         </label>
-        <label className="block text-base font-semibold">
+        <label className={label}>
           Password
           <input
             name="password"
@@ -105,39 +111,29 @@ export function AuthForm({ mode }: { mode: Mode }) {
             autoComplete={mode === "signup" ? "new-password" : "current-password"}
             required
             disabled={submitting}
+            aria-invalid={invalid}
             aria-describedby={mode === "signup" ? "password-hint" : undefined}
             className={fieldClass}
           />
           {mode === "signup" && (
-            <span id="password-hint" className="mt-1 block text-sm font-normal text-[var(--ink-soft)]">
+            <span id="password-hint" className="mt-1 block text-sm font-normal text-[var(--mute)]">
               At least 8 characters.
             </span>
           )}
         </label>
 
-        <p
-          role="alert"
-          className={
-            error
-              ? "rounded-xl border-2 border-[var(--tomato-deep)] bg-[var(--tomato)]/10 px-4 py-3 font-semibold text-[var(--tomato-deep)]"
-              : "sr-only"
-          }
-        >
+        <p role="alert" className={error ? "text-sm font-medium text-[var(--accent)]" : "sr-only"}>
           {error}
         </p>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-full border-2 border-[var(--ink)] bg-[var(--tomato)] py-4 text-xl font-bold text-[var(--paper)] shadow-[4px_4px_0_var(--ink)] transition-transform active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:cursor-wait disabled:opacity-60"
-        >
+        <button type="submit" disabled={submitting} className={cn(buttonPrimary, "w-full disabled:cursor-wait")}>
           {submitting ? copy.busy : copy.submit}
         </button>
       </form>
 
-      <p className="mt-6 text-center text-lg text-[var(--ink-soft)]">
+      <p className="mt-8 text-base text-[var(--mute)]">
         {copy.switchText}{" "}
-        <Link href={copy.switchHref} className="font-semibold text-[var(--tomato-deep)] underline underline-offset-4">
+        <Link href={copy.switchHref} className={cn(textLink, "text-[var(--ink)]")}>
           {copy.switchLabel}
         </Link>
       </p>
