@@ -5,7 +5,7 @@ import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { cookedColor, placements, Scattered } from "../food";
 import { blendOf, browned } from "../mixing";
-import { clamp01, HEX, INK, MIS, mix } from "../palette";
+import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob } from "../rough";
 import { Bubbles } from "../Steam";
 
@@ -35,14 +35,13 @@ function Tray({ items, char, sizzle }: { items: Item[]; char: number; sizzle: bo
   const doneness = Math.max(0, ...pieces.map((it) => browned(it.cooked)));
   return (
     <g>
-      <path d={TRAY_TOP} fill={mix(HEX.paper, HEX.ink, 0.48)} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={TRAY_TOP} fill="none" stroke={INK.paperDeep} strokeWidth={2.2} strokeLinejoin="round" />
-      <path d={TRAY_FRONT} fill={mix(HEX.paper, HEX.ink, 0.68)} stroke={INK.paperDeep} strokeWidth={2} strokeLinejoin="round" />
+      <path d={TRAY_TOP} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
+      <path d={TRAY_FRONT} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />
       {drip && (
         <motion.g {...landing(liquids.some((it) => it.fresh), still, 0, -20)}>
           <path d={dripD} fill={mix(drip, ROAST, 0.2 + doneness * 0.5)} />
-          <path d={dripD} fill="none" stroke={INK.ink} strokeWidth={1.8} />
-          {sizzle && <Bubbles cx={0} cy={-18} rx={62} ry={10} n={6} r={2.2} period={0.9} fill={INK.paper} seed={4} />}
+          <path d={dripD} fill="none" stroke={HEX.ink} strokeWidth={1.8} />
+          {sizzle && <Bubbles cx={0} cy={-18} rx={62} ry={10} n={6} r={2.2} period={0.9} seed={4} />}
         </motion.g>
       )}
       <AnimatePresence>
@@ -62,7 +61,7 @@ function Tray({ items, char, sizzle }: { items: Item[]; char: number; sizzle: bo
       </AnimatePresence>
       {spices.flatMap((it) =>
         placements(it.ingredient.id + "rub", 10, 0, -20, 58, 10).map((p) => (
-          <rect key={p.seed} x={p.x - 1.5} y={p.y - 1.5} width={3} height={3} rx={0.5} fill={it.ingredient.token.color} stroke={INK.ink} strokeWidth={0.8} />
+          <rect key={p.seed} x={p.x - 1.5} y={p.y - 1.5} width={3} height={3} rx={0.5} fill={it.ingredient.token.color} stroke={HEX.ink} strokeWidth={0.8} />
         )),
       )}
     </g>
@@ -74,16 +73,15 @@ function Tin({ items }: { items: Item[] }) {
   const { still } = useStage();
   const cooked = Math.max(0, ...items.map((it) => it.cooked));
   const rise = clamp01(cooked);
-  const batter = mix(blendOf(items) ?? "#efe0b8", HEX.paper, 0.3);
+  const batter = mix(blendOf(items) ?? "#efe0b8", HEX.white, 0.3);
   const crust = mix(batter, CRUST, browned(cooked));
   const h = 8 + rise * 26;
   const dome = `M-58 -46C-56 ${-46 - h} 56 ${-46 - h} 58 -46Z`;
   return (
     <motion.g {...landing(items.some((it) => it.fresh), still, 0, -90)}>
       <g transform="scale(1.22)">
-      <path d={TIN_BACK} fill={mix(HEX.paper, HEX.ink, 0.35)} stroke={INK.inkSoft} strokeWidth={2} strokeLinejoin="round" />
-      <path d={dome} fill={crust} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={dome} fill="none" stroke={INK.ink} strokeWidth={2.8} />
+      <path d={TIN_BACK} fill={HEX.light} stroke={HEX.ink} strokeWidth={LINE.detail} strokeLinejoin="round" />
+      <path d={dome} fill={crust} stroke={HEX.ink} strokeWidth={2} />
       {rise > 0.35 && (
         <path
           d={`M-28 ${-46 - h * 0.62}Q0 ${-46 - h * 0.86} 28 ${-46 - h * 0.62}`}
@@ -93,11 +91,10 @@ function Tin({ items }: { items: Item[] }) {
           strokeLinecap="round"
         />
       )}
-      <path d={TIN_FRONT} fill={INK.paperDeep} transform={`translate(${MIS.x} ${MIS.y})`} />
-      <path d={TIN_FRONT} fill="none" stroke={INK.inkSoft} strokeWidth={2.4} strokeLinejoin="round" />
-      <path d="M-56 -38H56" stroke={INK.tomato} strokeWidth={4} />
-      <circle cx={-44} cy={-22} r={2.2} fill={INK.ink} />
-      <circle cx={44} cy={-22} r={2.2} fill={INK.ink} />
+      <path d={TIN_FRONT} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main / 1.22} strokeLinejoin="round" />
+      <path d="M-56 -38H56" stroke={HEX.ink} strokeWidth={1} />
+      <circle cx={-44} cy={-22} r={2.2} fill={HEX.ink} />
+      <circle cx={44} cy={-22} r={2.2} fill={HEX.ink} />
       </g>
     </motion.g>
   );
