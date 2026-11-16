@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { AppShell } from "@/components/site/AppShell";
 import { ring } from "@/components/site/focus";
 import { LogoutButton } from "@/components/site/LogoutButton";
@@ -26,7 +27,8 @@ export default async function ProfilePage() {
   const entries = viewer ? await listSessions(viewer.id) : [];
   const finished = entries.map(toFinished).filter((s) => s !== null);
   const now = new Date();
-  const week = thisWeek(finished, now);
+  const tz = decodeURIComponent((await cookies()).get("tz")?.value ?? "UTC");
+  const week = thisWeek(finished, now, tz);
   const tried = techniqueCounts(finished).filter((t) => t.count > 0).length;
   const days = week.cooked.filter(Boolean).length;
   const member = viewer && !viewer.isGuest ? viewer : null;

@@ -47,7 +47,7 @@ export function isTimeZone(tz: string): boolean {
 }
 
 /** Whole days since 1970-01-01 of the calendar date `date` falls on in `tz`. */
-function localDay(date: Date, tz: string): number {
+export function localDay(date: Date, tz: string): number {
   const part = Object.fromEntries(formatter(tz).formatToParts(date).map((p) => [p.type, Number(p.value)]));
   return Date.UTC(part.year, part.month - 1, part.day) / DAY_MS;
 }
