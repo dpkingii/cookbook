@@ -1,13 +1,12 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { IngredientToken } from "@/components/stage";
 import type { TokenShape } from "@/lib/recipe/types";
 import { ingredientsFromLines, moveItem, setIngredientName, setIngredientToken } from "@/lib/recipes/edit";
 import { blankIngredient, isBlankIngredient, type FormState, type IngredientForm } from "@/lib/recipes/form";
 import { Field } from "./Field";
-import { iconButton, inputClass, panel, primaryButton, secondaryButton } from "./ui";
+import { hintClass, inputClass, primaryButton, secondaryButton, section, sectionTitle, smallButton } from "./ui";
 
 const SHAPES: TokenShape[] = ["round", "bulb", "leaf", "long", "strand", "cube", "liquid", "grain", "wedge"];
 
@@ -31,8 +30,8 @@ function IngredientRow({
   const at = `ingredient-${index}`;
   const label = ingredient.name.trim() || `ingredient ${index + 1}`;
   return (
-    <li className="rounded-2xl border-2 border-[var(--ink)] bg-[var(--paper)] p-3">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-[5rem_6rem_1fr_1fr]">
+    <li className="border-t border-[var(--rule)] py-5">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-[5rem_6rem_1fr_1fr]">
         <Field id={`${at}-quantity`} label="Quantity" error={error(`${at}-quantity`)}>
           {(props) => (
             <input
@@ -111,17 +110,17 @@ function IngredientRow({
           onChange={(event) =>
             onChange(setIngredientToken(ingredient, { ...ingredient.token, color: event.target.value }))
           }
-          className="size-11 shrink-0 cursor-pointer rounded-xl border-2 border-[var(--ink)] bg-[var(--paper)] p-1"
+          className="size-11 shrink-0 cursor-pointer border border-[var(--ink)] bg-white p-1"
         />
         <span className="ml-auto flex gap-2">
-          <button id={`${at}-up`} type="button" className={iconButton} disabled={index === 0} onClick={() => onMove(-1)} aria-label={`Move ${label} up`}>
-            <ArrowUp aria-hidden size={20} />
+          <button id={`${at}-up`} type="button" className={smallButton} disabled={index === 0} onClick={() => onMove(-1)} aria-label={`Move ${label} up`}>
+            Up
           </button>
-          <button id={`${at}-down`} type="button" className={iconButton} disabled={index === count - 1} onClick={() => onMove(1)} aria-label={`Move ${label} down`}>
-            <ArrowDown aria-hidden size={20} />
+          <button id={`${at}-down`} type="button" className={smallButton} disabled={index === count - 1} onClick={() => onMove(1)} aria-label={`Move ${label} down`}>
+            Down
           </button>
-          <button type="button" className={iconButton} onClick={onRemove} aria-label={`Remove ${label}`}>
-            <Trash2 aria-hidden size={20} />
+          <button type="button" className={smallButton} onClick={onRemove} aria-label={`Remove ${label}`}>
+            Remove
           </button>
         </span>
       </div>
@@ -167,15 +166,15 @@ export function IngredientsSection({
   };
 
   return (
-    <section aria-labelledby="ingredients-heading" className={panel}>
-      <h2 id="ingredients-heading" className="font-serif text-3xl font-semibold">
+    <section aria-labelledby="ingredients-heading" className={section}>
+      <h2 id="ingredients-heading" className={sectionTitle}>
         Ingredients
       </h2>
-      <p className="mt-1 text-[var(--ink-soft)]">
+      <p className={`mt-1 ${hintClass}`}>
         Each ingredient gets a token that shows up in the animation. It follows the name until you pick one yourself.
       </p>
 
-      <ul className="mt-4 grid gap-3">
+      <ul className="mt-4 border-b border-[var(--rule)]">
         {rows.map((ingredient, index) => (
           <IngredientRow
             key={ingredient.id}
@@ -196,19 +195,19 @@ export function IngredientsSection({
       <button
         id="add-ingredient"
         type="button"
-        className={`${secondaryButton} mt-4`}
+        className={`${secondaryButton} mt-5`}
         onClick={() => {
           const row = blankIngredient();
           focusAfter(`ingredient-${rows.length}-name`);
           setForm((f) => ({ ...f, ingredients: [...f.ingredients, row] }));
         }}
       >
-        <Plus aria-hidden size={20} /> Add ingredient
+        Add ingredient
       </button>
 
-      <details className="mt-4 rounded-2xl border-2 border-dashed border-[var(--ink)] p-3">
-        <summary className="min-h-11 cursor-pointer py-2 text-lg font-semibold">Paste ingredient lines</summary>
-        <label htmlFor="paste-lines" className="mt-2 block text-base font-semibold">
+      <details className="mt-4 border-t border-[var(--rule)] pt-2">
+        <summary className="min-h-11 cursor-pointer py-2.5 text-base font-medium">Paste ingredient lines</summary>
+        <label htmlFor="paste-lines" className="mt-2 block text-base font-medium">
           One ingredient per line
         </label>
         <textarea

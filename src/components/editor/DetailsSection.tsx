@@ -1,7 +1,7 @@
 import type { Difficulty } from "@/lib/recipe/types";
 import type { FormState } from "@/lib/recipes/form";
 import { Field } from "./Field";
-import { inputClass, panel } from "./ui";
+import { checkbox, hintClass, inputClass, section, sectionTitle } from "./ui";
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 
@@ -15,11 +15,11 @@ export function DetailsSection({
   error: (field: string) => string | undefined;
 }) {
   return (
-    <section aria-labelledby="details-heading" className={panel}>
-      <h2 id="details-heading" className="font-serif text-3xl font-semibold">
+    <section aria-labelledby="details-heading" className={section}>
+      <h2 id="details-heading" className={sectionTitle}>
         Recipe details
       </h2>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <div className="mt-5 grid gap-5 sm:grid-cols-2">
         <Field id="title" label="Title" error={error("title")} className="sm:col-span-2">
           {(props) => (
             <input
@@ -96,13 +96,13 @@ export function DetailsSection({
             role="switch"
             checked={form.isPublic}
             onChange={(event) => onChange({ isPublic: event.target.checked })}
-            className="mt-1 size-6 shrink-0 accent-[var(--tomato)]"
+            className={`${checkbox} mt-3`}
           />
           <span>
-            <span className="block text-lg font-semibold">
+            <span className="block text-base font-medium">
               {form.isPublic ? "Public: everyone can find this recipe" : "Private: only you can see this recipe"}
             </span>
-            <span className="block text-sm text-[var(--ink-soft)]">
+            <span className={`block ${hintClass}`}>
               Public recipes appear in the catalogue on the home page.
             </span>
           </span>
