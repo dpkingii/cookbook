@@ -1,21 +1,25 @@
-export function PageSkeleton({ label }: { label: string }) {
+import { AppShell } from "./AppShell";
+
+const block = "bg-[var(--wash)] motion-safe:animate-pulse";
+
+export function PageSkeleton({ label, rows = 6 }: { label: string; rows?: number }) {
   return (
-    <div className="min-h-dvh bg-[var(--paper)] text-[var(--ink)]" aria-busy="true">
-      <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 md:py-14">
+    <AppShell>
+      <div aria-busy="true">
         <p className="sr-only" role="status">
           {label}
         </p>
-        <div className="h-4 w-24 animate-pulse rounded-full bg-[var(--paper-deep)] motion-reduce:animate-none" />
-        <div className="mt-4 h-14 max-w-md animate-pulse rounded-2xl bg-[var(--paper-deep)] motion-reduce:animate-none" />
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div
-              key={i}
-              className="h-28 animate-pulse rounded-2xl border-2 border-[var(--ink)]/20 bg-[var(--paper-deep)] motion-reduce:animate-none"
-            />
+        <div className={`h-3 w-20 ${block}`} />
+        <div className={`mt-4 h-10 w-3/4 max-w-sm ${block}`} />
+        <div className="mt-10 border-b border-[var(--rule)]">
+          {Array.from({ length: rows }, (_, i) => (
+            <div key={i} className="border-t border-[var(--rule)] py-4">
+              <div className={`h-5 w-2/3 ${block}`} />
+              <div className={`mt-2 h-3 w-1/2 ${block}`} />
+            </div>
           ))}
         </div>
-      </main>
-    </div>
+      </div>
+    </AppShell>
   );
 }

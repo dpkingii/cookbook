@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buttonGhost } from "@/components/ui/styles";
 
 export const PAGE_SIZE = 24;
 
@@ -7,9 +8,6 @@ export function paginate<T>(items: T[], pageParam: string | undefined) {
   const page = Math.min(pages, Math.max(1, Number.parseInt(pageParam ?? "1", 10) || 1));
   return { page, pages, items: items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) };
 }
-
-const link =
-  "inline-flex min-h-11 items-center rounded-full border-2 border-[var(--ink)] px-5 text-lg font-semibold hover:bg-[var(--paper-deep)]";
 
 export function Pager({
   page,
@@ -30,19 +28,23 @@ export function Pager({
   };
 
   return (
-    <nav aria-label="Pages" className="mt-8 flex flex-wrap items-center gap-3">
-      {page > 1 && (
-        <Link href={href(page - 1)} className={link}>
+    <nav aria-label="Pages" className="mt-6 flex items-center justify-between gap-3">
+      {page > 1 ? (
+        <Link href={href(page - 1)} className={`${buttonGhost} !min-h-11`}>
           Previous
         </Link>
+      ) : (
+        <span />
       )}
-      <p className="text-lg text-[var(--ink-soft)]">
+      <p className="label-caps">
         Page {page} of {pages}
       </p>
-      {page < pages && (
-        <Link href={href(page + 1)} className={link}>
+      {page < pages ? (
+        <Link href={href(page + 1)} className={`${buttonGhost} !min-h-11`}>
           Next
         </Link>
+      ) : (
+        <span />
       )}
     </nav>
   );
