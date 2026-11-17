@@ -28,8 +28,11 @@ async function seedDemoUser() {
   });
 }
 
+const isLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(process.env.DATABASE_URL ?? "");
+
 async function main() {
-  await seedDemoUser();
+  // The demo password is in the repository, so the account must never exist on a hosted database.
+  if (isLocal) await seedDemoUser();
 
   const cuisineIds = new Map<string, string>();
   for (const name of new Set(SEED_RECIPES.map((r) => r.cuisine))) {
