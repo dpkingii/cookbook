@@ -111,7 +111,7 @@ export default async function CookPage({ searchParams }: { searchParams: Promise
     <AppShell>
       <p className="label-caps">Cook</p>
       <h1 className="mt-2 font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">What are you making?</h1>
-      <div className="mt-6">
+      <div className="mt-6 max-w-xl">
         <SearchField defaultValue={q} />
       </div>
       {q ? <Results viewerId={viewerId} q={q} page={page} /> : <Ready viewerId={viewerId} />}

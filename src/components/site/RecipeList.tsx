@@ -20,14 +20,12 @@ function meta(r: RecipeRow, showVisibility: boolean) {
 export function RecipeList({
   rows,
   showVisibility = false,
-  columns = false,
 }: {
   rows: RecipeRow[];
   showVisibility?: boolean;
-  columns?: boolean;
 }) {
   return (
-    <ul className={`border-b border-[var(--rule)] ${columns ? "md:grid md:grid-cols-2 md:gap-x-10" : ""}`}>
+    <ul className="border-b border-[var(--rule)] lg:grid lg:grid-cols-2 lg:gap-x-10 xl:grid-cols-3">
       {rows.map((r) => (
         <li key={r.id} className="border-t border-[var(--rule)]">
           <Link

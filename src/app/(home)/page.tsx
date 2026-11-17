@@ -5,6 +5,7 @@ import { Pager } from "@/components/site/Pager";
 import { RecipeList } from "@/components/site/RecipeList";
 import { plural } from "@/components/stats/format";
 import { Stage } from "@/components/stage";
+import { TECHNIQUE_NOTES } from "@/lib/recipe/technique-notes";
 import { getViewer } from "@/lib/auth/viewer";
 import { listCuisineNames, listRecipePage } from "@/lib/db/browse";
 import type { Difficulty, Recipe } from "@/lib/recipe/types";
@@ -87,7 +88,10 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   return (
     <AppShell>
       <header className="flex items-baseline justify-between gap-4">
-        <h1 className="font-serif text-3xl font-medium tracking-[-0.02em]">Cookbook</h1>
+        <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] lg:text-5xl">
+          <span className="lg:hidden">Cookbook</span>
+          <span className="hidden lg:inline">What will you cook next?</span>
+        </h1>
         {streak > 0 && <p className="label-caps">Streak · {plural(streak, "week")}</p>}
       </header>
 
@@ -96,27 +100,33 @@ export default async function Home({ searchParams }: PageProps<"/">) {
           <h2 id="next" className="label-caps">
             Next to learn
           </h2>
-          <Link href={`/recipes/${next.recipe.id}`} className={`group mt-3 block ${ring}`}>
+          <Link
+            href={`/recipes/${next.recipe.id}`}
+            className={`group mt-3 block lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center lg:gap-12 ${ring}`}
+          >
             <div className="border border-[var(--rule)]">
               <Stage recipe={next.recipe} stepIndex={coverStep(next.recipe)} progress={0.8} />
             </div>
-            <p className="label-caps mt-4 !text-[var(--accent)]">Teaches {next.teaches}</p>
-            <p className="mt-1 font-serif text-2xl font-medium tracking-[-0.01em] group-hover:underline group-hover:decoration-[var(--rule)] group-hover:underline-offset-4">
-              {next.recipe.title}
-            </p>
-            <p className="mt-1 text-sm text-[var(--mute)]">
-              {next.recipe.cuisine} · {next.recipe.difficulty} · {next.recipe.prepMinutes + next.recipe.cookMinutes} min ·{" "}
-              {plural(next.recipe.steps.length, "step")}
-            </p>
+            <div>
+              <p className="label-caps mt-4 !text-[var(--accent)] lg:mt-0">Teaches {TECHNIQUE_NOTES[next.teaches].name}</p>
+              <p className="mt-1 font-serif text-2xl font-medium tracking-[-0.01em] group-hover:underline group-hover:decoration-[var(--rule)] group-hover:underline-offset-4 lg:mt-3 lg:text-4xl lg:leading-[1.05] xl:text-5xl lg:tracking-[-0.02em]">
+                {next.recipe.title}
+              </p>
+              <p className="mt-4 hidden text-lg leading-snug text-[var(--mute)] lg:block">{TECHNIQUE_NOTES[next.teaches].why}</p>
+              <p className="mt-1 text-sm text-[var(--mute)] lg:mt-6 lg:border-t lg:border-[var(--rule)] lg:pt-4 lg:text-base">
+                {next.recipe.cuisine} · {next.recipe.difficulty} · {next.recipe.prepMinutes + next.recipe.cookMinutes} min ·{" "}
+                {plural(next.recipe.steps.length, "step")}
+              </p>
+            </div>
           </Link>
         </section>
       )}
 
-      <section aria-labelledby="all" className="mt-10">
+      <section aria-labelledby="all" className="mt-10 lg:mt-16">
         <h2 id="all" className="label-caps">
           All recipes · {list.total}
         </h2>
-        <div className="mt-2">
+        <div className="mt-2 lg:flex lg:flex-wrap lg:items-center lg:justify-between lg:gap-x-10">
           <FilterRow
             label="Filter by cuisine"
             current={cuisine}
