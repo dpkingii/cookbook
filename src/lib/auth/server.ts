@@ -10,7 +10,11 @@ const deploymentHost = process.env.VERCEL_URL;
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL ?? (vercelHost ? `https://${vercelHost}` : undefined),
-  trustedOrigins: deploymentHost ? [`https://${deploymentHost}`] : [],
+  trustedOrigins: [
+    ...(deploymentHost ? [`https://${deploymentHost}`] : []),
+    // The development server is not always on the port BETTER_AUTH_URL names.
+    ...(process.env.NODE_ENV === "production" ? [] : ["http://localhost:*", "http://127.0.0.1:*"]),
+  ],
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   advanced: { database: { generateId: "uuid" } },
   session: { modelName: "authSession" },
