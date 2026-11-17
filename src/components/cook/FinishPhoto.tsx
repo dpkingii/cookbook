@@ -1,20 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { EmptyPlate } from "@/components/photo/EmptyPlate";
 import { PhotoButton } from "@/components/photo/PhotoButton";
 import { buttonGhost, buttonPrimary } from "@/components/ui/styles";
 import { Footer } from "./Footer";
 
+function Frame({ caption, className = "", large = false, children }: { caption: string; className?: string; large?: boolean; children: ReactNode }) {
+  return (
+    <figure className={`sheet p-2 ${className}`}>
+      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-[var(--wash)]">{children}</div>
+      <figcaption className={`px-1 pb-1 pt-3 ${large ? "font-serif text-xl font-medium leading-snug" : "text-sm font-semibold"}`}>
+        {caption}
+      </figcaption>
+    </figure>
+  );
+}
+
 export function FinishPhoto({
   title,
   preview,
+  before,
   onPhoto,
   onNext,
   onBack,
 }: {
   title: string;
   preview: string | null;
+  /** Last time's photo of this recipe, to put next to today's. */
+  before: { url: string; when: string } | null;
   onPhoto: (photo: Blob) => void;
   onNext: () => void;
   onBack: () => void;
@@ -34,22 +48,40 @@ export function FinishPhoto({
           {preview ? "That is your cooking." : "Take a photo of your plate."}
         </h1>
         <p className="mt-3 text-lg leading-snug text-[var(--mute)]">
-          {preview
-            ? "It goes in your history next to this cook. Only you can see it."
-            : "Every cook ends with a picture. Next time you make this, you will see how far you have come."}
+          {before
+            ? preview
+              ? "Last time on the left, today on the right. Only you can see these."
+              : "Here is how it looked last time. Take today's and put them side by side."
+            : preview
+              ? "It goes in your history next to this cook. Only you can see it."
+              : "Every cook ends with a picture. Next time you make this, you will see how far you have come."}
         </p>
 
-        <div className="sheet mt-6 p-2">
-          <div className="flex aspect-[4/3] items-center justify-center overflow-hidden bg-[var(--wash)]">
+        {before ? (
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5">
+            <Frame caption={`Last time · ${before.when}`} className="-rotate-2 motion-reduce:rotate-0">
+              {/* eslint-disable-next-line @next/next/no-img-element -- private photo served by our own route */}
+              <img src={before.url} alt={`Your ${title} last time`} className="h-full w-full object-cover" />
+            </Frame>
+            <Frame caption="Today" className="rotate-1 motion-reduce:rotate-0">
+              {preview ? (
+                // eslint-disable-next-line @next/next/no-img-element -- a local preview of the photo just taken
+                <img src={preview} alt={`Your ${title}`} className="h-full w-full object-cover" />
+              ) : (
+                <EmptyPlate className="w-4/5" />
+              )}
+            </Frame>
+          </div>
+        ) : (
+          <Frame caption={title} className="mt-6" large>
             {preview ? (
               // eslint-disable-next-line @next/next/no-img-element -- a local preview of the photo just taken
               <img src={preview} alt={`Your ${title}`} className="h-full w-full object-cover" />
             ) : (
               <EmptyPlate className="w-3/5" />
             )}
-          </div>
-          <p className="px-1 pb-1 pt-3 font-serif text-xl font-medium leading-snug">{title}</p>
-        </div>
+          </Frame>
+        )}
 
         {failed && (
           <p role="alert" className="mt-4 text-base text-[var(--danger)]">

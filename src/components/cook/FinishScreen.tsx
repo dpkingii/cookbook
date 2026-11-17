@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth/client";
 import type { Recipe } from "@/lib/recipe/types";
 import { summary, type PlayerState } from "@/lib/player";
-import { uploadPhoto } from "@/lib/photos/client";
+import { photoUrl, uploadPhoto } from "@/lib/photos/client";
+import { lastWith, type PastCook } from "@/lib/sessions/past-cook";
 import { FinishLogged } from "./FinishLogged";
 import { FinishNext } from "./FinishNext";
 import { FinishPhoto } from "./FinishPhoto";
@@ -18,6 +19,7 @@ type Screen = "photo" | "rate" | "logged" | "week" | "techniques" | "next";
 export function FinishScreen({
   recipe,
   state,
+  past,
   flush,
   sessionId,
   onFinish,
@@ -26,6 +28,7 @@ export function FinishScreen({
 }: {
   recipe: Recipe;
   state: PlayerState;
+  past: PastCook[];
   flush: () => Promise<boolean>;
   sessionId: () => string;
   onFinish: (result: { rating?: number; note?: string }) => void;
@@ -62,6 +65,11 @@ export function FinishScreen({
     [flush, sessionId],
   );
 
+  const lastPhoto = lastWith(
+    past.filter((c) => c.id !== sessionId()),
+    "photoVersion",
+  );
+
   const local = summary(state, recipe);
   const ready = recap.status === "ready" ? recap.recap : null;
   const counted = ready?.session.plausible ?? local.plausible;
@@ -84,6 +92,7 @@ export function FinishScreen({
         <FinishPhoto
           title={recipe.title}
           preview={photo?.url ?? null}
+          before={lastPhoto ? { url: photoUrl(lastPhoto.id, lastPhoto.photoVersion), when: lastPhoto.when } : null}
           onPhoto={(blob) => setPhoto({ blob, url: URL.createObjectURL(blob) })}
           onNext={() => setScreen("rate")}
           onBack={onBackToSteps}
