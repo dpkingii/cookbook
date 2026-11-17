@@ -1,8 +1,19 @@
-const date = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
-const time = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" });
+const formatters = new Map<string, { date: Intl.DateTimeFormat; time: Intl.DateTimeFormat }>();
 
-export const formatDate = (d: Date) => date.format(d);
-export const formatTime = (d: Date) => time.format(d);
+function inZone(tz: string) {
+  let f = formatters.get(tz);
+  if (!f) {
+    f = {
+      date: new Intl.DateTimeFormat("en-US", { timeZone: tz, month: "short", day: "numeric", year: "numeric" }),
+      time: new Intl.DateTimeFormat("en-US", { timeZone: tz, hour: "numeric", minute: "2-digit" }),
+    };
+    formatters.set(tz, f);
+  }
+  return f;
+}
+
+export const formatDate = (d: Date, tz: string) => inZone(tz).date.format(d);
+export const formatTime = (d: Date, tz: string) => inZone(tz).time.format(d);
 
 export function formatMinutes(minutes: number): string {
   const m = Math.round(minutes);

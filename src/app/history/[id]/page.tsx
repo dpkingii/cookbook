@@ -5,6 +5,8 @@ import { RATINGS } from "@/components/cook/ratings";
 import { AppShell } from "@/components/site/AppShell";
 import { BackLink } from "@/components/site/BackLink";
 import { formatDate, formatTime } from "@/components/stats/format";
+import { TECHNIQUE_NOTES } from "@/lib/recipe/technique-notes";
+import { viewerTimeZone } from "@/lib/stats/viewer-time-zone";
 import { buttonGhost } from "@/components/ui/styles";
 import { getViewer } from "@/lib/auth/viewer";
 import { getSessionDetail } from "@/lib/sessions/queries";
@@ -31,6 +33,7 @@ export default async function SessionPage({ params }: PageProps<"/history/[id]">
   if (!detail) notFound();
 
   const { entry, events } = detail;
+  const tz = await viewerTimeZone();
   const timeline = buildTimeline(entry.recipe, events);
   const longest = Math.max(1, ...timeline.steps.map((s) => s.spentSeconds));
   const total = timeline.steps.reduce((sum, s) => sum + s.spentSeconds, 0);
@@ -40,7 +43,7 @@ export default async function SessionPage({ params }: PageProps<"/history/[id]">
       <BackLink />
       <p className="label-caps mt-2">
         <time dateTime={entry.startedAt.toISOString()}>
-          {formatDate(entry.startedAt)}, {formatTime(entry.startedAt)}
+          {formatDate(entry.startedAt, tz)}, {formatTime(entry.startedAt, tz)}
         </time>
         {entry.finishedAt === null && " · not finished"}
       </p>
@@ -81,7 +84,7 @@ export default async function SessionPage({ params }: PageProps<"/history/[id]">
               <li key={step.index} className="border-t border-[var(--rule)] py-4">
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="label-caps">
-                    Step {step.index + 1} · {step.technique}
+                    Step {step.index + 1} · {TECHNIQUE_NOTES[step.technique].name}
                   </p>
                   <p className="shrink-0 font-serif text-xl font-medium tabular-nums">
                     {step.reached ? formatDuration(step.spentSeconds) : "Not reached"}

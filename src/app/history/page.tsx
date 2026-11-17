@@ -10,6 +10,7 @@ import { GuestNote } from "@/components/stats/GuestNote";
 import { formatDate, formatTime } from "@/components/stats/format";
 import { buttonGhost } from "@/components/ui/styles";
 import { getViewer } from "@/lib/auth/viewer";
+import { viewerTimeZone } from "@/lib/stats/viewer-time-zone";
 import { listSessionGroups, type SessionEntry } from "@/lib/sessions/queries";
 
 export const metadata = { title: "History" };
@@ -25,13 +26,13 @@ function Section({ id, title, count, children }: { id: string; title: string; co
   );
 }
 
-function Finished({ entry }: { entry: SessionEntry }) {
-  const when = entry.finishedAt!;
+function Finished({ entry, tz }: { entry: SessionEntry; tz: string }) {
+  const when = entry.startedAt;
   return (
     <li className="border-t border-[var(--rule)] py-4">
       <p className="text-sm text-[var(--mute)]">
         <time dateTime={when.toISOString()}>
-          {formatDate(when)}, {formatTime(when)}
+          {formatDate(when, tz)}, {formatTime(when, tz)}
         </time>
         {" · "}
         {formatDuration(entry.durationSeconds ?? 0)}
@@ -55,14 +56,14 @@ function Finished({ entry }: { entry: SessionEntry }) {
   );
 }
 
-function Unfinished({ entry, live }: { entry: SessionEntry; live: boolean }) {
+function Unfinished({ entry, live, tz }: { entry: SessionEntry; live: boolean; tz: string }) {
   const resume = live && entry.recipeId;
   return (
     <li className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[var(--rule)] py-3">
       <div className="min-w-0">
         <p className="font-serif text-xl font-medium leading-snug">{entry.recipe.title}</p>
         <p className="text-sm text-[var(--mute)]">
-          Started {formatDate(entry.startedAt)}, {formatTime(entry.startedAt)}
+          Started {formatDate(entry.startedAt, tz)}, {formatTime(entry.startedAt, tz)}
         </p>
       </div>
       <Link href={resume ? `/cook/${entry.recipeId}` : `/history/${entry.id}`} className={buttonGhost}>
@@ -74,6 +75,7 @@ function Unfinished({ entry, live }: { entry: SessionEntry; live: boolean }) {
 
 export default async function HistoryPage() {
   const viewer = await getViewer();
+  const tz = await viewerTimeZone();
   const { total, finished, inProgress, abandoned } = viewer
     ? await listSessionGroups(viewer.id)
     : { total: 0, finished: [], inProgress: [], abandoned: [] };
@@ -94,21 +96,21 @@ export default async function HistoryPage() {
       {inProgress.length > 0 && (
         <Section id="progress" title="In progress" count={inProgress.length}>
           {inProgress.map((e) => (
-            <Unfinished key={e.id} entry={e} live />
+            <Unfinished key={e.id} entry={e} live tz={tz} />
           ))}
         </Section>
       )}
       {finished.length > 0 && (
         <Section id="finished" title="Finished" count={finished.length}>
           {finished.map((e) => (
-            <Finished key={e.id} entry={e} />
+            <Finished key={e.id} entry={e} tz={tz} />
           ))}
         </Section>
       )}
       {abandoned.length > 0 && (
         <Section id="abandoned" title="Left unfinished" count={abandoned.length}>
           {abandoned.map((e) => (
-            <Unfinished key={e.id} entry={e} live={false} />
+            <Unfinished key={e.id} entry={e} live={false} tz={tz} />
           ))}
         </Section>
       )}
