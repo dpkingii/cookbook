@@ -2,6 +2,8 @@
 
 Recipes you play, one step at a time.
 
+**Try it live: [cookbook-eight-jet.vercel.app](https://cookbook-eight-jet.vercel.app)**. You can cook as a guest, no sign-up needed.
+
 Cooking mode puts a single step on screen with an animation that shows the motion, the heat and what "done" looks like. Timers keep running in a dock while you move on to the next step. Every cook is recorded as a log of events, and the skills page is computed from what you actually cooked.
 
 ## What it does
