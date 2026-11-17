@@ -40,6 +40,11 @@ function vesselIn(text: string): Technique | undefined {
   return undefined;
 }
 
+const IN_WATER = /\bboil|\b(?:noodles?|pasta|spaghetti|macaroni|dumplings?|wontons?|blanch\w*|parboil\w*)\b/;
+
+/** Stirring or adding things to a pot that is already boiling is simmering, unless the pot is water for noodles or blanching. */
+const settle = (vessel: Technique, text: string): Technique => (vessel === "boil" && !IN_WATER.test(text) ? "simmer" : vessel);
+
 /**
  * Re-reads one sentence in light of the vessel the food is in: stir, mix, toss and a bare "cook" on the
  * stove take the vessel's technique, while the same verbs with a bowl, or after the food came out, stay in the bowl.
@@ -57,17 +62,17 @@ export function inheritTechnique(text: string, match: TechniqueMatch | null, sta
   const inBowl = !named && (BOWL.test(t) || !!state.bowl);
   if (m?.mix && !inBowl && !COMPOSE.test(t)) {
     const technique = live ? state.vessel : named;
-    if (technique) m = { technique, weak: false };
+    if (technique) m = { technique: settle(technique, t), weak: false };
   } else if (m?.technique === "marinate" && !m.weak && ADJECTIVE_MARINATED.test(t) && !MARINATE_VERB.test(t) && !inBowl && (live || named)) {
     m = { technique: (live ? state.vessel : named)!, weak: false };
   } else if (m && m.technique === "whisk" && !m.weak && named && !inBowl) {
-    m = { technique: live ? state.vessel! : named, weak: false };
+    m = { technique: settle(live ? state.vessel! : named, t), weak: false };
   } else if (m?.weak && live && ON_STOVE.includes(m.technique) && !m.cook && BOILING.includes(m.technique) === BOILING.includes(state.vessel!)) {
     m = { ...m, technique: state.vessel! };
   } else if (m?.generic && (live || state.oven || state.vessel)) {
     m = { technique: (live ? state.vessel : (state.oven ?? state.vessel))!, weak: true, cook: true };
   } else if (!m && live && !inBowl && IN_VESSEL.test(t) && !AWAY_FROM_VESSEL.test(t) && !leaves && !MOVING.test(t)) {
-    m = { technique: state.vessel!, weak: true };
+    m = { technique: settle(state.vessel!, t), weak: true };
   }
 
   const leadVessel = vesselIn(lead);

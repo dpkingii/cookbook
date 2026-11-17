@@ -59,6 +59,13 @@ describe("running vessel context", () => {
     expect(steps.map((s) => s.technique)).toEqual(["boil", "boil"]);
   });
 
+  it("calls stirring things into a soup that is already boiling simmering, but keeps noodles in boiling water as boiling", () => {
+    const soup = run("Bring the broth to a boil in a pot.", "Slowly pour in the slurry, stirring constantly.", "Stir in the eggs.");
+    expect(soup.map((s) => s.technique)).toEqual(["boil", "simmer", "simmer"]);
+    const noodles = run("Bring a pot of water to a boil.", "Stir in the noodles and loosen them with chopsticks.");
+    expect(noodles.map((s) => s.technique)).toEqual(["boil", "boil"]);
+  });
+
   it("gives a bare 'cook' the technique of the vessel", () => {
     expect(run("Simmer the soup over low heat.", "Cook for 10 minutes.").map((s) => s.technique)).toEqual(["simmer", "simmer"]);
     expect(run("Stir-fry the onion in the wok for 30 seconds.", "Cook for 2 minutes.").map((s) => s.technique)).toEqual(["fry", "fry"]);
