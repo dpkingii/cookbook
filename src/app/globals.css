@@ -160,16 +160,17 @@
 }
 
 /*
- * Cookbook look: white, ink and hairlines, serif for what you read first, colour only in the food.
+ * Cookbook look: a cool grey counter with white sheets on it, ink and hairlines, serif for what you read first, colour only in the food.
  * See docs/design.md.
  */
 :root {
-  --bg: #ffffff;
+  --bg: #e8ebee;
+  --surface: #ffffff;
   --ink: #111111;
-  --mute: #6a6a6a;
-  --rule: #e2e2e2;
-  --wash: #f6f6f4;
-  --accent: #b4530a;
+  --mute: #585d63;
+  --rule: #cdd2d7;
+  --wash: #dde1e5;
+  --accent: #a64805;
   --saffron: #e9a23b;
 
   /* Names from the previous look, kept until every screen is moved to the tokens above. */

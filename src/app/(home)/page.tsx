@@ -104,7 +104,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             href={`/recipes/${next.recipe.id}`}
             className={`group mt-3 block lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center lg:gap-12 ${ring}`}
           >
-            <div className="border border-[var(--rule)]">
+            <div className="border border-[var(--rule)] bg-white">
               <Stage recipe={next.recipe} stepIndex={coverStep(next.recipe)} progress={0.8} />
             </div>
             <div>

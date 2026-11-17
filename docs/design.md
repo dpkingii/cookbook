@@ -27,12 +27,13 @@ Defined in `src/app/globals.css`.
 
 | Token | Value | Use |
 |---|---|---|
-| `--bg` | `#ffffff` | Page and surfaces |
+| `--bg` | `#e8ebee` | The page: a cool grey counter |
+| `--surface` | `#ffffff` | Sheets on the counter: illustrations, fields, the navigation and the cooking footer |
 | `--ink` | `#111111` | Text, primary buttons, filled marks |
-| `--mute` | `#6a6a6a` | Labels, metadata |
-| `--rule` | `#e2e2e2` | Hairlines, outlines, empty marks |
-| `--wash` | `#f6f6f4` | Rare: a field or illustration backdrop that needs separating |
-| `--accent` | `#b4530a` | The one thing that changed |
+| `--mute` | `#585d63` | Labels, metadata |
+| `--rule` | `#cdd2d7` | Hairlines, outlines, empty marks |
+| `--wash` | `#dde1e5` | Rare: a field or illustration backdrop that needs separating |
+| `--accent` | `#a64805` | The one thing that changed |
 | `--saffron` | `#e9a23b` | Fills inside illustrations only |
 
 The names `--paper`, `--paper-deep`, `--ink-soft`, `--tomato`, `--tomato-deep` and `--gold` are aliases kept during the migration. New code must not use them, and each screen should drop them as it is restyled.

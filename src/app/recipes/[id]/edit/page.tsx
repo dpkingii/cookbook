@@ -15,7 +15,7 @@ export default async function EditRecipePage({ params }: { params: Promise<{ id:
   if (!recipe || recipe.ownerId !== viewer.id) notFound();
 
   return (
-    <div className="min-h-dvh bg-white text-[var(--ink)]">
+    <div className="min-h-dvh bg-[var(--bg)] text-[var(--ink)]">
       <main className="mx-auto max-w-5xl px-5 py-6 sm:px-6 md:py-10">
         <Link href={`/recipes/${recipe.id}`} className={`${textLink} inline-flex min-h-11 items-center`}>
           Back to recipe

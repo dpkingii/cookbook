@@ -57,10 +57,10 @@ export function CookPlayer({ recipe }: { recipe: Recipe }) {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  if (!ready) return <div className="min-h-dvh bg-white" />;
+  if (!ready) return <div className="min-h-dvh bg-[var(--bg)]" />;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-white text-[var(--ink)]">
+    <div className="flex min-h-dvh flex-col bg-[var(--bg)] text-[var(--ink)]">
       <header className={`mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-5 pt-2 ${showWrapUp ? "" : wideColumn}`}>
         <Link href={`/recipes/${recipe.id}`} className="label-caps flex min-h-11 items-center truncate hover:text-[var(--ink)]">
           {recipe.title}
