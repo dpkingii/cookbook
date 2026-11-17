@@ -11,6 +11,23 @@ describe("consolidate", () => {
     expect(out[0].text).toBe("Stir-fry the beef until browned. Mix well.");
   });
 
+  it("folds a bare heat adjustment into the cooking step before it", () => {
+    const out = consolidate([
+      step("Fry the garlic on high heat.", "fry", { heat: "high", uses: [{ ingredientId: "garlic" }] }),
+      step("Turn the heat to low.", "fry", { heat: "low" }),
+    ]);
+    expect(out).toHaveLength(1);
+    expect(out[0].heat).toBe("high");
+  });
+
+  it("keeps a heat step that does real work", () => {
+    const out = consolidate([
+      step("Fry the garlic on high heat.", "fry", { heat: "high" }),
+      step("Simmer on low heat.", "simmer", { heat: "low", timer: { seconds: 600, mode: "background", label: "Simmer" } }),
+    ]);
+    expect(out).toHaveLength(2);
+  });
+
   it("drops a lone 'enjoy' after a plating step", () => {
     const out = consolidate([step("Spoon the soup into bowls.", "plate"), step("Enjoy!", "plate")]);
     expect(out.map((s) => s.text)).toEqual(["Spoon the soup into bowls."]);

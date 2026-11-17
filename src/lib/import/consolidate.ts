@@ -10,6 +10,8 @@ const wordsOf = (text: string) => text.split(/\s+/).filter(Boolean).length;
 const bare = (s: Step) => !s.uses.length && !s.timer && !s.heat && !s.cue;
 const FILLER_TECHNIQUES: Technique[] = ["whisk", "rest", "plate", "season"];
 const filler = (s: Step) => bare(s) && wordsOf(s.text) <= 4 && FILLER_TECHNIQUES.includes(s.technique);
+const COOKING: Technique[] = ["sear", "fry", "saute", "simmer", "boil"];
+const heatOnly = (s: Step) => !!s.heat && /^(?:turn|lower|reduce|raise|increase|adjust|set|keep)\b/i.test(s.text) && COOKING.includes(s.technique) && !s.uses.length && !s.timer && !s.cue && wordsOf(s.text) <= 7;
 const closing = (s: Step) => /^(?:enjoy|serve|eat|dig in|bon app)/i.test(s.text);
 
 function join(a: Step, b: Step): Step {
@@ -23,6 +25,10 @@ export function consolidate(steps: Step[]): Step[] {
   const out: Step[] = [];
   for (const s of steps) {
     const prev = out[out.length - 1];
+    if (prev && heatOnly(s) && prev.text.length + 1 + s.text.length <= MAX_CHARS) {
+      out[out.length - 1] = join(prev, s);
+      continue;
+    }
     if (prev && filler(s)) {
       if (closing(s)) {
         if (prev.technique !== "plate" && s.technique === "plate") out.push(s);
