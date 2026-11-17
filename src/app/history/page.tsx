@@ -81,7 +81,7 @@ export default async function HistoryPage() {
     : { total: 0, finished: [], inProgress: [], abandoned: [] };
 
   return (
-    <AppShell>
+    <AppShell reading>
       <BackLink />
       <p className="label-caps mt-2">History</p>
       <h1 className="mt-2 font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">What you have cooked</h1>

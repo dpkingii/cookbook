@@ -39,7 +39,7 @@ export default async function SessionPage({ params }: PageProps<"/history/[id]">
   const total = timeline.steps.reduce((sum, s) => sum + s.spentSeconds, 0);
 
   return (
-    <AppShell>
+    <AppShell reading>
       <BackLink />
       <p className="label-caps mt-2">
         <time dateTime={entry.startedAt.toISOString()}>
