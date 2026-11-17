@@ -1,6 +1,7 @@
 import { LAU_RECIPES } from "../../src/lib/recipe/lau";
 import type { Recipe, Step, Technique } from "../../src/lib/recipe/types";
 import type { CorpusRecipe } from "./corpus";
+import { LABELS } from "./labels";
 
 export interface TruthRow {
   slug: string;
@@ -72,4 +73,31 @@ export function compareToTruth(corpus: CorpusRecipe[]): { rows: TruthRow[]; over
   const timers = mean((r) => r.timers);
   const steps = mean((r) => r.steps);
   return { rows, overall: { techniques, timers, steps, combined: (techniques + timers + steps) / 3 } };
+}
+
+export interface LabelMiss {
+  slug: string;
+  text: string;
+  got: Technique;
+  want: Technique;
+}
+
+/** Scores techniques against the hand labels. A labelled step whose text no longer starts a step counts as lost, not wrong. */
+export function compareToLabels(corpus: CorpusRecipe[]): { total: number; found: number; correct: number; misses: LabelMiss[] } {
+  let total = 0;
+  let found = 0;
+  let correct = 0;
+  const misses: LabelMiss[] = [];
+  for (const [slug, labels] of Object.entries(LABELS)) {
+    const steps = corpus.find((c) => c.slug === `recipes-${slug}`)?.draft.steps ?? [];
+    for (const [start, want] of labels) {
+      total += 1;
+      const step = steps.find((s) => s.text.startsWith(start));
+      if (!step) continue;
+      found += 1;
+      if (step.technique === want) correct += 1;
+      else misses.push({ slug, text: step.text, got: step.technique, want });
+    }
+  }
+  return { total, found, correct, misses };
 }

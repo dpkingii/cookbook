@@ -2,13 +2,13 @@ import { writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import { RULES, auditDraft, type Flag } from "./lib/audit-rules";
 import { loadCorpus } from "./lib/corpus";
-import { compareToTruth } from "./lib/ground-truth";
+import { compareToLabels, compareToTruth } from "./lib/ground-truth";
 
-const USAGE = "npx tsx scripts/audit-import.ts [host] [--show <rule>] [--truth] [--save <file>]";
+const USAGE = "npx tsx scripts/audit-import.ts [host] [--show <rule>] [--truth] [--labels] [--save <file>]";
 
 const { values, positionals } = parseArgs({
   allowPositionals: true,
-  options: { show: { type: "string" }, truth: { type: "boolean", default: false }, save: { type: "string" }, only: { type: "string" } },
+  options: { show: { type: "string" }, truth: { type: "boolean", default: false }, labels: { type: "boolean", default: false }, save: { type: "string" }, only: { type: "string" } },
 });
 if (values.show && !(RULES as readonly string[]).includes(values.show)) {
   console.error(`Unknown rule. ${USAGE}\nRules: ${RULES.join(", ")}`);
@@ -39,6 +39,13 @@ async function main() {
 
   const truth = compareToTruth(corpus);
   console.log(`\nground truth (8 hand-made recipes): techniques ${pct(truth.overall.techniques)}, timers ${pct(truth.overall.timers)}, step count ${pct(truth.overall.steps)}, overall ${pct(truth.overall.combined)}`);
+  const labelled = compareToLabels(corpus);
+  console.log(
+    `hand labels (${labelled.total} steps of 20 recipes): techniques ${pct(labelled.correct / Math.max(1, labelled.found))}, steps still found ${labelled.found}`,
+  );
+  if (values.labels) {
+    for (const m of labelled.misses) console.log(`  ${m.slug}: ${m.got} -> ${m.want} | ${m.text}`);
+  }
   if (values.truth) {
     for (const r of truth.rows) {
       console.log(`\n${r.slug}: techniques ${pct(r.techniques)}, timers ${pct(r.timers)}, steps ${r.stepCounts.join(" vs ")}`);
@@ -53,7 +60,7 @@ async function main() {
   }
   if (values.save) {
     const flags = Object.fromEntries(RULES.map((r) => [r, byRule.get(r)!.map((h) => `${h.slug}#${h.flag.step}`)]));
-    await writeFile(values.save, JSON.stringify({ flags, truth: truth.overall }, null, 1));
+    await writeFile(values.save, JSON.stringify({ flags, truth: truth.overall, labels: labelled.correct / Math.max(1, labelled.found) }, null, 1));
   }
 }
 
