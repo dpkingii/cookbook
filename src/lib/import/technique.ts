@@ -18,10 +18,10 @@ const GROUPS: (Rule[] | typeof COOK_HERE)[] = [
   [[
     "simmer",
     new RegExp(
-      String.raw`\b(?:simmer(?:s|ing)?|poach(?:es|ing)?|blanch(?:es|ing)?|braise[s]?|braising|stew(?:s|ing)?|parboil(?:s|ing)?)\b|${NOUNISH}\b(?:simmered|poached|blanched|braised|stewed|steam(?:ed|ing|s)?)\b|(?<!\b(?:some|the|a|an|your|more|excess|any|of|hot|with|from|that|this|its|release|generate) )\bsteam\b`,
+      String.raw`\b(?:simmer(?:s|ing)?|poach(?:es|ing)?|braise[s]?|braising|stew(?:s|ing)?|parboils?)\b|${NOUNISH}\b(?:simmered|poached|braised|stewed|parboil(?:ed|ing)|steam(?:ed|ing|s)?)\b|(?<!\b(?:some|the|a|an|your|more|excess|any|of|hot|with|from|that|this|its|release|generate) )\bsteam\b`,
     ),
   ]],
-  [["boil", new RegExp(String.raw`\bboil(?:s|ing)?\b|${NOUNISH}\bboiled\b`)]],
+  [["boil", new RegExp(String.raw`\bboils?\b|\bblanch(?:es|ing)?\b|${NOUNISH}\b(?:boil(?:ed|ing)|blanched)\b`)]],
   [["marinate", /\b(?:marinat(?:e|ed|es|ing)|massage(?= [^.]*\b(?:marinade|sauce|meat|pork|beef|chicken|lamb|fish|salmon|shrimp|tofu|steak|ribs)\b))\b/]],
   [["knead", /\bknead(?:ed|ing)?\b/]],
   [["fold", /\bfold(?:ed|ing)?\b/]],
@@ -98,7 +98,26 @@ function isMixing(technique: Technique, word: string, text: string): boolean {
   return /^(?:mix|combin|stir|fold)/.test(word) && !BOWL_VERB.test(text);
 }
 
-function matchText(t: string): TechniqueMatch | null {
+const PROTEIN = /\b(?:chicken|pork|beef|lamb|duck|shrimp|prawns?|fish|fillets?|salmon|cod|tofu|meat|steak|ribs|drumsticks|wings)\b/;
+
+/** Fixes a few readings that depend on the whole sentence rather than its first verb. */
+function refine(m: TechniqueMatch | null, t: string): TechniqueMatch | null {
+  if (!m) return m;
+  // Mixing the meat into its marinade is marinating; mixing the marinade on its own ("the beef marinade", "chicken powder") is not.
+  const meat = t.replace(/\b\w+ (?=marinade\b)|\b(?:chicken|beef|pork|fish|shrimp) (?:powder|bouillon|broth|stock|sauce)\b/g, "");
+  if (m.technique === "whisk" && PROTEIN.test(meat) && /\b(?:marinade|flavou?rs|seasonings?)\b/.test(t) && !/\b(?:wok|pan|pot|skillet)\b/.test(t)) {
+    return { technique: "marinate", weak: false };
+  }
+  if (m.technique === "plate" && /\bfor (?:now|later)\b/.test(t)) return { technique: "rest", weak: false };
+  return m;
+}
+
+function matchText(text: string): TechniqueMatch | null {
+  const t = text.replace(/\([^)]*\)/g, " ");
+  return refine(matchWords(t), t);
+}
+
+function matchWords(t: string): TechniqueMatch | null {
   for (const group of GROUPS) {
     if (group === COOK_HERE) {
       if (!COOK.test(t)) continue;
