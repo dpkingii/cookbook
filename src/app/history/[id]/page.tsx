@@ -4,6 +4,7 @@ import { formatClock, formatDuration } from "@/components/cook/format";
 import { RATINGS } from "@/components/cook/ratings";
 import { AppShell } from "@/components/site/AppShell";
 import { BackLink } from "@/components/site/BackLink";
+import { DishPhoto } from "@/components/photo/DishPhoto";
 import { formatDate, formatTime } from "@/components/stats/format";
 import { TECHNIQUE_NOTES } from "@/lib/recipe/technique-notes";
 import { viewerTimeZone } from "@/lib/stats/viewer-time-zone";
@@ -48,6 +49,8 @@ export default async function SessionPage({ params }: PageProps<"/history/[id]">
         {entry.finishedAt === null && " · not finished"}
       </p>
       <h1 className="mt-2 font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">{entry.recipe.title}</h1>
+
+      {entry.finishedAt && <DishPhoto sessionId={entry.id} version={entry.photoVersion} title={entry.recipe.title} />}
 
       <dl className="mt-6 grid grid-cols-3 border-y border-[var(--rule)] py-4">
         {[
