@@ -55,7 +55,7 @@ function TechniqueMap({ sessions }: { sessions: FinishedSession[] }) {
       title="Technique map"
       note={`${tried} of ${TECHNIQUES.length} techniques practised. Dark names are ones you have cooked; light ones are still ahead.`}
     >
-      <div className="grid gap-6">
+      <div className="grid gap-6 lg:grid-cols-3 lg:gap-x-8">
         {techniqueMap(sessions).map(({ station, techniques }) => (
           <section key={station} aria-labelledby={`st-${station}`}>
             <h3 id={`st-${station}`} className="label-caps mb-2">
@@ -135,13 +135,21 @@ function Pace({ sessions }: { sessions: FinishedSession[] }) {
             <p className="text-base font-medium">{e.title}</p>
             <div className="mt-2 grid grid-cols-[3.5rem_1fr_5.5rem] items-center gap-x-3 gap-y-2 text-sm">
               <span className="text-[var(--mute)]">You</span>
-              <span aria-hidden className="h-2 bg-[var(--ink)]" style={{ width: `${Math.max(1, (e.actualMinutes / scale) * 100)}%` }} />
+              <span
+                aria-hidden
+                className="h-2 bg-[var(--ink)]"
+                style={{
+                  width: `${Math.max(1, (e.actualMinutes / scale) * 100)}%`,
+                }}
+              />
               <span className="text-right tabular-nums">{formatMinutes(e.actualMinutes)}</span>
               <span className="text-[var(--mute)]">Recipe</span>
               <span
                 aria-hidden
                 className="h-2 border border-[var(--ink)]"
-                style={{ width: `${Math.max(1, (e.plannedMinutes / scale) * 100)}%` }}
+                style={{
+                  width: `${Math.max(1, (e.plannedMinutes / scale) * 100)}%`,
+                }}
               />
               <span className="text-right tabular-nums">{formatMinutes(e.plannedMinutes)}</span>
             </div>
@@ -181,9 +189,20 @@ export default async function SkillsPage() {
             <StatTiles
               tiles={[
                 { label: "Cooks", value: String(sum.sessions) },
-                { label: "Recipes", value: String(sum.recipes), unit: "different" },
-                { label: "At the stove", value: formatCompact(sum.totalSeconds) },
-                { label: "Weekly streak", value: String(streak.current), unit: streak.current === 1 ? "week" : "weeks" },
+                {
+                  label: "Recipes",
+                  value: String(sum.recipes),
+                  unit: "different",
+                },
+                {
+                  label: "At the stove",
+                  value: formatCompact(sum.totalSeconds),
+                },
+                {
+                  label: "Weekly streak",
+                  value: String(streak.current),
+                  unit: streak.current === 1 ? "week" : "weeks",
+                },
               ]}
             />
             <p className="mt-3 text-sm text-[var(--mute)]">
@@ -193,13 +212,19 @@ export default async function SkillsPage() {
           </div>
 
           <TechniqueMap sessions={finished} />
-          <Cuisines sessions={finished} />
-          <Pace sessions={finished} />
+          <div className="lg:grid lg:grid-cols-2 lg:gap-x-16">
+            <Cuisines sessions={finished} />
+            <Pace sessions={finished} />
+          </div>
 
           <Section
             id="next"
             title="Next up"
-            note={upNext.length === 0 ? "You have practised every technique the catalogue uses." : "Recipes that teach you something you have not tried."}
+            note={
+              upNext.length === 0
+                ? "You have practised every technique the catalogue uses."
+                : "Recipes that teach you something you have not tried."
+            }
           >
             <ul className="border-b border-[var(--rule)]">
               {upNext.map(({ recipe, newTechniques }) => (
