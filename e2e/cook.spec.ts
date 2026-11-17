@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+const PLATE = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR4nGN4FmUDRAwQCgAsRgXx6yQjjQAAAABJRU5ErkJggg==",
+  "base64",
+);
+
 test("a guest cooks a recipe end to end and a reload resumes mid-cook", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("navigation", { name: "Main" })).toBeVisible();
@@ -33,10 +38,16 @@ test("a guest cooks a recipe end to end and a reload resumes mid-cook", async ({
   }
   await page.getByRole("button", { name: "Done cooking" }).click();
 
+  await expect(page.getByRole("heading", { name: "Take a photo of your plate." })).toBeVisible();
+  await page.getByLabel("Photo of your dish").setInputFiles({ name: "plate.png", mimeType: "image/png", buffer: PLATE });
+  await expect(page.getByRole("img", { name: "Your Garlic & Basil Pomodoro" })).toBeVisible();
+  await page.getByRole("button", { name: "Use this photo" }).click();
+
   await page.getByRole("radio", { name: /Really good/ }).click();
   await page.getByLabel("One note for next time").fill("More basil.");
   await page.getByRole("button", { name: "Save this cook" }).click();
   await expect(page.getByText("Session logged")).toBeVisible();
+  await expect(page.getByText("Photo saved")).toBeVisible();
   await expect(page.getByText(/reads as a walkthrough/)).toBeVisible();
   await page.getByRole("button", { name: "Next", exact: true }).click();
 
@@ -44,6 +55,13 @@ test("a guest cooks a recipe end to end and a reload resumes mid-cook", async ({
   await expect(page.getByRole("heading", { level: 1 })).toContainText("What you have cooked");
   await expect(page.getByText("Garlic & Basil Pomodoro")).toBeVisible();
   await expect(page.getByText("More basil.")).toBeVisible();
+
+  await page.getByRole("link", { name: "Garlic & Basil Pomodoro" }).click();
+  const photo = page.getByRole("img", { name: "Your Garlic & Basil Pomodoro" });
+  await expect(photo).toBeVisible();
+  await expect.poll(() => photo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(2);
+  await page.getByRole("button", { name: "Remove" }).click();
+  await expect(page.getByText("No photo of this one yet.")).toBeVisible();
 });
 
 test("a member imports a pasted recipe, saves it, and deletes it", async ({ page }) => {
