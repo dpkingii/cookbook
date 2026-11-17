@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { Recap } from "@/lib/stats/recap";
-import { buttonPrimary, figure, listRow } from "@/components/ui/styles";
+import { buttonPrimary, figure, listRow, textLink } from "@/components/ui/styles";
 import { Footer } from "./Footer";
 import { formatMinutes, ordinal } from "./format";
 import type { RecapState } from "./useRecap";
@@ -53,13 +53,42 @@ function Rows({ recap }: { recap: Recap }) {
   );
 }
 
+export interface LoggedPhoto {
+  url: string;
+  status: "saving" | "saved" | "failed";
+  onRetry: () => void;
+}
+
+function Photo({ photo, title }: { photo: LoggedPhoto; title: string }) {
+  return (
+    <figure className="sheet mt-6 w-56 -rotate-2 p-2 motion-reduce:rotate-0">
+      {/* eslint-disable-next-line @next/next/no-img-element -- a local preview of the photo just taken */}
+      <img src={photo.url} alt={`Your ${title}`} className="aspect-[4/3] w-full object-cover" />
+      <figcaption role="status" className="px-1 pt-2 text-sm text-[var(--mute)]">
+        {photo.status === "saving" && "Saving your photo…"}
+        {photo.status === "saved" && "Photo saved"}
+        {photo.status === "failed" && (
+          <>
+            Photo not saved yet.{" "}
+            <button type="button" onClick={photo.onRetry} className={textLink}>
+              Try again
+            </button>
+          </>
+        )}
+      </figcaption>
+    </figure>
+  );
+}
+
 export function FinishLogged({
   local,
   recap,
+  photo,
   onNext,
 }: {
   local: LocalSummary;
   recap: RecapState;
+  photo: LoggedPhoto | null;
   onNext: () => void;
 }) {
   const ready = recap.status === "ready" ? recap.recap : null;
@@ -74,6 +103,7 @@ export function FinishLogged({
         <h1 tabIndex={-1} className="mt-2 font-serif text-3xl font-medium leading-[1.1] tracking-[-0.02em] outline-none">
           {local.title}
         </h1>
+        {photo && <Photo photo={photo} title={local.title} />}
         <p className={`${figure} mt-8 text-7xl`}>
           {value}
           <span className="ml-2 font-sans text-base font-medium tracking-normal text-[var(--mute)]">{unit}</span>
