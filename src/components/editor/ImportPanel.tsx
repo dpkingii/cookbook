@@ -77,7 +77,7 @@ export function ImportPanel({ onDraft, onScratch }: { onDraft: (draft: RecipeDra
               setTab(t.id);
               setError(null);
             }}
-            className={`-mb-px min-h-11 border-b-2 text-base font-medium focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] ${
+            className={`-mb-px min-h-11 border-b-2 text-base font-medium focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)] ${
               tab === t.id
                 ? "border-[var(--ink)] text-[var(--ink)]"
                 : "border-transparent text-[var(--mute)] hover:text-[var(--ink)]"

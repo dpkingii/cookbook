@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export const inputClass = cn(
   input,
-  "min-h-11 aria-[invalid=true]:border-[var(--accent)] aria-[invalid=true]:outline-[var(--accent)] disabled:opacity-60",
+  "min-h-11 aria-[invalid=true]:border-[var(--danger)] aria-[invalid=true]:outline-[var(--accent)] disabled:opacity-60",
 );
 
 export const primaryButton = cn(buttonPrimary, "gap-2 disabled:cursor-wait");
@@ -24,6 +24,6 @@ export const labelClass = "block text-base font-medium";
 
 export const hintClass = "text-sm text-[var(--mute)]";
 
-export const errorClass = "text-sm font-medium text-[var(--accent)]";
+export const errorClass = "text-sm font-medium text-[var(--danger)]";
 
 export const checkbox = "size-5 shrink-0 accent-[var(--ink)]";

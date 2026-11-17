@@ -20,7 +20,7 @@ export function TechniqueNote({ technique, className = "" }: { technique: Techni
         type="button"
         aria-haspopup="dialog"
         onClick={() => dialog.current?.showModal()}
-        className={`underline decoration-dotted underline-offset-4 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] ${className}`}
+        className={`underline decoration-dotted underline-offset-4 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--ink)] ${className}`}
       >
         {note.name}
         <span className="sr-only">: what does this mean?</span>
@@ -32,7 +32,7 @@ export function TechniqueNote({ technique, className = "" }: { technique: Techni
         onClick={(e) => {
           if (e.target === dialog.current) dialog.current.close();
         }}
-        className="m-0 mt-auto w-full max-w-none border-0 border-t border-[var(--ink)] bg-white p-0 text-[var(--ink)] backdrop:bg-black/40 sm:m-auto sm:max-w-md sm:border"
+        className="m-0 mt-auto w-full max-w-none border-0 border-t-2 border-[var(--ink)] bg-white p-0 text-[var(--ink)] backdrop:bg-black/40 sm:m-auto sm:max-w-md sm:border-2 sm:shadow-[6px_6px_0_var(--ink)]"
       >
         <div className="mx-auto max-w-xl px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 text-left normal-case tracking-normal">
           <p className="label-caps">Technique</p>

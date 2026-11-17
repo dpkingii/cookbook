@@ -1,6 +1,6 @@
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-/** Seven boxes, Monday to Sunday. Cooked days are ink with a white check; today is marked in the accent. */
+/** Seven boxes, Monday to Sunday. Cooked days are ink with a white check; today is the white box with a shadow. */
 export function WeekBoxes({ cooked, today }: { cooked: readonly boolean[]; today: number | null }) {
   return (
     <ol aria-label="This week" className="grid grid-cols-7 gap-2">
@@ -9,8 +9,8 @@ export function WeekBoxes({ cooked, today }: { cooked: readonly boolean[]; today
         const now = i === today;
         const box = now
           ? done
-            ? "border-[var(--accent)] bg-[var(--accent)]"
-            : "border-[var(--accent)]"
+            ? "border-[var(--ink)] bg-[var(--ink)] shadow-[3px_3px_0_var(--tomato)]"
+            : "border-[var(--ink)] bg-white shadow-[3px_3px_0_var(--ink)]"
           : done
             ? "border-[var(--ink)] bg-[var(--ink)]"
             : "border-[var(--rule)]";
@@ -23,7 +23,7 @@ export function WeekBoxes({ cooked, today }: { cooked: readonly boolean[]; today
                 </svg>
               )}
             </span>
-            <span className={`label-caps ${now ? "!text-[var(--accent)]" : ""}`} aria-hidden>
+            <span className={`label-caps ${now ? "!text-[var(--ink)] underline decoration-2 underline-offset-4" : ""}`} aria-hidden>
               {day[0]}
             </span>
             <span className="sr-only">
