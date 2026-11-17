@@ -4,7 +4,7 @@ import { BackLink } from "@/components/site/BackLink";
 import { ring } from "@/components/site/focus";
 import { EmptyState } from "@/components/stats/EmptyState";
 import { GuestNote } from "@/components/stats/GuestNote";
-import { formatMinutes, plural } from "@/components/stats/format";
+import { formatCompact, formatMinutes, plural } from "@/components/stats/format";
 import { StatTiles } from "@/components/stats/StatTiles";
 import { getViewer } from "@/lib/auth/viewer";
 import { listCatalogueTechniques } from "@/lib/db/browse";
@@ -20,7 +20,9 @@ import {
   weeklyStreak,
   type FinishedSession,
 } from "@/lib/stats";
+import { TECHNIQUE_NOTES } from "@/lib/recipe/technique-notes";
 import { TECHNIQUES } from "@/lib/recipe/types";
+import { viewerTimeZone } from "@/lib/stats/viewer-time-zone";
 
 export const metadata = { title: "Skills" };
 
@@ -67,7 +69,7 @@ function TechniqueMap({ sessions }: { sessions: FinishedSession[] }) {
                     count > 0 ? "text-[var(--ink)]" : "text-[var(--mute)]"
                   }`}
                 >
-                  <span className="text-base capitalize">{technique}</span>
+                  <span className="text-base">{TECHNIQUE_NOTES[technique].name}</span>
                   <span className="text-sm tabular-nums">{count > 0 ? plural(count, "cook") : "not yet"}</span>
                 </li>
               ))}
@@ -158,7 +160,7 @@ export default async function SkillsPage() {
   const catalogue = finished.length > 0 ? await listCatalogueTechniques(viewer!.id) : [];
   const now = new Date();
   const sum = totals(finished);
-  const streak = weeklyStreak(finished, now);
+  const streak = weeklyStreak(finished, now, await viewerTimeZone());
   const upNext = nextUp(finished, catalogue);
   const skipped = finished.filter((s) => !s.plausible).length;
 
@@ -180,7 +182,7 @@ export default async function SkillsPage() {
               tiles={[
                 { label: "Cooks", value: String(sum.sessions) },
                 { label: "Recipes", value: String(sum.recipes), unit: "different" },
-                { label: "At the stove", value: formatMinutes(sum.totalSeconds / 60) },
+                { label: "At the stove", value: formatCompact(sum.totalSeconds) },
                 { label: "Weekly streak", value: String(streak.current), unit: streak.current === 1 ? "week" : "weeks" },
               ]}
             />
@@ -207,7 +209,7 @@ export default async function SkillsPage() {
                       {recipe.title}
                     </span>
                     <span className="mt-0.5 block text-sm text-[var(--mute)]">
-                      {recipe.cuisine} · {recipe.difficulty} · New: <span className="capitalize">{newTechniques.join(", ")}</span>
+                      {recipe.cuisine} · {recipe.difficulty} · New: {newTechniques.map((t) => TECHNIQUE_NOTES[t].name).join(", ")}
                     </span>
                   </Link>
                 </li>

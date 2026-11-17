@@ -14,7 +14,7 @@ export function StatTiles({ tiles }: { tiles: readonly Tile[] }) {
           className={`px-1 py-5 ${i % 2 === 1 ? "border-l border-[var(--rule)] pl-5" : "pr-5"} ${i >= 2 ? "border-t border-[var(--rule)]" : ""}`}
         >
           <dt className="label-caps">{t.label}</dt>
-          <dd className="mt-2 font-serif text-5xl font-medium leading-none tracking-[-0.03em] tabular-nums">
+          <dd className={`mt-2 whitespace-nowrap font-serif font-medium leading-none tracking-[-0.03em] tabular-nums ${t.value.length > 4 ? "pt-3 text-4xl" : "text-5xl"}`}>
             {t.value}
             {t.unit && <span className="ml-1.5 font-sans text-sm font-normal tracking-normal text-[var(--mute)]">{t.unit}</span>}
           </dd>
