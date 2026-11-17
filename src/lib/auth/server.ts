@@ -4,7 +4,13 @@ import { nextCookies } from "better-auth/next-js";
 import { anonymous } from "better-auth/plugins";
 import { prisma } from "@/lib/db/client";
 
+// On Vercel the site address comes from the platform, so only local development needs BETTER_AUTH_URL.
+const vercelHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+const deploymentHost = process.env.VERCEL_URL;
+
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL ?? (vercelHost ? `https://${vercelHost}` : undefined),
+  trustedOrigins: deploymentHost ? [`https://${deploymentHost}`] : [],
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   advanced: { database: { generateId: "uuid" } },
   session: { modelName: "authSession" },
