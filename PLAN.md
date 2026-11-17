@@ -217,7 +217,8 @@ Milestones 0 to 5 are built on `main`. Still open:
 - [x] Deploy: Vercel project `cookbook` at https://cookbook-eight-jet.vercel.app, Neon Postgres with the current schema and the 11 public recipes. Deployed with `vercel deploy --prod` from this folder; nothing deploys on push.
 - [ ] Try it on a real phone: chime, vibration, wake lock and touch.
 - [ ] Wok and steamer scenes. Stir-frying is drawn in the skillet and steaming in a pot.
-- [ ] Importer accuracy, second pass. Stirring on the heat is now read as cooking and timers land on the right step, but boil versus simmer, marinating and soaking are still often wrong. `npx tsx scripts/audit-import.ts` measures it.
+- [x] Importer accuracy, second pass. Techniques agree with hand labels on 84% of the steps of 20 imported recipes (was 76%): boil versus simmer, blanching, marinating, soaking and draining, named cuts, and labels now come from the text the step shows. `npx tsx scripts/audit-import.ts --labels` lists what is still wrong.
+- [ ] Importer, third pass. A pot of water stays the "vessel" after it is drained, so some later stir-fry steps read as boiling. Recipes over 14 steps are left long on purpose: most of their steps are timed wok actions, and merging them would hide the timers.
 
 ## State of the repo before this work
 
