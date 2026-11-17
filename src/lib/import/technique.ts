@@ -56,6 +56,7 @@ const GROUPS: (Rule[] | typeof COOK_HERE)[] = [
 
 const WEAK: Rule[] = [
   ["simmer", /\bcover(?:ed|ing)?\b[^.,;]{0,15}\b(?:wok|pot|pan|lid)\b|\bsteamer\b|\b(?:put|place) the lid\b/],
+  ["boil", /\bwater\b[^.;]*\b(?:to|in|into) (?:a|the|your) wok\b|\bwok\b[^.;]*\b(?:of|with) (?:\w+ )?water\b/],
   ["fry", /\bwok\b/],
   ["saute", /\b(?:skillet|frying pan|saucepan)\b|(?<!\b(?:baking|roasting|cake|loaf|pie|muffin|sheet|bread|drip) )\bpan\b/],
   ["saute", /\bheat\b\s+(?:\w+\s+){0,2}(?:oil|butter|fat)\b/],
@@ -85,6 +86,7 @@ function withoutClauses(text: string): string {
   return text
     .replace(NEGATED, " ")
     .replace(/\buntil\b[^,.;]*/g, " ")
+    .replace(/\bsince\b[^,.;]*,/g, " ")
     .replace(/\bbefore\b[^,.;]*/g, " ")
     .replace(/\b(?:to (?:ensures?|help|prevent|avoid|allow|make sure|be \w+)|so that|so (?:you|they|it)(?:'re|'ll|'s| can| will| don't| won't| are| is)|in order to|which (?:helps|allows|means|will|makes|ensures)|because)\b[^.;]*/g, " ");
 }
@@ -122,8 +124,10 @@ function matchWords(t: string): TechniqueMatch | null {
     if (group === COOK_HERE) {
       if (!COOK.test(t)) continue;
       if (/\boven\b/.test(t)) return { technique: "bake", weak: true, cook: true };
+      if (/\bboiling water\b/.test(t)) return { technique: "boil", weak: true, cook: true };
       if (/\b(?:pot|soup|water|covered|lid|rice cooker|steamer)\b/.test(t)) return { technique: "simmer", weak: true, cook: true };
       if (/\bwok\b/.test(t)) return { technique: "fry", weak: true, cook: true };
+      if (/\bcook\b[^.;]*\brice\b/.test(t)) return { technique: "simmer", weak: true, cook: true };
       return { technique: "saute", weak: true, cook: true, generic: true };
     }
     let best: { technique: Technique; index: number; word: string } | null = null;
