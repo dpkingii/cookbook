@@ -127,6 +127,14 @@ describe("weeklyStreak", () => {
     const sessions = ["2026-01-02", "2025-12-24", "2025-12-17"].map((d) => session({ finishedAt: at(d) }));
     expect(weeklyStreak(sessions, at("2026-01-03")).current).toBe(3);
   });
+
+  it("places a late Sunday cook in the cook's own week, not the UTC one", () => {
+    const lateSunday = new Date("2026-11-16T02:30:00Z");
+    const sessions = [session({ finishedAt: lateSunday })];
+    const tuesday = new Date("2026-11-17T18:00:00Z");
+    expect(weeklyStreak(sessions, tuesday).activeThisWeek).toBe(true);
+    expect(weeklyStreak(sessions, tuesday, "America/New_York").activeThisWeek).toBe(false);
+  });
 });
 
 describe("totals", () => {

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { AppShell } from "@/components/site/AppShell";
 import { ring } from "@/components/site/focus";
 import { LogoutButton } from "@/components/site/LogoutButton";
@@ -12,6 +11,7 @@ import { getViewer } from "@/lib/auth/viewer";
 import { TECHNIQUES } from "@/lib/recipe/types";
 import { listSessions, toFinished } from "@/lib/sessions/queries";
 import { techniqueCounts, totals, weeklyStreak } from "@/lib/stats";
+import { viewerTimeZone } from "@/lib/stats/viewer-time-zone";
 
 export const metadata = { title: "Profile" };
 
@@ -27,7 +27,7 @@ export default async function ProfilePage() {
   const entries = viewer ? await listSessions(viewer.id) : [];
   const finished = entries.map(toFinished).filter((s) => s !== null);
   const now = new Date();
-  const tz = decodeURIComponent((await cookies()).get("tz")?.value ?? "UTC");
+  const tz = await viewerTimeZone();
   const week = thisWeek(finished, now, tz);
   const tried = techniqueCounts(finished).filter((t) => t.count > 0).length;
   const days = week.cooked.filter(Boolean).length;
@@ -43,7 +43,7 @@ export default async function ProfilePage() {
       <div className="mt-6">
         <StatTiles
           tiles={[
-            { label: "Streak", value: String(weeklyStreak(finished, now).current), unit: "weeks" },
+            { label: "Streak", value: String(weeklyStreak(finished, now, tz).current), unit: "weeks" },
             { label: "This week", value: formatCompact(week.seconds) },
             { label: "Dishes", value: String(totals(finished).recipes) },
             { label: "Techniques", value: String(tried), unit: `of ${TECHNIQUES.length}` },

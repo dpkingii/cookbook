@@ -1,5 +1,6 @@
 import { STATIONS, TECHNIQUES, TECHNIQUE_STATION } from "@/lib/recipe/types";
 import type { Difficulty, Recipe, Station, Technique } from "@/lib/recipe/types";
+import { localDay } from "./recap";
 
 export interface FinishedSession {
   id: string;
@@ -87,10 +88,9 @@ export function cuisineProficiency(sessions: readonly FinishedSession[]): Cuisin
     .sort((a, b) => b.points - a.points || a.cuisine.localeCompare(b.cuisine));
 }
 
-const DAY_MS = 86_400_000;
 
-/** Weeks start on Monday (ISO); 1970-01-01 was a Thursday, hence the +3. */
-const weekIndex = (d: Date) => Math.floor((Math.floor(d.getTime() / DAY_MS) + 3) / 7);
+/** Weeks start on Monday (ISO) in the cook's own zone; 1970-01-01 was a Thursday, hence the +3. */
+const weekIndex = (d: Date, tz: string) => Math.floor((localDay(d, tz) + 3) / 7);
 
 export interface Streak {
   current: number;
@@ -102,9 +102,9 @@ export interface Streak {
  * A streak that ended last week is still alive until this week is over, so
  * `current` counts back from last week when this week has no cook yet.
  */
-export function weeklyStreak(sessions: readonly FinishedSession[], now: Date): Streak {
-  const thisWeek = weekIndex(now);
-  const weeks = [...new Set(counted(sessions).map((s) => weekIndex(s.finishedAt)))]
+export function weeklyStreak(sessions: readonly FinishedSession[], now: Date, tz = "UTC"): Streak {
+  const thisWeek = weekIndex(now, tz);
+  const weeks = [...new Set(counted(sessions).map((s) => weekIndex(s.finishedAt, tz)))]
     .filter((w) => w <= thisWeek)
     .sort((a, b) => a - b);
 

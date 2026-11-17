@@ -10,6 +10,7 @@ import { listCuisineNames, listRecipePage } from "@/lib/db/browse";
 import type { Difficulty, Recipe } from "@/lib/recipe/types";
 import { listSessions, toFinished } from "@/lib/sessions/queries";
 import { weeklyStreak } from "@/lib/stats";
+import { viewerTimeZone } from "@/lib/stats/viewer-time-zone";
 import { suggestNext } from "./suggest";
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
@@ -80,7 +81,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
     viewerId ? listSessions(viewerId) : [],
   ]);
   const finished = entries.map(toFinished).filter((s) => s !== null);
-  const streak = weeklyStreak(finished, new Date()).current;
+  const streak = weeklyStreak(finished, new Date(), await viewerTimeZone()).current;
   const next = filtered || list.page > 1 ? null : await suggestNext(viewerId, finished);
 
   return (
