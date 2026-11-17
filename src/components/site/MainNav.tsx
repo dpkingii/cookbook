@@ -17,7 +17,7 @@ function Icon({ d }: { d: string }) {
   );
 }
 
-const focus = "focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--accent)]";
+const focus = "focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--ink)]";
 const tab = `grid min-h-14 place-items-center content-center gap-1 text-[0.625rem] font-semibold uppercase tracking-[0.1em] ${focus}`;
 const row = `flex min-h-12 items-center gap-3 px-3 text-base ${focus}`;
 
@@ -39,7 +39,7 @@ export function MainNav() {
     <>
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--rule)] bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-[var(--ink)] bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         <div className="mx-auto grid max-w-xl grid-cols-3 items-center px-2 py-1.5">
           <Link href="/" aria-current={current("home")} className={`${tab} ${tone("home")}`}>
@@ -47,7 +47,7 @@ export function MainNav() {
             Home
           </Link>
           <Link href="/cook" aria-current={current("cook")} className={`${tab} text-[var(--ink)]`}>
-            <span className="grid h-10 w-16 place-items-center bg-[var(--ink)] text-white">
+            <span className="grid h-10 w-16 place-items-center border-2 border-[var(--ink)] bg-[var(--tomato)] text-[var(--ink)] shadow-[3px_3px_0_var(--ink)]">
               <Icon d={icons.cook} />
             </span>
             Cook
@@ -61,7 +61,7 @@ export function MainNav() {
 
       <nav
         aria-label="Main"
-        className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-[var(--rule)] bg-white px-5 pb-6 pt-9 lg:flex"
+        className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r-2 border-[var(--ink)] bg-white px-5 pb-6 pt-9 lg:flex"
       >
         <Link href="/" className={`px-3 font-serif text-3xl font-medium tracking-[-0.02em] ${focus}`}>
           Cookbook
@@ -70,13 +70,13 @@ export function MainNav() {
         <Link
           href="/cook"
           aria-current={current("cook")}
-          className={`mt-9 flex min-h-12 items-center gap-3 bg-[var(--ink)] px-3 text-base font-semibold text-white transition-opacity hover:opacity-85 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]`}
+          className={`mt-9 flex min-h-12 items-center gap-3 border-2 border-[var(--ink)] bg-[var(--tomato)] px-3 text-base font-bold text-[var(--ink)] shadow-[4px_4px_0_var(--ink)] transition-[transform,box-shadow] duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--ink)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--ink)]`}
         >
           <Icon d={icons.cook} />
           Cook
         </Link>
 
-        <ul className="mt-4">
+        <ul className="mt-6">
           {(
             [
               ["home", "/", "Home"],
@@ -87,10 +87,8 @@ export function MainNav() {
               <Link
                 href={href}
                 aria-current={current(key)}
-                className={`${row} border-l-2 ${
-                  on === key
-                    ? "border-[var(--ink)] font-semibold text-[var(--ink)]"
-                    : "border-transparent text-[var(--mute)] hover:text-[var(--ink)]"
+                className={`${row} ${
+                  on === key ? "bg-[var(--ink)] font-semibold text-white" : "text-[var(--ink)] hover:bg-[var(--wash)]"
                 }`}
               >
                 <Icon d={icons[key]} />
@@ -109,10 +107,8 @@ export function MainNav() {
                 <Link
                   href={l.href}
                   aria-current={here ? "page" : undefined}
-                  className={`flex min-h-10 items-center border-l-2 px-3 text-base ${focus} ${
-                    here
-                      ? "border-[var(--ink)] font-semibold text-[var(--ink)]"
-                      : "border-transparent text-[var(--mute)] hover:text-[var(--ink)]"
+                  className={`flex min-h-10 items-center px-3 text-base ${focus} ${
+                    here ? "bg-[var(--ink)] font-semibold text-white" : "text-[var(--ink)] hover:bg-[var(--wash)]"
                   }`}
                 >
                   {l.name}

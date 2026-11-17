@@ -64,12 +64,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   const fieldClass = cn(
     input,
-    "mt-1 min-h-12 aria-[invalid=true]:border-[var(--accent)] aria-[invalid=true]:outline-[var(--accent)] disabled:opacity-60",
+    "mt-1 min-h-12 aria-[invalid=true]:border-[var(--danger)] aria-[invalid=true]:outline-[var(--accent)] disabled:opacity-60",
   );
   const invalid = error ? true : undefined;
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-sm flex-col px-5 py-8 text-[var(--ink)]">
+    <main data-tone="sun" className="mx-auto flex min-h-dvh w-full max-w-sm flex-col px-5 py-8 text-[var(--ink)]">
       <Link href="/" className={cn(display, "inline-flex min-h-11 items-center self-start text-2xl")}>
         Cookbook
       </Link>
@@ -122,7 +122,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           )}
         </label>
 
-        <p role="alert" className={error ? "text-sm font-medium text-[var(--accent)]" : "sr-only"}>
+        <p role="alert" className={error ? "text-sm font-medium text-[var(--danger)]" : "sr-only"}>
           {error}
         </p>
 

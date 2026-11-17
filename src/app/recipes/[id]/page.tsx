@@ -30,7 +30,7 @@ export default async function RecipePage({ params }: PageProps<"/recipes/[id]">)
   ];
 
   return (
-    <AppShell>
+    <AppShell tone="pink">
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:items-start lg:gap-14">
         <div>
           <p className="label-caps">
@@ -49,7 +49,7 @@ export default async function RecipePage({ params }: PageProps<"/recipes/[id]">)
             </p>
           )}
 
-          <dl className="mt-6 grid grid-cols-4 border-y border-[var(--rule)] py-4">
+          <dl className="sheet mt-6 grid grid-cols-4 px-4 py-4">
             {facts.map(([term, value]) => (
               <div key={term}>
                 <dt className="label-caps">{term}</dt>
@@ -87,7 +87,7 @@ export default async function RecipePage({ params }: PageProps<"/recipes/[id]">)
             <h2 id="need" className="label-caps mb-2">
               You&rsquo;ll need
             </h2>
-            <ul className="border-b border-[var(--rule)]">
+            <ul className="sheet px-4 [&>li:first-child]:border-t-0">
               {recipe.ingredients.map((ingredient) => (
                 <li key={ingredient.id} className="flex min-h-12 items-center gap-3 border-t border-[var(--rule)] py-2">
                   <IngredientToken ingredient={ingredient} size={28} />

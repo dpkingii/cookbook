@@ -108,7 +108,7 @@ export default async function CookPage({ searchParams }: { searchParams: Promise
   const q = (Array.isArray(raw) ? raw[0] : raw)?.trim() || undefined;
 
   return (
-    <AppShell>
+    <AppShell tone="tomato">
       <p className="label-caps">Cook</p>
       <h1 className="mt-2 font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">What are you making?</h1>
       <div className="mt-6 max-w-xl">

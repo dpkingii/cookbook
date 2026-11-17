@@ -25,18 +25,18 @@ export function RecipeList({
   showVisibility?: boolean;
 }) {
   return (
-    <ul className="border-b border-[var(--rule)] lg:grid lg:grid-cols-2 lg:gap-x-10 xl:grid-cols-3">
+    <ul className="grid gap-4 sm:grid-cols-2 lg:gap-5 xl:grid-cols-3">
       {rows.map((r) => (
-        <li key={r.id} className="border-t border-[var(--rule)]">
+        <li key={r.id} className="flex">
           <Link
             href={`/recipes/${r.id}`}
-            className={`group flex min-h-16 items-start justify-between gap-3 py-3 ${ring}`}
+            className={`sheet group flex min-h-24 w-full items-start justify-between gap-3 px-4 py-3 transition-[transform,box-shadow] duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0_var(--ink)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 ${ring}`}
           >
             <span className="min-w-0">
-              <span className="block font-serif text-xl font-medium leading-snug group-hover:underline group-hover:decoration-[var(--rule)] group-hover:underline-offset-4">
+              <span className="block font-serif text-xl font-medium leading-snug ">
                 {r.title}
               </span>
-              <span className="mt-0.5 block text-sm text-[var(--mute)]">{meta(r, showVisibility)}</span>
+              <span className="mt-1 block text-sm text-[var(--mute)]">{meta(r, showVisibility)}</span>
             </span>
             {r.favorited && (
               <>

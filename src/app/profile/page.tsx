@@ -46,7 +46,7 @@ export default async function ProfilePage() {
   const member = viewer && !viewer.isGuest ? viewer : null;
 
   return (
-    <AppShell>
+    <AppShell tone="mint">
       <p className="label-caps">Profile</p>
       <h1 className="mt-2 font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">
         {member ? (member.name ?? member.email) : "Guest"}
@@ -86,7 +86,7 @@ export default async function ProfilePage() {
 
         <nav
           aria-label="More"
-          className="mt-10 border-b border-[var(--rule)] lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-start"
+          className="mt-10 sheet px-4 [&>a:first-child]:border-t-0 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mt-0 lg:self-start"
         >
           {LINKS.map((l) => (
             <Link

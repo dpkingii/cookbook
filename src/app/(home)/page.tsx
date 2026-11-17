@@ -43,7 +43,7 @@ function FilterRow({
   hrefOf: (name: string | undefined) => string;
 }) {
   return (
-    <nav aria-label={label} className="-mx-2 flex flex-wrap">
+    <nav aria-label={label} className="flex flex-wrap">
       {options.map(({ name, text }) => {
         const on = name === current;
         return (
@@ -51,10 +51,10 @@ function FilterRow({
             key={text}
             href={hrefOf(name)}
             aria-current={on ? "true" : undefined}
-            className={`inline-flex min-h-11 items-center px-2 text-base ${ring} ${
+            className={`inline-flex min-h-11 items-center px-3 text-base ${ring} ${
               on
-                ? "font-semibold text-[var(--ink)] underline decoration-[var(--ink)] decoration-2 underline-offset-8"
-                : "text-[var(--mute)] hover:text-[var(--ink)]"
+                ? "bg-[var(--ink)] font-semibold text-white"
+                : "text-[var(--ink)] hover:bg-[var(--wash)]"
             }`}
           >
             {text}
@@ -86,7 +86,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const next = filtered || list.page > 1 ? null : await suggestNext(viewerId, finished);
 
   return (
-    <AppShell>
+    <AppShell tone="sun">
       <header className="flex items-baseline justify-between gap-4">
         <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] lg:text-5xl">
           <span className="lg:hidden">Cookbook</span>
@@ -104,12 +104,12 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             href={`/recipes/${next.recipe.id}`}
             className={`group mt-3 block lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center lg:gap-12 ${ring}`}
           >
-            <div className="border border-[var(--rule)] bg-white">
+            <div className="sheet">
               <Stage recipe={next.recipe} stepIndex={coverStep(next.recipe)} progress={0.8} />
             </div>
             <div>
-              <p className="label-caps mt-4 !text-[var(--accent)] lg:mt-0">Teaches {TECHNIQUE_NOTES[next.teaches].name}</p>
-              <p className="mt-1 font-serif text-2xl font-medium tracking-[-0.01em] group-hover:underline group-hover:decoration-[var(--rule)] group-hover:underline-offset-4 lg:mt-3 lg:text-4xl lg:leading-[1.05] xl:text-5xl lg:tracking-[-0.02em]">
+              <p className="tag mt-5 lg:mt-0">Teaches {TECHNIQUE_NOTES[next.teaches].name}</p>
+              <p className="mt-1 font-serif text-2xl font-medium tracking-[-0.01em] group-hover:underline group-hover:decoration-2 group-hover:underline-offset-4 mt-3 lg:text-4xl lg:leading-[1.05] xl:text-5xl lg:tracking-[-0.02em]">
                 {next.recipe.title}
               </p>
               <p className="mt-4 hidden text-lg leading-snug text-[var(--mute)] lg:block">{TECHNIQUE_NOTES[next.teaches].why}</p>
@@ -151,7 +151,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
             )}
           </p>
         ) : (
-          <div className="mt-4">
+          <div className="mt-5">
             <RecipeList rows={list.rows} />
           </div>
         )}

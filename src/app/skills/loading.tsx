@@ -1,5 +1,5 @@
 import { PageSkeleton } from "@/components/site/PageSkeleton";
 
 export default function Loading() {
-  return <PageSkeleton label="Loading your skills" />;
+  return <PageSkeleton tone="mint" label="Loading your skills" />;
 }

@@ -173,7 +173,7 @@ export default async function SkillsPage() {
   const skipped = finished.filter((s) => !s.plausible).length;
 
   return (
-    <AppShell>
+    <AppShell tone="mint">
       <BackLink />
       <p className="label-caps mt-2">Skills</p>
       <h1 className="mt-2 font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">What your hands know</h1>

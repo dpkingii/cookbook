@@ -31,7 +31,7 @@ export default async function MyRecipesPage({ searchParams }: { searchParams: Pr
     : [null, []];
 
   return (
-    <AppShell>
+    <AppShell tone="lilac">
       <BackLink />
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
         <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">My recipes</h1>

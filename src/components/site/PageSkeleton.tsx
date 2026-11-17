@@ -1,10 +1,10 @@
-import { AppShell } from "./AppShell";
+import { AppShell, type Tone } from "./AppShell";
 
 const block = "bg-[var(--wash)] motion-safe:animate-pulse";
 
-export function PageSkeleton({ label, rows = 6 }: { label: string; rows?: number }) {
+export function PageSkeleton({ label, tone, rows = 6 }: { label: string; tone: Tone; rows?: number }) {
   return (
-    <AppShell>
+    <AppShell tone={tone}>
       <div aria-busy="true">
         <p className="sr-only" role="status">
           {label}
