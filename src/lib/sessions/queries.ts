@@ -40,9 +40,14 @@ export interface SessionEntry {
   plausible: boolean;
   rating: number | null;
   note: string | null;
+  /** When the dish photo was uploaded, or null if there is none. Part of the photo's address. */
+  photoVersion: number | null;
 }
 
-function toEntry(row: CookingSession): SessionEntry {
+/** Only the upload time, never the image itself. */
+const photo = { select: { createdAt: true } } as const;
+
+function toEntry(row: CookingSession & { photo: { createdAt: Date } | null }): SessionEntry {
   return {
     id: row.id,
     recipeId: row.recipeId,
@@ -54,6 +59,7 @@ function toEntry(row: CookingSession): SessionEntry {
     plausible: row.plausible,
     rating: row.rating,
     note: row.note,
+    photoVersion: row.photo?.createdAt.getTime() ?? null,
   };
 }
 
@@ -61,6 +67,7 @@ export async function listSessions(viewerId: string): Promise<SessionEntry[]> {
   const rows = await prisma.cookingSession.findMany({
     where: { userId: viewerId },
     orderBy: { startedAt: "desc" },
+    include: { photo },
   });
   return rows.map(toEntry);
 }
@@ -69,7 +76,7 @@ export async function getSessionDetail(viewerId: string, id: string) {
   if (!UUID.test(id)) return null;
   const row = await prisma.cookingSession.findFirst({
     where: { id, userId: viewerId },
-    include: { events: { orderBy: [...eventOrder] } },
+    include: { events: { orderBy: [...eventOrder] }, photo },
   });
   return row ? { entry: toEntry(row), events: row.events.map(fromRow) } : null;
 }
