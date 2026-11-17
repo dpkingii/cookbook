@@ -1,10 +1,17 @@
 import Link from "next/link";
+import { TECHNIQUE_NOTES } from "@/lib/recipe/technique-notes";
+import type { Technique } from "@/lib/recipe/types";
 import type { Recap } from "@/lib/stats/recap";
 import { buttonGhost, buttonPrimary, textLink } from "@/components/ui/styles";
 import { Footer } from "./Footer";
 import { formatMinutes } from "./format";
 
-const list = (items: string[]) => (items.length > 1 ? `${items.slice(0, -1).join(", ")} and ${items.at(-1)}` : items[0]);
+/** "Sear", "Sear and boil", or "Sear, boil and 4 more": the tag has to stay one short line. */
+function list(techniques: Technique[]) {
+  const names = techniques.map((t) => TECHNIQUE_NOTES[t].name.toLowerCase());
+  if (names.length <= 2) return names.join(" and ");
+  return `${names.slice(0, 2).join(", ")} and ${names.length - 2} more`;
+}
 
 export function FinishNext({
   next,
