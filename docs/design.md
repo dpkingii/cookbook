@@ -90,11 +90,15 @@ The bar is hidden in cooking mode (`/cook/[id]`), the finish flow, the recipe ed
 - "Done when" has its own label and is set larger than body text. It is the line that tells a beginner they are on track.
 - Bottom: timer in the serif at left, Back (ghost) and Next (primary) at right.
 
+## Cooking a recipe again
+
+The recipe page's button reads "Cook it again" once the viewer has finished it. Under it, "Your cooks" is a row of tilted polaroids, oldest on the left, each with its date and rating and linking to that cook's history page, followed by the most recent note. Mise en place shows that note above the ingredients, so it is read before cooking starts. A finished cook reopens on its recap for 15 minutes; after that, opening the recipe starts a new cook.
+
 ## Finish flow
 
 After the last step. Each screen has one primary button at the bottom; Back is a ghost button from the second screen on.
 
-0. **Plate up.** "Take a photo of your plate." An empty place setting in a `sheet` until a photo is picked (camera on phones, file picker on laptops), then the photo itself with Retake. "Skip" continues without one. The photo is shrunk to a JPEG of at most 1600px and 700 KB in the browser, uploaded once the session reaches the server, and shown as a tilted polaroid on screen 1 with its save status. It appears on the history page for that cook (add, replace, remove), as a thumbnail in History, and under "Your plates" on Profile. Photos are private to their owner.
+0. **Plate up.** "Take a photo of your plate." An empty place setting in a `sheet` until a photo is picked (camera on phones, file picker on laptops), then the photo itself with Retake. "Skip" continues without one. The photo is shrunk to a JPEG of at most 1600px and 700 KB in the browser, uploaded once the session reaches the server, and shown as a tilted polaroid on screen 1 with its save status. It appears on the history page for that cook (add, replace, remove), as a thumbnail in History, and under "Your plates" on Profile. Photos are private to their owner. When an earlier cook of the same recipe has a photo, the screen shows it beside today's: "Last time · date" on the left, "Today" on the right.
 0. **How did it go** (optional): rating and one note. "Save" continues; "Skip" also continues.
 1. **Session logged.** Label, recipe name, this session's minutes as the large figure. Then rows: Today (total, with "+Nm" in accent, counting up from the old value), This week (same), Session ("2nd today · 5th this week").
 2. **Your week.** Weeks of streak as the large figure. Seven square boxes Monday to Sunday: cooked days filled in ink with a white check, today in accent. "Days cooked: 4 of 7". One sentence on what keeps the streak going.

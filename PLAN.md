@@ -169,6 +169,7 @@ No database, no login. One recipe as a typed constant.
 - [x] Resume a session after reload
 - [x] Session summary on finish; rating and note
 - [x] Photo of the dish at the end of every cook (stored in Postgres, owner only)
+- [x] Cooking again: earlier cooks and the last note on the recipe page and at mise en place; last time's photo beside today's
 - [x] History page
 - [x] Guest sessions
 
