@@ -31,12 +31,12 @@ export function MiseScreen({
         </h1>
         <p className="mt-3 text-base text-[var(--mute)]">Tap each ingredient as it lands on the counter.</p>
 
-        <ul className="mt-6 border-b border-[var(--rule)] lg:grid lg:grid-cols-2 lg:gap-x-12 xl:grid-cols-3">
+        <ul className="sheet mt-6 px-4 lg:grid lg:grid-cols-2 lg:gap-x-12 xl:grid-cols-3">
           {recipe.ingredients.map((ingredient) => {
             const on = checked.includes(ingredient.id);
             const amount = formatAmount(ingredient);
             return (
-              <li key={ingredient.id} className="border-t border-[var(--rule)]">
+              <li key={ingredient.id} className="-mt-px border-t border-[var(--rule)]">
                 <button
                   type="button"
                   aria-pressed={on}

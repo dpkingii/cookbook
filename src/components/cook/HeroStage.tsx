@@ -20,9 +20,9 @@ export function HeroStage({ recipe }: { recipe: Recipe }) {
   const step = recipe.steps[stepIndex];
 
   return (
-    <figure className="border border-[var(--rule)] bg-white">
+    <figure className="sheet">
       <Stage recipe={recipe} stepIndex={stepIndex} progress={step.timer ? (tick % 12) / 11 : null} />
-      <figcaption className="border-t border-[var(--rule)] px-4 py-3">
+      <figcaption className="border-t-2 border-[var(--ink)] px-4 py-3">
         <span className="label-caps">
           Step {stepIndex + 1} of {recipe.steps.length}
         </span>

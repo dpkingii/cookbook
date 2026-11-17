@@ -32,8 +32,8 @@ export function FinishWeek({ streak, onNext, onBack }: { streak: Recap["streak"]
                 </span>
                 <span
                   aria-hidden
-                  className={`grid aspect-square w-full place-items-center border ${
-                    today ? "border-[var(--accent)] bg-[var(--accent)]" : on ? "border-[var(--ink)] bg-[var(--ink)]" : "border-[var(--rule)]"
+                  className={`grid aspect-square w-full place-items-center border-2 ${
+                    today ? "border-[var(--ink)] bg-[var(--ink)] shadow-[3px_3px_0_var(--tomato)]" : on ? "border-[var(--ink)] bg-[var(--ink)]" : "border-[var(--rule)]"
                   }`}
                 >
                   {on && (

@@ -21,17 +21,17 @@ export function TimerDock({
   if (ringing.length === 0 && running.length === 0) return null;
 
   return (
-    <aside aria-label="Timers" className="border-t border-[var(--rule)] bg-white">
+    <aside aria-label="Timers" className="border-t-2 border-[var(--ink)] bg-white">
       <ul className={`mx-auto w-full max-w-xl divide-y divide-[var(--rule)] px-5 ${wideColumn}`}>
         {ringing.map((t) => (
           <li key={t.id}>
             <button
               type="button"
               onClick={() => onAcknowledge(t.id)}
-              className={`my-2 flex min-h-14 w-full items-center justify-between gap-3 border-l-4 border-[var(--accent)] pl-3 text-left ${focusRing}`}
+              className={`my-2 flex min-h-14 w-full items-center justify-between gap-3 border-l-8 border-[var(--tomato)] pl-3 text-left ${focusRing}`}
             >
               <span>
-                <span className="label-caps block !text-[var(--accent)]">Ready · Step {t.stepIndex + 1}</span>
+                <span className="tag mb-1">Ready · Step {t.stepIndex + 1}</span>
                 <span className="block font-serif text-xl font-medium leading-tight">{t.label} is ready</span>
                 <span className="block text-base text-[var(--mute)]">
                   {recipe.steps[t.stepIndex].cue ?? "Check it now."}

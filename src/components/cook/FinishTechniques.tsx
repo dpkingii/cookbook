@@ -46,7 +46,7 @@ export function FinishTechniques({
         <ul className="mt-6 border-b border-[var(--rule)]">
           {techniques.items.map(({ technique, count, first }) => (
             <li key={technique} className="border-t border-[var(--rule)] py-3">
-              <p className={`label-caps ${first ? "!text-[var(--accent)]" : ""}`}>
+              <p className={first ? "tag" : "label-caps"}>
                 {first ? "First time" : `${ordinal(count)} time`}
               </p>
               <div className="mt-1 flex items-center justify-between gap-4">

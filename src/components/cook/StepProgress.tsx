@@ -24,8 +24,8 @@ export function StepProgress({
             className={`flex h-11 w-full items-center ${focusRing}`}
           >
             <span
-              className={`block h-[3px] w-full transition-colors ${
-                n === current ? "bg-[var(--accent)]" : completed.includes(n) ? "bg-[var(--ink)]" : "bg-[var(--rule)]"
+              className={`block w-full border-2 border-[var(--ink)] transition-[height,background-color] ${
+                n === current ? "h-3.5 bg-white" : completed.includes(n) ? "h-2 bg-[var(--ink)]" : "h-2 bg-transparent"
               }`}
             />
           </button>

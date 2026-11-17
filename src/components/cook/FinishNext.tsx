@@ -26,8 +26,8 @@ export function FinishNext({
         </h1>
 
         {next ? (
-          <div className="mt-6 border border-[var(--rule)] p-4">
-            <p className="label-caps !text-[var(--accent)]">Teaches {list(next.teaches)}</p>
+          <div className="sheet mt-6 p-4">
+            <p className="tag">Teaches {list(next.teaches)}</p>
             <p className="mt-1 font-serif text-2xl font-medium leading-tight">{next.title}</p>
             <p className="mt-2 text-base text-[var(--mute)]">
               {next.cuisine} · <span className="capitalize">{next.difficulty}</span> · {formatMinutes(next.minutes)} ·{" "}

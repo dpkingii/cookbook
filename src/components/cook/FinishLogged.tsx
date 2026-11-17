@@ -26,7 +26,7 @@ function Total({ label, before, after, accent }: { label: string; before: number
       <div className="flex items-baseline justify-between gap-3">
         <span className="label-caps">{label}</span>
         {delta > 0 && (
-          <span className={`text-sm font-semibold tabular-nums ${accent ? "text-[var(--accent)]" : "text-[var(--mute)]"}`}>
+          <span className={`text-sm font-semibold tabular-nums ${accent ? "bg-[var(--ink)] px-1.5 py-0.5 text-white" : "text-[var(--mute)]"}`}>
             +{formatMinutes(delta)}
           </span>
         )}

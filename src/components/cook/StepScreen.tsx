@@ -48,7 +48,7 @@ export function StepScreen({
       <StepProgress recipe={recipe} current={i} completed={state.completed} onGoTo={(n) => run((ctx) => goTo(ctx, n))} />
 
       <div className="lg:mt-4 lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] lg:items-start lg:gap-14">
-        <div className="relative mt-1 border border-[var(--rule)] bg-white lg:sticky lg:top-6 lg:mt-0">
+        <div className="sheet relative mt-1 lg:sticky lg:top-6 lg:mt-0">
           <Stage recipe={recipe} stepIndex={i} progress={stepProgress(state, recipe, now)} />
           <button
             type="button"

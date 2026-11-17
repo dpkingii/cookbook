@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { Recipe } from "@/lib/recipe/types";
+import { TECHNIQUE_STATION, type Recipe, type Station } from "@/lib/recipe/types";
+import type { Tone } from "@/components/site/AppShell";
 import {
   acknowledgeTimer,
   back,
@@ -23,6 +24,9 @@ import { StepScreen } from "./StepScreen";
 import { StepBar } from "./StepBar";
 import { FinishScreen } from "./FinishScreen";
 import { TimerDock } from "./TimerDock";
+
+/** Each station cooks in its own colour, so the room changes as the recipe moves around the kitchen. */
+const STATION_TONE: Record<Station, Tone> = { board: "mint", bowl: "sun", pan: "tomato", pot: "sky", oven: "pink", rest: "lilac" };
 
 export function CookPlayer({ recipe }: { recipe: Recipe }) {
   const { state, now, ready, run, restart, flush, sessionId } = useSession(recipe);
@@ -57,10 +61,12 @@ export function CookPlayer({ recipe }: { recipe: Recipe }) {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  if (!ready) return <div className="min-h-dvh bg-[var(--bg)]" />;
+  const tone = showWrapUp ? "pink" : cooking ? STATION_TONE[TECHNIQUE_STATION[recipe.steps[state.currentStep].technique]] : "sun";
+
+  if (!ready) return <div data-tone="sun" className="min-h-dvh bg-[var(--bg)]" />;
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[var(--bg)] text-[var(--ink)]">
+    <div data-tone={tone} className="flex min-h-dvh flex-col bg-[var(--bg)] text-[var(--ink)] transition-colors duration-500 motion-reduce:transition-none">
       <header className={`mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-5 pt-2 ${showWrapUp ? "" : wideColumn}`}>
         <Link href={`/recipes/${recipe.id}`} className="label-caps flex min-h-11 items-center truncate hover:text-[var(--ink)]">
           {recipe.title}
