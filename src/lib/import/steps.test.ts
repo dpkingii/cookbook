@@ -349,6 +349,74 @@ describe("ingredient matching", () => {
   });
 });
 
+describe("structureStep timers and filtering", () => {
+  it("gives 'after 2 minutes, flip' to the cooking step before it", () => {
+    const ctx = createStepContext();
+    const [first] = structureStep("Place the steaks in the hot pan.", [], ctx);
+    const [second] = structureStep("After 2 minutes, flip the steaks.", [], ctx);
+    expect(second.timer).toBeUndefined();
+    expect(first.timer).toMatchObject({ seconds: 120, mode: "stay" });
+  });
+
+  it("does not overwrite a timer the earlier step already has", () => {
+    const ctx = createStepContext();
+    const [first] = structureStep("Sear the steaks for 3 minutes.", [], ctx);
+    structureStep("After 1 minute, flip the steaks.", [], ctx);
+    expect(first.timer?.seconds).toBe(180);
+  });
+
+  it("turns a long soak or overnight rest on a prep or cooking step into resting", () => {
+    expect(structureStep("Soak the beans for 8 hours.", [], createStepContext())[0]).toMatchObject({ technique: "rest" });
+    expect(structureStep("Boil the leaves, then let them sit in water overnight.", [], createStepContext())[0].technique).toBe("rest");
+  });
+
+  it("drops text that holds no instruction, unless the recipe has nothing else", () => {
+    expect(structureStep("It is up to you how thick the slices are.", [], createStepContext())).toEqual([]);
+    expect(structureStep("It is up to you how thick the slices are.", [], createStepContext(true))).toHaveLength(1);
+  });
+
+  it("keeps an imperative step name when the text holds no instruction", () => {
+    const [s] = structureStep("It is lovely.", [], createStepContext(), "Prepare the shrimp");
+    expect(s.text).toBe("Prepare the shrimp.");
+  });
+
+  it("drops the leading clause of a long sentence instead of cutting off the instruction", () => {
+    const text =
+      "If you are improvising with the amounts and veering well away from the recipe as it is written down above, just make sure to be careful with the vegetables and avoid ones with high water content.";
+    const [s] = structureStep(text, [], createStepContext());
+    expect(s.text.startsWith("Just make sure")).toBe(true);
+  });
+
+  it("keeps a lead-in 'On high heat,' as an instruction", () => {
+    expect(structureStep("On high heat, add and stir-fry the vegetables.", [], createStepContext())).toHaveLength(1);
+  });
+});
+
+describe("ingredient matching by short name", () => {
+  it("links 'the pork' to a cut of pork no other ingredient shares a word with", () => {
+    const list = [ing("pork", "pork belly"), ing("oil", "olive oil")];
+    const [s] = structureStep("Cut the pork into bite-sized pieces.", list, createStepContext());
+    expect(s.uses.map((u) => u.ingredientId)).toEqual(["pork"]);
+  });
+
+  it("does not guess when two ingredients share the first word", () => {
+    const list = [ing("breast", "chicken breast"), ing("powder", "chicken powder")];
+    const [s] = structureStep("Cut the chicken into pieces.", list, createStepContext());
+    expect(s.uses).toEqual([]);
+  });
+
+  it("does not link through a colour or type word", () => {
+    const list = [ing("w", "white pepper"), ing("s", "soy sauce")];
+    const [s] = structureStep("Slice the white onion.", list, createStepContext());
+    expect(s.uses).toEqual([]);
+  });
+
+  it("matches chilies to chili", () => {
+    const [s] = structureStep("Fry the chilies for 20 seconds.", [ing("c", "dried red chili")], createStepContext());
+    expect(s.uses.map((u) => u.ingredientId)).toEqual(["c"]);
+  });
+});
+
 describe("attachUnusedIngredients", () => {
   it("attaches orphans to the first whisk/marinate/season step and warns", () => {
     const ingredients = [ing("a", "salt"), ing("b", "flour")];

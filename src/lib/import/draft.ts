@@ -92,10 +92,13 @@ function difficultyOf(steps: number, ingredients: number): Difficulty {
 
 export function buildDraft(input: DraftInput): RecipeDraft {
   const ingredients = buildIngredients(input.ingredientLines);
-  const ctx = createStepContext();
-  ctx.warnings.push(...(input.warnings ?? []));
-
-  const steps: Step[] = consolidate(input.steps.flatMap((s) => structureStep(s.text, ingredients, ctx, s.name)));
+  const build = (lenient: boolean) => {
+    const context = createStepContext(lenient);
+    context.warnings.push(...(input.warnings ?? []));
+    return { context, steps: consolidate(input.steps.flatMap((s) => structureStep(s.text, ingredients, context, s.name))) };
+  };
+  let { context: ctx, steps }: { context: ReturnType<typeof createStepContext>; steps: Step[] } = build(false);
+  if (!steps.length) ({ context: ctx, steps } = build(true));
   if (!steps.length) {
     ctx.warnings.push("No steps were found, so a placeholder step was added.");
     steps.push({ text: "Follow the original recipe.", technique: "rest", uses: [] });
