@@ -212,10 +212,10 @@ Voice control ("next", "start timer") · cooking two recipes at once on a merged
 
 Milestones 0 to 5 are built on `main`. Still open:
 
-- [ ] Deploy (Vercel and a hosted Postgres). The new schema has only been applied to the local database.
+- [x] Deploy: Vercel project `cookbook` at https://cookbook-eight-jet.vercel.app, Neon Postgres with the current schema and the 11 public recipes. Deployed with `vercel deploy --prod` from this folder; nothing deploys on push.
 - [ ] Try it on a real phone: chime, vibration, wake lock and touch.
 - [ ] Wok and steamer scenes. Stir-frying is drawn in the skillet and steaming in a pot.
-- [ ] Importer accuracy. Across 198 imported recipes the median is 11 steps; some steps still get the wrong technique (stirring on the heat read as whisking) and 61 recipes carry a warning.
+- [ ] Importer accuracy, second pass. Stirring on the heat is now read as cooking and timers land on the right step, but boil versus simmer, marinating and soaking are still often wrong. `npx tsx scripts/audit-import.ts` measures it.
 
 ## State of the repo before this work
 

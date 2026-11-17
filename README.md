@@ -77,6 +77,17 @@ Open http://localhost:3000. The seed adds eleven public recipes and a demo accou
 
 If the development server crashes with "Next.js package not found", delete the `.next` folder and start it again.
 
+## Deploying
+
+The app runs on Vercel with a Neon Postgres database.
+
+```bash
+npx vercel deploy --prod                              # build and release
+DATABASE_URL="<direct Neon URL>" npx prisma migrate deploy   # after a schema change
+```
+
+Vercel holds two production variables: `DATABASE_URL` (Neon's pooled connection string) and `BETTER_AUTH_SECRET`. The site address comes from Vercel, so `BETTER_AUTH_URL` is only needed locally. Run migrations against Neon's direct connection string, which is the pooled one without `-pooler` in the host. The seed skips the demo account on any database that is not local.
+
 ## Stack
 
 Next.js 16 (App Router), React 19, TypeScript, Tailwind 4, Motion, Prisma 6, Postgres, Better Auth, Zod, Vitest.
