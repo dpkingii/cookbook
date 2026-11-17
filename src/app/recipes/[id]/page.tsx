@@ -4,11 +4,14 @@ import { HeroStage } from "@/components/cook/HeroStage";
 import { formatAmount } from "@/components/cook/format";
 import { DeleteRecipe } from "@/components/editor/DeleteRecipe";
 import { FavoriteButton } from "@/components/editor/FavoriteButton";
+import { PastCooks } from "@/components/photo/PastCooks";
 import { AppShell } from "@/components/site/AppShell";
 import { IngredientToken } from "@/components/stage";
 import { buttonGhost, buttonPrimary, textLink } from "@/components/ui/styles";
 import { getViewer } from "@/lib/auth/viewer";
 import { getRecipe } from "@/lib/db/recipes";
+import { listPastCooks } from "@/lib/sessions/past";
+import { viewerTimeZone } from "@/lib/stats/viewer-time-zone";
 
 export async function generateMetadata({ params }: PageProps<"/recipes/[id]">) {
   const viewerId = (await getViewer())?.id ?? null;
@@ -21,6 +24,7 @@ export default async function RecipePage({ params }: PageProps<"/recipes/[id]">)
   if (!recipe) notFound();
   const isOwner = Boolean(viewer && recipe.ownerId === viewer.id);
   const isMember = Boolean(viewer && !viewer.isGuest);
+  const past = viewer ? await listPastCooks(viewer.id, recipe.id, await viewerTimeZone()) : [];
 
   const facts = [
     ["Prep", `${recipe.prepMinutes} min`],
@@ -59,7 +63,7 @@ export default async function RecipePage({ params }: PageProps<"/recipes/[id]">)
           </dl>
 
           <Link href={`/cook/${recipe.id}`} className={`${buttonPrimary} mt-6 w-full`}>
-            Cook this
+            {past.length > 0 ? "Cook it again" : "Cook this"}
           </Link>
 
           {(isMember || isOwner) && (
@@ -78,6 +82,8 @@ export default async function RecipePage({ params }: PageProps<"/recipes/[id]">)
           {isOwner && !recipe.isPublic && (
             <p className="mt-3 text-sm text-[var(--mute)]">Private: only you can see this recipe.</p>
           )}
+
+          <PastCooks cooks={past} />
 
           <div className="mt-8 lg:hidden">
             <HeroStage recipe={recipe} />
