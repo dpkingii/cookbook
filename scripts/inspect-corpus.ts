@@ -1,8 +1,6 @@
-import { readdir, readFile } from "node:fs/promises";
-import path from "node:path";
 import { parseArgs } from "node:util";
-import { draftFromJsonLd, extractJsonLdRecipe } from "../src/lib/import";
 import type { RecipeDraft } from "../src/lib/import/types";
+import { loadCorpus } from "./lib/corpus";
 
 const USAGE = "npx tsx scripts/inspect-corpus.ts <host> [--only <slug text>] [--audit]";
 
@@ -14,18 +12,6 @@ const host = positionals[0];
 if (!host) {
   console.error(`Usage: ${USAGE}`);
   process.exit(1);
-}
-
-const dir = path.join(".cache/import", host);
-
-async function load(): Promise<{ slug: string; draft: RecipeDraft }[]> {
-  const files = (await readdir(dir)).filter((f) => f.endsWith(".html") && f.includes(values.only ?? "")).sort();
-  const out: { slug: string; draft: RecipeDraft }[] = [];
-  for (const f of files) {
-    const data = extractJsonLdRecipe(await readFile(path.join(dir, f), "utf8"));
-    if (data) out.push({ slug: f.replace(/\.html$/, ""), draft: draftFromJsonLd(data, `https://${host}/${f}`) });
-  }
-  return out;
 }
 
 function show({ slug, draft }: { slug: string; draft: RecipeDraft }) {
@@ -58,7 +44,7 @@ function audit(recipes: { slug: string; draft: RecipeDraft }[]) {
   for (const r of rows) console.log(`  ${r}`);
 }
 
-load().then((recipes) => {
+loadCorpus(host, values.only).then((recipes) => {
   if (values.audit) audit(recipes);
   else recipes.forEach(show);
 });
