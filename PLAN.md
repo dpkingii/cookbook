@@ -168,6 +168,7 @@ No database, no login. One recipe as a typed constant.
 - [x] Event ingestion endpoint with idempotent writes and a local queue
 - [x] Resume a session after reload
 - [x] Session summary on finish; rating and note
+- [x] Photo of the dish at the end of every cook (stored in Postgres, owner only)
 - [x] History page
 - [x] Guest sessions
 

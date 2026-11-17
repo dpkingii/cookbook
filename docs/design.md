@@ -94,6 +94,7 @@ The bar is hidden in cooking mode (`/cook/[id]`), the finish flow, the recipe ed
 
 After the last step. Each screen has one primary button at the bottom; Back is a ghost button from the second screen on.
 
+0. **Plate up.** "Take a photo of your plate." An empty place setting in a `sheet` until a photo is picked (camera on phones, file picker on laptops), then the photo itself with Retake. "Skip" continues without one. The photo is shrunk to a JPEG of at most 1600px and 700 KB in the browser, uploaded once the session reaches the server, and shown as a tilted polaroid on screen 1 with its save status. It appears on the history page for that cook (add, replace, remove), as a thumbnail in History, and under "Your plates" on Profile. Photos are private to their owner.
 0. **How did it go** (optional): rating and one note. "Save" continues; "Skip" also continues.
 1. **Session logged.** Label, recipe name, this session's minutes as the large figure. Then rows: Today (total, with "+Nm" in accent, counting up from the old value), This week (same), Session ("2nd today · 5th this week").
 2. **Your week.** Weeks of streak as the large figure. Seven square boxes Monday to Sunday: cooked days filled in ink with a white check, today in accent. "Days cooked: 4 of 7". One sentence on what keeps the streak going.
