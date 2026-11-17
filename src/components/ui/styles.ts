@@ -4,9 +4,9 @@ const focus = "focus-visible:outline-3 focus-visible:outline-offset-2 focus-visi
 const press =
   "transition-[transform,box-shadow] duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0";
 
-export const buttonPrimary = `inline-flex min-h-12 items-center justify-center border-2 border-[var(--ink)] bg-[var(--ink)] px-6 text-base font-semibold text-white shadow-[4px_4px_0_var(--rule)] hover:shadow-[6px_6px_0_var(--rule)] ${press} ${focus}`;
+export const buttonPrimary = `inline-flex min-h-12 items-center justify-center border-2 border-[var(--ink)] bg-[var(--ink)] px-6 text-base font-semibold text-white shadow-[4px_4px_0_var(--room)] hover:shadow-[6px_6px_0_var(--room)] ${press} ${focus}`;
 
-export const buttonGhost = `inline-flex min-h-12 items-center justify-center border-2 border-[var(--ink)] bg-white px-4 text-base font-semibold text-[var(--ink)] shadow-[3px_3px_0_var(--ink)] hover:shadow-[5px_5px_0_var(--ink)] ${press} ${focus}`;
+export const buttonGhost = `inline-flex min-h-12 items-center justify-center border-2 border-[var(--ink)] bg-white px-4 text-base font-semibold text-[var(--ink)] shadow-[3px_3px_0_var(--room)] hover:shadow-[5px_5px_0_var(--room)] ${press} ${focus}`;
 
 export const textLink = `font-semibold underline decoration-[var(--ink)] decoration-2 underline-offset-4 hover:decoration-4 ${focus}`;
 

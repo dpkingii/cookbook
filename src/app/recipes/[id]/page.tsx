@@ -49,11 +49,11 @@ export default async function RecipePage({ params }: PageProps<"/recipes/[id]">)
             </p>
           )}
 
-          <dl className="sheet mt-6 grid grid-cols-4 px-4 py-4">
+          <dl className="sheet mt-6 grid grid-cols-4 gap-x-2 px-3 py-4 sm:px-4">
             {facts.map(([term, value]) => (
               <div key={term}>
                 <dt className="label-caps">{term}</dt>
-                <dd className="mt-1 whitespace-nowrap font-serif text-2xl font-medium tabular-nums lg:text-xl xl:text-2xl">{value}</dd>
+                <dd className="mt-1 whitespace-nowrap font-serif text-xl font-medium tabular-nums sm:text-2xl lg:text-xl xl:text-2xl">{value}</dd>
               </div>
             ))}
           </dl>

@@ -30,7 +30,7 @@ export function RecipeList({
         <li key={r.id} className="flex">
           <Link
             href={`/recipes/${r.id}`}
-            className={`sheet group flex min-h-24 w-full items-start justify-between gap-3 px-4 py-3 transition-[transform,box-shadow] duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0_var(--ink)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 ${ring}`}
+            className={`sheet group flex min-h-24 w-full items-start justify-between gap-3 px-4 py-3 transition-[transform,box-shadow] duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[7px_7px_0_var(--room)] motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0 ${ring}`}
           >
             <span className="min-w-0">
               <span className="block font-serif text-xl font-medium leading-snug ">

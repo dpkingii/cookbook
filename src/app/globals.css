@@ -160,41 +160,41 @@
 }
 
 /*
- * Cookbook look: every room has its own colour, with white sheets, ink outlines and hard shadows on top.
+ * Cookbook look: one soft mint page, white sheets with ink outlines, and a pastel accent that changes with the room.
  * See docs/design.md.
  */
 :root {
-  --sun: #ffd95a;
-  --tomato: #ff9a80;
-  --mint: #a6e3b8;
-  --sky: #b3d0ff;
-  --pink: #ffb3ce;
-  --lilac: #d3c2ff;
+  --sun: #f6e3a1;
+  --tomato: #f9b8a6;
+  --mint: #a9ddb9;
+  --sky: #aecbf5;
+  --pink: #f5b5cc;
+  --lilac: #c9bcf2;
 
-  --bg: var(--sun);
+  --bg: #e4f3e8;
+  --room: var(--tomato);
   --surface: #ffffff;
   --ink: #111111;
-  /* Mixed from ink so they sit on any of the room colours. */
-  --mute: color-mix(in srgb, var(--ink) 70%, transparent);
-  --rule: color-mix(in srgb, var(--ink) 22%, transparent);
-  --wash: color-mix(in srgb, var(--ink) 8%, transparent);
+  /* Mixed from ink so they sit on the page and on any pastel. */
+  --mute: color-mix(in srgb, var(--ink) 68%, transparent);
+  --rule: color-mix(in srgb, var(--ink) 18%, transparent);
+  --wash: color-mix(in srgb, var(--ink) 7%, transparent);
   --accent: var(--ink);
   --danger: #9b1c1c;
   --saffron: #e9a23b;
 }
 
-/* The page that is showing names its room; the root follows so overscroll matches. */
-:root:has([data-tone="sun"]) { --bg: var(--sun); }
-:root:has([data-tone="tomato"]) { --bg: var(--tomato); }
-:root:has([data-tone="mint"]) { --bg: var(--mint); }
-:root:has([data-tone="sky"]) { --bg: var(--sky); }
-:root:has([data-tone="pink"]) { --bg: var(--pink); }
-:root:has([data-tone="lilac"]) { --bg: var(--lilac); }
+/* The page that is showing names its room. Only the accent changes: sheet shadows and the current step. */
+:root:has([data-tone="sun"]) { --room: var(--sun); }
+:root:has([data-tone="tomato"]) { --room: var(--tomato); }
+:root:has([data-tone="mint"]) { --room: var(--mint); }
+:root:has([data-tone="sky"]) { --room: var(--sky); }
+:root:has([data-tone="pink"]) { --room: var(--pink); }
+:root:has([data-tone="lilac"]) { --room: var(--lilac); }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  transition: background-color 0.45s ease;
 }
 
 @utility label-caps {
@@ -209,7 +209,8 @@ body {
 @utility sheet {
   background: var(--surface);
   border: 2px solid var(--ink);
-  box-shadow: 5px 5px 0 var(--ink);
+  box-shadow: 5px 5px 0 var(--room);
+  transition: box-shadow 0.4s ease;
 }
 
 /* A small ink label, for the one thing on a screen that is new. */
@@ -227,7 +228,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body {
+  .sheet {
     transition: none;
   }
 }

@@ -32,7 +32,7 @@ export function TechniqueNote({ technique, className = "" }: { technique: Techni
         onClick={(e) => {
           if (e.target === dialog.current) dialog.current.close();
         }}
-        className="m-0 mt-auto w-full max-w-none border-0 border-t-2 border-[var(--ink)] bg-white p-0 text-[var(--ink)] backdrop:bg-black/40 sm:m-auto sm:max-w-md sm:border-2 sm:shadow-[6px_6px_0_var(--ink)]"
+        className="m-0 mt-auto w-full max-w-none border-0 border-t-2 border-[var(--ink)] bg-white p-0 text-[var(--ink)] backdrop:bg-black/40 sm:m-auto sm:max-w-md sm:border-2 sm:shadow-[6px_6px_0_var(--room)]"
       >
         <div className="mx-auto max-w-xl px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-5 text-left normal-case tracking-normal">
           <p className="label-caps">Technique</p>

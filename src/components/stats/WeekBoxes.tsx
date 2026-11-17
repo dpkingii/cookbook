@@ -10,7 +10,7 @@ export function WeekBoxes({ cooked, today }: { cooked: readonly boolean[]; today
         const box = now
           ? done
             ? "border-[var(--ink)] bg-[var(--ink)] shadow-[3px_3px_0_var(--tomato)]"
-            : "border-[var(--ink)] bg-white shadow-[3px_3px_0_var(--ink)]"
+            : "border-[var(--ink)] bg-white shadow-[3px_3px_0_var(--tomato)]"
           : done
             ? "border-[var(--ink)] bg-[var(--ink)]"
             : "border-[var(--rule)]";

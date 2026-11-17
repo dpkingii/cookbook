@@ -25,7 +25,7 @@ import { StepBar } from "./StepBar";
 import { FinishScreen } from "./FinishScreen";
 import { TimerDock } from "./TimerDock";
 
-/** Each station cooks in its own colour, so the room changes as the recipe moves around the kitchen. */
+/** Each station has its own pastel, which tints the stage's shadow and the current step. */
 const STATION_TONE: Record<Station, Tone> = { board: "mint", bowl: "sun", pan: "tomato", pot: "sky", oven: "pink", rest: "lilac" };
 
 export function CookPlayer({ recipe }: { recipe: Recipe }) {
@@ -66,7 +66,7 @@ export function CookPlayer({ recipe }: { recipe: Recipe }) {
   if (!ready) return <div data-tone="sun" className="min-h-dvh bg-[var(--bg)]" />;
 
   return (
-    <div data-tone={tone} className="flex min-h-dvh flex-col bg-[var(--bg)] text-[var(--ink)] transition-colors duration-500 motion-reduce:transition-none">
+    <div data-tone={tone} className="flex min-h-dvh flex-col bg-[var(--bg)] text-[var(--ink)]">
       <header className={`mx-auto flex w-full max-w-xl items-center justify-between gap-3 px-5 pt-2 ${showWrapUp ? "" : wideColumn}`}>
         <Link href={`/recipes/${recipe.id}`} className="label-caps flex min-h-11 items-center truncate hover:text-[var(--ink)]">
           {recipe.title}

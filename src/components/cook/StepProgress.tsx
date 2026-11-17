@@ -25,7 +25,7 @@ export function StepProgress({
           >
             <span
               className={`block w-full border-2 border-[var(--ink)] transition-[height,background-color] ${
-                n === current ? "h-3.5 bg-white" : completed.includes(n) ? "h-2 bg-[var(--ink)]" : "h-2 bg-transparent"
+                n === current ? "h-3.5 bg-[var(--room)]" : completed.includes(n) ? "h-2 bg-[var(--ink)]" : "h-2 bg-transparent"
               }`}
             />
           </button>

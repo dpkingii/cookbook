@@ -39,7 +39,7 @@ export function MainNav() {
     <>
       <nav
         aria-label="Main"
-        className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-[var(--ink)] bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--rule)] bg-white pb-[env(safe-area-inset-bottom)] lg:hidden"
       >
         <div className="mx-auto grid max-w-xl grid-cols-3 items-center px-2 py-1.5">
           <Link href="/" aria-current={current("home")} className={`${tab} ${tone("home")}`}>
@@ -47,7 +47,7 @@ export function MainNav() {
             Home
           </Link>
           <Link href="/cook" aria-current={current("cook")} className={`${tab} text-[var(--ink)]`}>
-            <span className="grid h-10 w-16 place-items-center border-2 border-[var(--ink)] bg-[var(--tomato)] text-[var(--ink)] shadow-[3px_3px_0_var(--ink)]">
+            <span className="grid h-10 w-16 place-items-center border-2 border-[var(--ink)] bg-[var(--tomato)] text-[var(--ink)]">
               <Icon d={icons.cook} />
             </span>
             Cook
@@ -61,7 +61,7 @@ export function MainNav() {
 
       <nav
         aria-label="Main"
-        className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r-2 border-[var(--ink)] bg-white px-5 pb-6 pt-9 lg:flex"
+        className="fixed inset-y-0 left-0 z-20 hidden w-60 flex-col border-r border-[var(--rule)] bg-white px-5 pb-6 pt-9 lg:flex"
       >
         <Link href="/" className={`px-3 font-serif text-3xl font-medium tracking-[-0.02em] ${focus}`}>
           Cookbook
@@ -70,7 +70,7 @@ export function MainNav() {
         <Link
           href="/cook"
           aria-current={current("cook")}
-          className={`mt-9 flex min-h-12 items-center gap-3 border-2 border-[var(--ink)] bg-[var(--tomato)] px-3 text-base font-bold text-[var(--ink)] shadow-[4px_4px_0_var(--ink)] transition-[transform,box-shadow] duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_var(--ink)] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--ink)]`}
+          className={`mt-9 flex min-h-12 items-center gap-3 border-2 border-[var(--ink)] bg-[var(--tomato)] px-3 text-base font-bold text-[var(--ink)] transition-transform duration-100 hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-none motion-reduce:transition-none focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-[var(--ink)]`}
         >
           <Icon d={icons.cook} />
           Cook
