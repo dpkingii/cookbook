@@ -25,7 +25,7 @@ export function StepBar({
   const last = i === recipe.steps.length - 1;
 
   return (
-    <Footer dock={dock}>
+    <Footer dock={dock} wide>
       {timer?.status === "running" && (
         <span
           role="timer"
@@ -33,6 +33,11 @@ export function StepBar({
           className="mr-auto font-serif text-3xl font-medium tabular-nums"
         >
           {formatClock(remainingMs(timer, now))}
+        </span>
+      )}
+      {timer?.status !== "running" && (
+        <span className="mr-auto hidden text-sm text-[var(--mute)] lg:block">
+          <kbd className="font-sans">Space</kbd> or <kbd className="font-sans">→</kbd> for next, <kbd className="font-sans">←</kbd> to go back
         </span>
       )}
       <button

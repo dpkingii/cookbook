@@ -3,7 +3,7 @@
 import type { Recipe } from "@/lib/recipe/types";
 import { IngredientToken } from "@/components/stage";
 import { buttonPrimary } from "@/components/ui/styles";
-import { focusRing } from "./focus";
+import { focusRing, wideColumn } from "./focus";
 import { Footer } from "./Footer";
 import { formatAmount } from "./format";
 
@@ -22,7 +22,7 @@ export function MiseScreen({
 
   return (
     <>
-      <div className="mx-auto w-full max-w-xl flex-1 px-5 pb-8 pt-6">
+      <div className={`mx-auto w-full max-w-xl flex-1 px-5 pb-8 pt-6 ${wideColumn}`}>
         <p className="label-caps">
           Mise en place · {checked.length} of {recipe.ingredients.length} out
         </p>
@@ -31,7 +31,7 @@ export function MiseScreen({
         </h1>
         <p className="mt-3 text-base text-[var(--mute)]">Tap each ingredient as it lands on the counter.</p>
 
-        <ul className="mt-6 border-b border-[var(--rule)]">
+        <ul className="mt-6 border-b border-[var(--rule)] lg:grid lg:grid-cols-2 lg:gap-x-12 xl:grid-cols-3">
           {recipe.ingredients.map((ingredient) => {
             const on = checked.includes(ingredient.id);
             const amount = formatAmount(ingredient);
@@ -75,8 +75,8 @@ export function MiseScreen({
         </ul>
       </div>
 
-      <Footer>
-        <button type="button" onClick={onStart} className={`${buttonPrimary} w-full`}>
+      <Footer wide>
+        <button type="button" onClick={onStart} className={`${buttonPrimary} w-full lg:ml-auto lg:w-auto lg:min-w-80`}>
           {remaining === 0 ? "Start cooking" : `Start cooking (${remaining} still to find)`}
         </button>
       </Footer>

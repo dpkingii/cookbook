@@ -2,7 +2,7 @@
 
 import type { Recipe } from "@/lib/recipe/types";
 import { dockTimers, remainingMs, ringingTimers, type PlayerState } from "@/lib/player";
-import { focusRing } from "./focus";
+import { focusRing, wideColumn } from "./focus";
 import { formatClock } from "./format";
 
 export function TimerDock({
@@ -22,7 +22,7 @@ export function TimerDock({
 
   return (
     <aside aria-label="Timers" className="border-t border-[var(--rule)] bg-white">
-      <ul className="mx-auto w-full max-w-xl divide-y divide-[var(--rule)] px-5">
+      <ul className={`mx-auto w-full max-w-xl divide-y divide-[var(--rule)] px-5 ${wideColumn}`}>
         {ringing.map((t) => (
           <li key={t.id}>
             <button
