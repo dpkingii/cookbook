@@ -33,7 +33,7 @@ function unitSeconds(unit: string): number {
   return 3600;
 }
 
-const AFTER_BEFORE = /\bafter\s+(?:about\s+|around\s+|roughly\s+|~\s*)?$/i;
+const AFTER_BEFORE = /\b(?:after\s+(?:[a-z-]+ing\s+(?:[a-z-]+\s+){0,2})?(?:for\s+)?(?:about\s+|around\s+|roughly\s+|~\s*)?|in the (?:last|final)\s+(?:about\s+)?|during the (?:last|final)\s+(?:about\s+)?)$/i;
 const A_SECOND_OK = /\b(?:for|about|within|in|just|only|another)\s+$/i;
 
 interface Candidate {
@@ -53,7 +53,6 @@ function candidates(text: string): Candidate[] {
     if (!ok(index)) return;
     const before = text.slice(Math.max(0, index - 30), index);
     const after = AFTER_BEFORE.test(before);
-    if (after && seconds < 30) return;
     found.push({ seconds, index, forPhrase: FOR_BEFORE.test(before), after });
   };
 
@@ -75,7 +74,7 @@ function candidates(text: string): Candidate[] {
   return found.sort((a, b) => a.index - b.index);
 }
 
-const PASSIVE: Technique[] = ["boil", "simmer", "roast", "bake", "marinate", "rest", "chill"];
+export const PASSIVE: Technique[] = ["boil", "simmer", "roast", "bake", "marinate", "rest", "chill", "drain"];
 
 const BASE_LABEL: Partial<Record<Technique, string>> = {
   simmer: "Simmer", boil: "Boil", roast: "Roast", bake: "Bake", marinate: "Marinate", rest: "Rest",
@@ -135,17 +134,27 @@ function labelFor(text: string, technique: Technique): string {
   return base;
 }
 
-export function detectTimer(text: string, technique: Technique): StepTimer | undefined {
-  const list = candidates(text);
-  const pick = list.find((c) => c.forPhrase) ?? list.find((c) => !c.after) ?? list[0];
+const MIN_SECONDS = 10;
+
+function timerFrom(pick: Candidate | undefined, text: string, technique: Technique): StepTimer | undefined {
   if (!pick) return undefined;
   const seconds = Math.round(pick.seconds);
-  if (seconds <= 0) return undefined;
+  if (seconds < MIN_SECONDS) return undefined;
   return {
     seconds,
     mode: PASSIVE.includes(technique) || seconds >= 300 ? "background" : "stay",
     label: labelFor(text, technique),
   };
+}
+
+/** How long to wait on this step. A duration that only says when to act ("after 2 minutes, flip") belongs to the step before. */
+export function detectTimer(text: string, technique: Technique): StepTimer | undefined {
+  const list = candidates(text);
+  return timerFrom(list.find((c) => c.forPhrase) ?? list.find((c) => !c.after), text, technique);
+}
+
+export function detectDelayedTimer(text: string, technique: Technique): StepTimer | undefined {
+  return timerFrom(candidates(text).find((c) => c.after), text, technique);
 }
 
 export function parseDuration(iso: unknown): number | null {

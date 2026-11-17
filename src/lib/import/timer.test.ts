@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { detectTimer, parseDuration } from "./timer";
+import { detectDelayedTimer, detectTimer, parseDuration } from "./timer";
 import type { Technique } from "@/lib/recipe/types";
 
 describe("detectTimer seconds and mode", () => {
@@ -36,10 +36,16 @@ describe("detectTimer seconds and mode", () => {
     ["Take a second to smell the steam, then serve.", "plate", undefined, undefined],
     ["Add another ladle of oil, then a second ladle.", "fry", undefined, undefined],
     ["Count to one second, then flip.", "fry", undefined, undefined],
-    ["Hold it under the tap for a second.", "fry", 1, "stay"],
+    ["Hold it under the tap for a second.", "fry", undefined, undefined],
+    ["Stir-fry for 5 seconds.", "fry", undefined, undefined],
+    ["Stir for 5-10 seconds.", "fry", undefined, undefined],
+    ["Stir-fry for 10 seconds.", "fry", 10, "stay"],
+    ["Lower the heat in the last minute of cooking.", "fry", undefined, undefined],
+    ["After 10 seconds, lower the heat.", "fry", undefined, undefined],
+    ["Cook for 3 minutes. After 1 minute, stir.", "fry", 180, "stay"],
     ["Stir-fry, then lower the heat after ~10-15 sec and keep going.", "fry", undefined, undefined],
     ["Fry the garlic for 20 seconds and lower the heat after 10 seconds.", "fry", 20, "stay"],
-    ["After 2 minutes of frying, flip the pieces.", "fry", 120, "stay"],
+    ["After 2 minutes of frying, flip the pieces.", "fry", undefined, undefined],
   ];
   it.each(cases)("%s", (text, technique, seconds, mode) => {
     const t = detectTimer(text, technique);
@@ -77,5 +83,17 @@ describe("parseDuration", () => {
     expect(parseDuration("PT45S")).toBe(1);
     expect(parseDuration("nonsense")).toBeNull();
     expect(parseDuration(undefined)).toBeNull();
+  });
+});
+
+describe("detectDelayedTimer", () => {
+  it("reads how long the previous step runs before this one's action", () => {
+    expect(detectDelayedTimer("After 2 minutes, flip the steaks.", "sear")).toMatchObject({ seconds: 120, mode: "stay" });
+    expect(detectDelayedTimer("After 30 minutes of baking, remove the ribs.", "bake")).toMatchObject({ seconds: 1800, mode: "background" });
+  });
+
+  it("ignores durations that are not delays and delays under ten seconds", () => {
+    expect(detectDelayedTimer("Fry for 2 minutes.", "fry")).toBeUndefined();
+    expect(detectDelayedTimer("After 5 seconds, stir.", "fry")).toBeUndefined();
   });
 });
