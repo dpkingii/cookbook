@@ -160,37 +160,74 @@
 }
 
 /*
- * Cookbook look: a cool grey counter with white sheets on it, ink and hairlines, serif for what you read first, colour only in the food.
+ * Cookbook look: every room has its own colour, with white sheets, ink outlines and hard shadows on top.
  * See docs/design.md.
  */
 :root {
-  --bg: #e8ebee;
+  --sun: #ffd95a;
+  --tomato: #ff9a80;
+  --mint: #a6e3b8;
+  --sky: #b3d0ff;
+  --pink: #ffb3ce;
+  --lilac: #d3c2ff;
+
+  --bg: var(--sun);
   --surface: #ffffff;
   --ink: #111111;
-  --mute: #585d63;
-  --rule: #cdd2d7;
-  --wash: #dde1e5;
-  --accent: #a64805;
+  /* Mixed from ink so they sit on any of the room colours. */
+  --mute: color-mix(in srgb, var(--ink) 70%, transparent);
+  --rule: color-mix(in srgb, var(--ink) 22%, transparent);
+  --wash: color-mix(in srgb, var(--ink) 8%, transparent);
+  --accent: var(--ink);
+  --danger: #9b1c1c;
   --saffron: #e9a23b;
-
-  /* Names from the previous look, kept until every screen is moved to the tokens above. */
-  --paper: var(--bg);
-  --paper-deep: var(--wash);
-  --ink-soft: var(--mute);
-  --tomato: var(--accent);
-  --tomato-deep: var(--accent);
-  --gold: var(--saffron);
 }
+
+/* The page that is showing names its room; the root follows so overscroll matches. */
+:root:has([data-tone="sun"]) { --bg: var(--sun); }
+:root:has([data-tone="tomato"]) { --bg: var(--tomato); }
+:root:has([data-tone="mint"]) { --bg: var(--mint); }
+:root:has([data-tone="sky"]) { --bg: var(--sky); }
+:root:has([data-tone="pink"]) { --bg: var(--pink); }
+:root:has([data-tone="lilac"]) { --bg: var(--lilac); }
 
 body {
   background: var(--bg);
   color: var(--ink);
+  transition: background-color 0.45s ease;
 }
 
 @utility label-caps {
   font-size: 0.6875rem;
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--mute);
+}
+
+/* A white sheet lying on the colour: square, outlined, with a hard shadow. */
+@utility sheet {
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+/* A small ink label, for the one thing on a screen that is new. */
+@utility tag {
+  display: inline-block;
+  width: fit-content;
+  background: var(--ink);
+  color: #ffffff;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }

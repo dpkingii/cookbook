@@ -1,5 +1,7 @@
 # Cookbook visual design
 
+> The colour rooms described under Tokens replaced the earlier white-and-hairline look on 2026-11-16. Where an older rule below says the interface has no colour, the Tokens section wins.
+
 Agreed on 2026-11-16. This replaces the cream-paper print look.
 
 ## Who it is for
@@ -23,22 +25,26 @@ A beginner cook who wants to learn new dishes and build confidence. They want co
 
 ## Tokens
 
-Defined in `src/app/globals.css`.
+Every room has its own colour. The page that is showing sets `data-tone` and the root follows (`:root:has([data-tone])` in `globals.css`).
 
-| Token | Value | Use |
+| Token | Value | Where |
 |---|---|---|
-| `--bg` | `#e8ebee` | The page: a cool grey counter |
-| `--surface` | `#ffffff` | Sheets on the counter: illustrations, fields, the navigation and the cooking footer |
-| `--ink` | `#111111` | Text, primary buttons, filled marks |
-| `--mute` | `#585d63` | Labels, metadata |
-| `--rule` | `#cdd2d7` | Hairlines, outlines, empty marks |
-| `--wash` | `#dde1e5` | Rare: a field or illustration backdrop that needs separating |
-| `--accent` | `#a64805` | The one thing that changed |
+| `--sun` | `#ffd95a` | Home, sign-in, mise en place, the mixing bowl |
+| `--tomato` | `#ff9a80` | Cook tab, the Cook button, the pan |
+| `--mint` | `#a6e3b8` | Profile, Skills, the cutting board |
+| `--sky` | `#b3d0ff` | History, the pot |
+| `--pink` | `#ffb3ce` | Recipe page, the oven, the finish flow |
+| `--lilac` | `#d3c2ff` | My recipes, the editor, resting and plating |
+| `--surface` | `#ffffff` | Sheets: illustrations, cards, fields, navigation, the cooking footer |
+| `--ink` | `#111111` | Text, outlines, primary buttons, hard shadows |
+| `--mute`, `--rule`, `--wash` | ink at 70%, 22%, 8% | Secondary text, hairlines, hover. Mixed from ink so they sit on any room colour |
+| `--danger` | `#9b1c1c` | Form errors |
 | `--saffron` | `#e9a23b` | Fills inside illustrations only |
 
-The names `--paper`, `--paper-deep`, `--ink-soft`, `--tomato`, `--tomato-deep` and `--gold` are aliases kept during the migration. New code must not use them, and each screen should drop them as it is restyled.
-
-Shared class strings are in `src/components/ui/styles.ts`: `buttonPrimary`, `buttonGhost`, `textLink`, `input`, `display`, `figure`, `listRow`, `surface`.
+- Text on a room colour is always ink, never white. White text appears only on ink (buttons, tags, the active navigation item).
+- `sheet` is a white rectangle with a 2px ink outline and a 5px hard shadow. `tag` is a small ink label for the one new thing on a screen.
+- No rounded rectangles, no gradients, no soft shadows.
+- In cooking mode the room colour follows the station of the current step, so the screen changes colour as the recipe moves around the kitchen.
 
 ## Type scale
 
