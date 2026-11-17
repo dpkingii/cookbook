@@ -150,14 +150,18 @@ function score(s: Sentence, groupStrong?: Technique): number {
   return base + same + (s.hasTimer ? 1 : 0) + (detectHeat(s.raw) ? 0.5 : 0) + (CUE_RE.test(s.raw) ? 0.5 : 0);
 }
 
-function shown(group: Group): { text: string; raw: string } {
+function shown(group: Group): { text: string; raw: string; sentences: Sentence[] } {
   const ranked = group.sentences
     .map((s, i) => ({ s, i, score: score(s, group.strong) }))
     .sort((a, b) => b.score - a.score || a.i - b.i);
   let chosen = ranked.slice(0, MAX_SHOWN);
   if (chosen.map((c) => c.s.text).join(" ").length > MAX_CHARS) chosen = chosen.slice(0, 1);
   chosen.sort((a, b) => a.i - b.i);
-  return { text: shorten(chosen.map((c) => c.s.text).join(" ")), raw: chosen.map((c) => c.s.raw).join(" ") };
+  return {
+    text: shorten(chosen.map((c) => c.s.text).join(" ")),
+    raw: chosen.map((c) => c.s.raw).join(" "),
+    sentences: chosen.map((c) => c.s),
+  };
 }
 
 function techniqueOf(group: Group): TechniqueMatch | null {
@@ -168,6 +172,13 @@ function techniqueOf(group: Group): TechniqueMatch | null {
     if (all) return all;
   }
   return group.sentences.find((s) => s.kind === "major" && s.match)?.match ?? group.sentences.find((s) => s.match)?.match ?? null;
+}
+
+/** The label has to come from a sentence the cook reads, not from one that was cut to keep the step short. */
+function visible(match: TechniqueMatch | null, sentences: Sentence[]): TechniqueMatch | null {
+  if (!match || sentences.some((s) => s.match?.technique === match.technique)) return match;
+  const strong = sentences.find((s) => s.match && !s.match.weak && s.kind !== "loose");
+  return strong?.match ?? sentences.find((s) => s.match)?.match ?? match;
 }
 
 const GROUP_WORD = /\b(?:the|this|that|our|your|remaining|reserved|prepared|leftover)\s+(?:(?:remaining|reserved|prepared|leftover)\s+)?(sauce|marinade|seasonings?|slurry|batter|glaze|dressing|syrup|rub|spice mix|mixture)\b/gi;
@@ -220,9 +231,9 @@ export function structureStep(text: string, ingredients: Ingredient[], context: 
   }
 
   return buildGroups(sentences).map((group): Step => {
-    const { text: stepText, raw: shownRaw } = shown(group);
+    const { text: stepText, raw: shownRaw, sentences: read } = shown(group);
     const raw = group.sentences.map((s) => s.raw).join(" ");
-    let match = techniqueOf(group);
+    let match = visible(techniqueOf(group), read);
     const timedMatch = group.sentences.find((x) => x.hasTimer)?.match;
     if (match && PREP.includes(match.technique) && timedMatch && !timedMatch.generic && (!timedMatch.weak || timedMatch.cook)) match = timedMatch;
 
