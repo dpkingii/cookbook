@@ -55,13 +55,14 @@ Cooking mode text must stay readable from a metre away: step text never below `t
 
 ## Layout
 
-- Mobile first. Content column is `max-w-xl`, centred, with 20px side padding. Wider screens keep the single column; lists may go to `max-w-4xl` with two columns.
-- Screens with the bottom bar use `AppShell` (`src/components/site/AppShell.tsx`).
+- Mobile first. Below 1024px the content column is `max-w-xl`, centred, with 20px side padding.
+- From 1024px up, pages sit beside the side rail, left-aligned, up to `max-w-6xl`. Long single-column pages (History) pass `reading` to stay at `max-w-3xl`.
+- Screens with the main navigation use `AppShell` (`src/components/site/AppShell.tsx`). Cooking screens have no navigation; mise en place and the step screen widen with `wideColumn`, the finish flow stays a narrow column.
 - Touch targets are at least 44px high.
 
 ## Navigation
 
-A fixed bottom bar with three buttons (`src/components/site/BottomNav.tsx`):
+On phones, a fixed bottom bar with three buttons (`src/components/site/MainNav.tsx`). From 1024px up the same component is a side rail instead: wordmark, an ink Cook button, Home, Profile, then History, Skills, My recipes and New recipe. Pages spread out beside it: recipe lists in two or three columns, the recipe page and the cooking step with the stage on one side and the text on the other. The three bottom-bar buttons:
 
 | Button | Route | What it is |
 |---|---|---|
