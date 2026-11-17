@@ -32,12 +32,11 @@ One page colour everywhere, with a pastel accent that changes by room. The page 
 | `--bg` | `#e4f3e8` | Every page: a soft mint |
 | `--surface` | `#ffffff` | Sheets: illustrations, cards, fields, navigation, the cooking footer |
 | `--room` | one of the pastels below | Sheet and button shadows, the current step in the progress bar |
-| `--tomato` | `#f9b8a6` | Cook tab, the Cook button, the pan. The default accent |
-| `--sun` | `#f6e3a1` | Home, sign-in, mise en place, the mixing bowl |
+| `--tomato` | `#f9b8a6` | Home, Cook tab, sign-in, mise en place, the Cook button, the pan. The default accent |
 | `--mint` | `#a9ddb9` | Profile, Skills, the cutting board |
-| `--sky` | `#aecbf5` | History, the pot |
+| `--sky` | `#aecbf5` | History, the pot, resting and plating |
 | `--pink` | `#f5b5cc` | Recipe page, the oven, the finish flow |
-| `--lilac` | `#c9bcf2` | My recipes, the editor, resting and plating |
+| `--lilac` | `#c9bcf2` | My recipes, the editor, the mixing bowl |
 | `--ink` | `#111111` | Text, outlines, primary buttons |
 | `--mute`, `--rule`, `--wash` | ink at 68%, 18%, 7% | Secondary text, hairlines, hover |
 | `--danger` | `#9b1c1c` | Form errors |

@@ -4,7 +4,7 @@ import { buttonPrimary } from "@/components/ui/styles";
 
 export default function NotFound() {
   return (
-    <AppShell tone="sun" reading>
+    <AppShell tone="tomato" reading>
       <p className="label-caps">Page not found</p>
       <h1 className="mt-2 font-serif text-3xl font-medium tracking-[-0.02em] sm:text-4xl">That page is not here.</h1>
       <p className="mt-3 max-w-md text-base text-[var(--mute)]">

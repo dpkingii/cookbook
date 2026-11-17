@@ -164,7 +164,6 @@
  * See docs/design.md.
  */
 :root {
-  --sun: #f6e3a1;
   --tomato: #f9b8a6;
   --mint: #a9ddb9;
   --sky: #aecbf5;
@@ -185,7 +184,6 @@
 }
 
 /* The page that is showing names its room. Only the accent changes: sheet shadows and the current step. */
-:root:has([data-tone="sun"]) { --room: var(--sun); }
 :root:has([data-tone="tomato"]) { --room: var(--tomato); }
 :root:has([data-tone="mint"]) { --room: var(--mint); }
 :root:has([data-tone="sky"]) { --room: var(--sky); }

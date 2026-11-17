@@ -7,7 +7,7 @@ import { TimeZoneCookie } from "./TimeZoneCookie";
  * bottom bar on phones, a wide canvas beside the side rail on laptops.
  * `reading` keeps long single-column pages at a comfortable line length. `tone` is the room's colour.
  */
-export type Tone = "sun" | "tomato" | "mint" | "sky" | "pink" | "lilac";
+export type Tone = "tomato" | "mint" | "sky" | "pink" | "lilac";
 
 export function AppShell({ children, tone, reading = false }: { children: ReactNode; tone: Tone; reading?: boolean }) {
   return (

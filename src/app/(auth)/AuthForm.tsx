@@ -69,7 +69,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const invalid = error ? true : undefined;
 
   return (
-    <main data-tone="sun" className="mx-auto flex min-h-dvh w-full max-w-sm flex-col px-5 py-8 text-[var(--ink)]">
+    <main data-tone="tomato" className="mx-auto flex min-h-dvh w-full max-w-sm flex-col px-5 py-8 text-[var(--ink)]">
       <Link href="/" className={cn(display, "inline-flex min-h-11 items-center self-start text-2xl")}>
         Cookbook
       </Link>

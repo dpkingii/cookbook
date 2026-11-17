@@ -26,7 +26,7 @@ import { FinishScreen } from "./FinishScreen";
 import { TimerDock } from "./TimerDock";
 
 /** Each station has its own pastel, which tints the stage's shadow and the current step. */
-const STATION_TONE: Record<Station, Tone> = { board: "mint", bowl: "sun", pan: "tomato", pot: "sky", oven: "pink", rest: "lilac" };
+const STATION_TONE: Record<Station, Tone> = { board: "mint", bowl: "lilac", pan: "tomato", pot: "sky", oven: "pink", rest: "sky" };
 
 export function CookPlayer({ recipe }: { recipe: Recipe }) {
   const { state, now, ready, run, restart, flush, sessionId } = useSession(recipe);
@@ -61,9 +61,9 @@ export function CookPlayer({ recipe }: { recipe: Recipe }) {
     return () => window.removeEventListener("keydown", onKey);
   });
 
-  const tone = showWrapUp ? "pink" : cooking ? STATION_TONE[TECHNIQUE_STATION[recipe.steps[state.currentStep].technique]] : "sun";
+  const tone = showWrapUp ? "pink" : cooking ? STATION_TONE[TECHNIQUE_STATION[recipe.steps[state.currentStep].technique]] : "tomato";
 
-  if (!ready) return <div data-tone="sun" className="min-h-dvh bg-[var(--bg)]" />;
+  if (!ready) return <div data-tone="tomato" className="min-h-dvh bg-[var(--bg)]" />;
 
   return (
     <div data-tone={tone} className="flex min-h-dvh flex-col bg-[var(--bg)] text-[var(--ink)]">

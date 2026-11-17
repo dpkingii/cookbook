@@ -86,7 +86,7 @@ export default async function Home({ searchParams }: PageProps<"/">) {
   const next = filtered || list.page > 1 ? null : await suggestNext(viewerId, finished);
 
   return (
-    <AppShell tone="sun">
+    <AppShell tone="tomato">
       <header className="flex items-baseline justify-between gap-4">
         <h1 className="font-serif text-3xl font-medium tracking-[-0.02em] lg:text-5xl">
           <span className="lg:hidden">Cookbook</span>
