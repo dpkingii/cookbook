@@ -30,7 +30,7 @@ import { TimerDock } from "./TimerDock";
 const STATION_TONE: Record<Station, Tone> = { board: "mint", bowl: "lilac", pan: "tomato", pot: "sky", oven: "pink", rest: "sky" };
 
 export function CookPlayer({ recipe, past }: { recipe: Recipe; past: PastCook[] }) {
-  const { state, now, ready, run, restart, flush, sessionId } = useSession(recipe);
+  const { state, now, ready, run, flush, sessionId } = useSession(recipe);
   const [wrapUp, setWrapUp] = useState(false);
   const lastStep = state.currentStep === recipe.steps.length - 1;
   const cooking = state.phase === "cooking";
@@ -124,10 +124,6 @@ export function CookPlayer({ recipe, past }: { recipe: Recipe; past: PastCook[] 
           sessionId={sessionId}
           onFinish={(result) => run((ctx) => finish(ctx, result))}
           onBackToSteps={() => setWrapUp(false)}
-          onRestart={() => {
-            setWrapUp(false);
-            restart();
-          }}
         />
       )}
     </div>

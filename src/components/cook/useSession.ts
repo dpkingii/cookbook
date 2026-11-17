@@ -215,5 +215,5 @@ export function useSession(recipe: Recipe) {
 
   const sessionId = useCallback(() => journal.current.id, []);
 
-  return { state: session.player, now: session.now, ready, run, restart: startFresh, flush, sessionId };
+  return { state: session.player, now: session.now, ready, run, flush, sessionId };
 }

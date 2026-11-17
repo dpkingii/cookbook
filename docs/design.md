@@ -96,14 +96,14 @@ The recipe page's button reads "Cook it again" once the viewer has finished it. 
 
 ## Finish flow
 
-After the last step. Each screen has one primary button at the bottom; Back is a ghost button from the second screen on.
+After the last step. Each screen has one primary button at the bottom, "Next" until the last screen; Back is a ghost button from the second screen on.
 
 0. **Plate up.** "Take a photo of your plate." An empty place setting in a `sheet` until a photo is picked (camera on phones, file picker on laptops), then the photo itself with Retake. "Skip" continues without one. The photo is shrunk to a JPEG of at most 1600px and 700 KB in the browser, uploaded once the session reaches the server, and shown as a tilted polaroid on screen 1 with its save status. It appears on the history page for that cook (add, replace, remove), as a thumbnail in History, and under "Your plates" on Profile. Photos are private to their owner. When an earlier cook of the same recipe has a photo, the screen shows it beside today's: "Last time · date" on the left, "Today" on the right.
 0. **How did it go** (optional): rating and one note. "Save" continues; "Skip" also continues.
 1. **Session logged.** Label, recipe name, this session's minutes as the large figure. Then rows: Today (total, with "+Nm" in accent, counting up from the old value), This week (same), Session ("2nd today · 5th this week").
 2. **Your week.** Weeks of streak as the large figure. Seven square boxes Monday to Sunday: cooked days filled in ink with a white check, today in accent. "Days cooked: 4 of 7". One sentence on what keeps the streak going.
 3. **Techniques tonight.** Each technique practised in this session: name, how many times now, a five-segment meter, and a "First time" label in accent when it is new. Then "Techniques: 12 of 20".
-4. **Next.** One recipe that teaches a technique not yet practised, with "Teaches sear". Primary button opens that recipe; a text link returns Home.
+The last screen shown has "Done" instead of "Next", and it returns Home. The flow does not suggest another recipe: the cook has just eaten, and Home already has "Next to learn" for whenever they want it. Guests see a sign-up line on screen 1.
 
 A cook that finished too fast to be real (see `plausible` in the player summary) still shows screen 1 with its time, says plainly that it was a walkthrough and is not counted, and skips screens 2 and 3.
 

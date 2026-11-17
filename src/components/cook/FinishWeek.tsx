@@ -1,10 +1,21 @@
 import type { Recap } from "@/lib/stats/recap";
-import { buttonGhost, buttonPrimary, figure, listRow } from "@/components/ui/styles";
+import { buttonGhost, figure, listRow } from "@/components/ui/styles";
 import { Footer } from "./Footer";
+import { NextOrDone } from "./NextOrDone";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export function FinishWeek({ streak, onNext, onBack }: { streak: Recap["streak"]; onNext: () => void; onBack: () => void }) {
+export function FinishWeek({
+  streak,
+  last,
+  onNext,
+  onBack,
+}: {
+  streak: Recap["streak"];
+  last: boolean;
+  onNext: () => void;
+  onBack: () => void;
+}) {
   const cooked = streak.days.filter(Boolean).length;
   return (
     <>
@@ -63,9 +74,7 @@ export function FinishWeek({ streak, onNext, onBack }: { streak: Recap["streak"]
         <button type="button" onClick={onBack} className={buttonGhost}>
           Back
         </button>
-        <button type="button" onClick={onNext} className={`${buttonPrimary} flex-1`}>
-          Next
-        </button>
+        <NextOrDone last={last} onNext={onNext} />
       </Footer>
     </>
   );

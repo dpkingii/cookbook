@@ -7,14 +7,13 @@ import { summary, type PlayerState } from "@/lib/player";
 import { photoUrl, uploadPhoto } from "@/lib/photos/client";
 import { lastWith, type PastCook } from "@/lib/sessions/past-cook";
 import { FinishLogged } from "./FinishLogged";
-import { FinishNext } from "./FinishNext";
 import { FinishPhoto } from "./FinishPhoto";
 import { FinishRating } from "./FinishRating";
 import { FinishTechniques } from "./FinishTechniques";
 import { FinishWeek } from "./FinishWeek";
 import { useRecap } from "./useRecap";
 
-type Screen = "photo" | "rate" | "logged" | "week" | "techniques" | "next";
+type Screen = "photo" | "rate" | "logged" | "week" | "techniques";
 
 export function FinishScreen({
   recipe,
@@ -24,7 +23,6 @@ export function FinishScreen({
   sessionId,
   onFinish,
   onBackToSteps,
-  onRestart,
 }: {
   recipe: Recipe;
   state: PlayerState;
@@ -33,7 +31,6 @@ export function FinishScreen({
   sessionId: () => string;
   onFinish: (result: { rating?: number; note?: string }) => void;
   onBackToSteps: () => void;
-  onRestart: () => void;
 }) {
   const finished = state.phase === "finished";
   const [screen, setScreen] = useState<Screen>(finished ? "logged" : "photo");
@@ -77,8 +74,8 @@ export function FinishScreen({
   const path: Screen[] = ["logged"];
   if (counted && ready) path.push("week");
   if (counted && ready && ready.techniques.items.length > 0) path.push("techniques");
-  path.push("next");
   const step = (by: number) => setScreen(path[Math.max(0, path.indexOf(screen) + by)]);
+  const last = (s: Screen) => path.at(-1) === s;
 
   const save = (result: { rating?: number; note?: string }) => {
     onFinish(result);
@@ -104,15 +101,14 @@ export function FinishScreen({
           local={{ title: recipe.title, seconds: local.durationSeconds, plausible: local.plausible, techniques: local.techniques }}
           recap={recap}
           photo={photo && { url: photo.url, status: photoStatus, onRetry: () => void sendPhoto(photo.blob) }}
+          guest={guest}
+          last={last("logged")}
           onNext={() => step(1)}
         />
       )}
-      {screen === "week" && ready && <FinishWeek streak={ready.streak} onNext={() => step(1)} onBack={() => step(-1)} />}
+      {screen === "week" && ready && <FinishWeek streak={ready.streak} last={last("week")} onNext={() => step(1)} onBack={() => step(-1)} />}
       {screen === "techniques" && ready && (
-        <FinishTechniques techniques={ready.techniques} onNext={() => step(1)} onBack={() => step(-1)} />
-      )}
-      {screen === "next" && (
-        <FinishNext next={ready?.next ?? null} guest={guest} onBack={() => step(-1)} onRestart={onRestart} />
+        <FinishTechniques techniques={ready.techniques} last={last("techniques")} onNext={() => step(1)} onBack={() => step(-1)} />
       )}
     </div>
   );

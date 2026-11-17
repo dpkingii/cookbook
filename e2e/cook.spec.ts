@@ -49,9 +49,11 @@ test("a guest cooks a recipe end to end and a reload resumes mid-cook", async ({
   await expect(page.getByText("Session logged")).toBeVisible();
   await expect(page.getByText("Photo saved")).toBeVisible();
   await expect(page.getByText(/reads as a walkthrough/)).toBeVisible();
-  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await page.getByRole("link", { name: "Done", exact: true }).click();
+  await expect(page).toHaveURL(/\/$/);
 
-  await page.getByRole("link", { name: "See your history" }).click();
+  await page.getByRole("link", { name: "Profile", exact: true }).click();
+  await page.getByRole("link", { name: /^History/ }).click();
   await expect(page.getByRole("heading", { level: 1 })).toContainText("What you have cooked");
   await expect(page.getByText("Garlic & Basil Pomodoro")).toBeVisible();
   await expect(page.getByText("More basil.")).toBeVisible();

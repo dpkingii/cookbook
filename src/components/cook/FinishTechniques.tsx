@@ -1,6 +1,7 @@
 import type { Recap } from "@/lib/stats/recap";
-import { buttonGhost, buttonPrimary, listRow } from "@/components/ui/styles";
+import { buttonGhost, listRow } from "@/components/ui/styles";
 import { Footer } from "./Footer";
+import { NextOrDone } from "./NextOrDone";
 import { TechniqueNote } from "@/components/technique/TechniqueNote";
 import { ordinal } from "./format";
 
@@ -28,10 +29,12 @@ function Meter({ count }: { count: number }) {
 
 export function FinishTechniques({
   techniques,
+  last,
   onNext,
   onBack,
 }: {
   techniques: Recap["techniques"];
+  last: boolean;
   onNext: () => void;
   onBack: () => void;
 }) {
@@ -74,9 +77,7 @@ export function FinishTechniques({
         <button type="button" onClick={onBack} className={buttonGhost}>
           Back
         </button>
-        <button type="button" onClick={onNext} className={`${buttonPrimary} flex-1`}>
-          Next
-        </button>
+        <NextOrDone last={last} onNext={onNext} />
       </Footer>
     </>
   );

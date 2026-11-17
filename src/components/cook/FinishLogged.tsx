@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import type { Recap } from "@/lib/stats/recap";
-import { buttonPrimary, figure, listRow, textLink } from "@/components/ui/styles";
+import { figure, listRow, textLink } from "@/components/ui/styles";
 import { Footer } from "./Footer";
+import { NextOrDone } from "./NextOrDone";
 import { formatMinutes, ordinal } from "./format";
 import type { RecapState } from "./useRecap";
 import { useCountUp } from "./useCountUp";
@@ -84,11 +85,15 @@ export function FinishLogged({
   local,
   recap,
   photo,
+  guest,
+  last,
   onNext,
 }: {
   local: LocalSummary;
   recap: RecapState;
   photo: LoggedPhoto | null;
+  guest: boolean;
+  last: boolean;
   onNext: () => void;
 }) {
   const ready = recap.status === "ready" ? recap.recap : null;
@@ -129,22 +134,23 @@ export function FinishLogged({
               </div>
             )}
             <p className="mt-2 text-base text-[var(--mute)]">
-              The rest of your recap, your totals, week and next recipe, will appear once you are back online.
+              The rest of your recap, your totals and week, will appear once you are back online.
             </p>
           </div>
+        )}
+        {guest && (
+          <p className="mt-6 border-t border-[var(--rule)] pt-3 text-base text-[var(--mute)]">
+            You are cooking as a guest.{" "}
+            <Link href="/signup" className={`${textLink} text-[var(--ink)]`}>
+              Sign up
+            </Link>{" "}
+            to keep your history and skills.
+          </p>
         )}
       </div>
 
       <Footer>
-        {recap.status === "offline" ? (
-          <Link href="/" className={`${buttonPrimary} flex-1`}>
-            Back to recipes
-          </Link>
-        ) : (
-          <button type="button" onClick={onNext} disabled={recap.status === "loading"} className={`${buttonPrimary} flex-1`}>
-            Next
-          </button>
-        )}
+        <NextOrDone last={last || recap.status === "offline"} onNext={onNext} disabled={recap.status === "loading"} />
       </Footer>
     </>
   );
