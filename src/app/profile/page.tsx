@@ -8,6 +8,7 @@ import { WeekBoxes } from "@/components/stats/WeekBoxes";
 import { thisWeek } from "@/components/stats/week";
 import { buttonGhost, buttonPrimary } from "@/components/ui/styles";
 import { getViewer } from "@/lib/auth/viewer";
+import { photoUrl } from "@/lib/photos/client";
 import { TECHNIQUES } from "@/lib/recipe/types";
 import { listSessions, toFinished } from "@/lib/sessions/queries";
 import { techniqueCounts, totals, weeklyStreak } from "@/lib/stats";
@@ -44,6 +45,10 @@ export default async function ProfilePage() {
   const tried = techniqueCounts(finished).filter((t) => t.count > 0).length;
   const days = week.cooked.filter(Boolean).length;
   const member = viewer && !viewer.isGuest ? viewer : null;
+  const plates = entries
+    .filter((e) => e.finishedAt && e.photoVersion !== null)
+    .sort((a, b) => b.finishedAt!.getTime() - a.finishedAt!.getTime())
+    .slice(0, 6);
 
   return (
     <AppShell tone="mint">
@@ -70,6 +75,29 @@ export default async function ProfilePage() {
           ]}
         />
       </div>
+
+      {plates.length > 0 && (
+        <section aria-labelledby="plates" className="mt-10">
+          <h2 id="plates" className="label-caps">
+            Your plates
+          </h2>
+          <ul className="mt-3 grid grid-cols-3 gap-3 sm:gap-4 lg:grid-cols-6">
+            {plates.map((e) => (
+              <li key={e.id}>
+                <Link href={`/history/${e.id}`} className={`sheet block transition-transform hover:-translate-y-0.5 motion-reduce:transition-none ${ring}`}>
+                  {/* eslint-disable-next-line @next/next/no-img-element -- private photo served by our own route */}
+                  <img
+                    src={photoUrl(e.id, e.photoVersion!)}
+                    alt={e.recipe.title}
+                    loading="lazy"
+                    className="aspect-square w-full object-cover"
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div className="lg:mt-12 lg:grid lg:grid-cols-2 lg:content-start lg:gap-x-16">
         <section aria-labelledby="week" className="mt-8 lg:col-start-1 lg:mt-0">

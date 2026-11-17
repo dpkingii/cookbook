@@ -10,6 +10,7 @@ import { GuestNote } from "@/components/stats/GuestNote";
 import { formatDate, formatTime } from "@/components/stats/format";
 import { buttonGhost } from "@/components/ui/styles";
 import { getViewer } from "@/lib/auth/viewer";
+import { photoUrl } from "@/lib/photos/client";
 import { viewerTimeZone } from "@/lib/stats/viewer-time-zone";
 import { listSessionGroups, type SessionEntry } from "@/lib/sessions/queries";
 
@@ -29,29 +30,42 @@ function Section({ id, title, count, children }: { id: string; title: string; co
 function Finished({ entry, tz }: { entry: SessionEntry; tz: string }) {
   const when = entry.startedAt;
   return (
-    <li className="border-t border-[var(--rule)] py-4">
-      <p className="text-sm text-[var(--mute)]">
-        <time dateTime={when.toISOString()}>
-          {formatDate(when, tz)}, {formatTime(when, tz)}
-        </time>
-        {" · "}
-        {formatDuration(entry.durationSeconds ?? 0)}
-      </p>
-      <h3 className="mt-1 font-serif text-xl font-medium leading-snug">
-        <Link href={`/history/${entry.id}`} className={`inline-block py-1 hover:underline hover:decoration-[var(--rule)] hover:underline-offset-4 ${ring}`}>
-          {entry.recipe.title}
-        </Link>
-      </h3>
-      <p className="text-base">{entry.rating ? `${RATINGS[entry.rating - 1]} (${entry.rating} of 5)` : "Not rated"}</p>
-      {!entry.plausible && (
-        <p className="mt-2 text-sm text-[var(--mute)]">
-          Walkthrough: faster than the timers allow, so it does not count towards your skills.
+    <li className="flex items-start gap-4 border-t border-[var(--rule)] py-4">
+      <div className="min-w-0 flex-1">
+        <p className="text-sm text-[var(--mute)]">
+          <time dateTime={when.toISOString()}>
+            {formatDate(when, tz)}, {formatTime(when, tz)}
+          </time>
+          {" · "}
+          {formatDuration(entry.durationSeconds ?? 0)}
         </p>
-      )}
-      <div className="mt-2">
-        <TechniqueChips techniques={entry.techniques} />
+        <h3 className="mt-1 font-serif text-xl font-medium leading-snug">
+          <Link href={`/history/${entry.id}`} className={`inline-block py-1 hover:underline hover:decoration-[var(--rule)] hover:underline-offset-4 ${ring}`}>
+            {entry.recipe.title}
+          </Link>
+        </h3>
+        <p className="text-base">{entry.rating ? `${RATINGS[entry.rating - 1]} (${entry.rating} of 5)` : "Not rated"}</p>
+        {!entry.plausible && (
+          <p className="mt-2 text-sm text-[var(--mute)]">
+            Walkthrough: faster than the timers allow, so it does not count towards your skills.
+          </p>
+        )}
+        <div className="mt-2">
+          <TechniqueChips techniques={entry.techniques} />
+        </div>
+        {entry.note && <p className="mt-3 border-l border-[var(--ink)] pl-3 font-serif text-lg italic">{entry.note}</p>}
       </div>
-      {entry.note && <p className="mt-3 border-l border-[var(--ink)] pl-3 font-serif text-lg italic">{entry.note}</p>}
+      {entry.photoVersion !== null && (
+        <Link href={`/history/${entry.id}`} tabIndex={-1} aria-hidden className="shrink-0">
+          {/* eslint-disable-next-line @next/next/no-img-element -- private photo served by our own route */}
+          <img
+            src={photoUrl(entry.id, entry.photoVersion)}
+            alt=""
+            loading="lazy"
+            className="h-24 w-24 border-2 border-[var(--ink)] object-cover shadow-[4px_4px_0_var(--room)] sm:h-28 sm:w-36"
+          />
+        </Link>
+      )}
     </li>
   );
 }
