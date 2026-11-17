@@ -18,6 +18,11 @@ import { createOutbox, type Outbox } from "./outbox";
 const makeId = () => crypto.randomUUID();
 const storageKey = (recipe: Recipe) => `cookbook:session:${recipe.id}`;
 const RESUME_TIMEOUT_MS = 2500;
+/** A finished cook reopens on its recap only for a short while, so a reload mid-recap still works but coming back later starts a new cook. */
+const RECAP_WINDOW_MS = 15 * 60_000;
+
+const finishedLongAgo = (recipe: Recipe, events: PlayerEvent[], now: number) =>
+  reduce(initialState(recipe), events).phase === "finished" && now - (events.at(-1)?.at ?? 0) > RECAP_WINDOW_MS;
 
 interface Session {
   player: PlayerState;
@@ -143,6 +148,11 @@ export function useSession(recipe: Recipe) {
 
   useEffect(() => {
     const saved = loadJournal(recipe);
+    if (saved && finishedLongAgo(recipe, saved.journal.events, Date.now())) {
+      if (saved.unsynced) adopt(saved.journal, true);
+      startFresh();
+      return;
+    }
     if (saved) {
       adopt(saved.journal, saved.unsynced);
       return;
