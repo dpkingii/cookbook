@@ -17,8 +17,12 @@ function stem(word: string): string {
 function words(text: string): string[] {
   let t = text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   for (const [re, to] of ALIASES) t = t.replace(re, to);
-  return (t.match(/[a-z0-9]+/g) ?? []).map(stem);
+  return (t.match(/[a-z0-9]+/g) ?? []).map((w) => stem(w).replace(/y$/, "i"));
 }
+
+const MODIFIERS = new Set(
+  "black white red green yellow brown dark light soy olive sesame cooking baking corn ground fresh dried dry frozen chopped sliced large small hot cold boiling sweet sour regular extra whole raw plain thin thick pure fine all-purpose".split(" "),
+);
 
 function phrasesOf(name: string): string[][] {
   const out: string[][] = [];
@@ -56,6 +60,14 @@ export function linkIngredients(text: string, ingredients: Ingredient[], used: S
   const all = [...groups.entries()].flatMap(([key, lines]) =>
     phrasesOf(lines[0].name).map((phrase) => ({ key, lines, phrase, whole: phrase.length === words(lines[0].name).length })),
   );
+
+  // "pork belly" is usually just "the pork" in the steps, as long as no other ingredient shares that word.
+  const wordOwners = new Map<string, Set<string>>();
+  for (const [key, lines] of groups) for (const w of words(lines[0].name)) wordOwners.set(w, (wordOwners.get(w) ?? new Set()).add(key));
+  for (const [key, lines] of groups) {
+    const [first, ...rest] = words(lines[0].name);
+    if (rest.length && first.length >= 4 && !MODIFIERS.has(first) && wordOwners.get(first)!.size === 1) all.push({ key, lines, phrase: [first], whole: false });
+  }
 
   // A bare head noun ("sauce", "oil") is ambiguous when several ingredients share it: the ingredient
   // actually named that word wins, otherwise the first one listed.
