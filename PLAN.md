@@ -158,7 +158,7 @@ No database, no login. One recipe as a typed constant.
 - [x] Step navigation: tap zones, keyboard, progress rail
 - [x] Timer dock, wake lock, sound and vibration
 - [x] Finish screen
-- [ ] Deploy
+- [x] Deploy
 
 **Done when**: you cook a real dinner from it on a phone without touching the laptop.
 
