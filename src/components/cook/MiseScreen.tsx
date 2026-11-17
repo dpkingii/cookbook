@@ -1,6 +1,7 @@
 "use client";
 
 import type { Recipe } from "@/lib/recipe/types";
+import { LastNote } from "@/components/photo/PastCooks";
 import { IngredientToken } from "@/components/stage";
 import { buttonPrimary } from "@/components/ui/styles";
 import { focusRing, wideColumn } from "./focus";
@@ -10,11 +11,13 @@ import { formatAmount } from "./format";
 export function MiseScreen({
   recipe,
   checked,
+  lastNote,
   onToggle,
   onStart,
 }: {
   recipe: Recipe;
   checked: readonly string[];
+  lastNote?: { note: string; when: string };
   onToggle: (ingredientId: string) => void;
   onStart: () => void;
 }) {
@@ -30,6 +33,7 @@ export function MiseScreen({
           Get everything out first.
         </h1>
         <p className="mt-3 text-base text-[var(--mute)]">Tap each ingredient as it lands on the counter.</p>
+        {lastNote && <LastNote note={lastNote.note} when={lastNote.when} className="mt-5 max-w-xl" />}
 
         <ul className="sheet mt-6 px-4 lg:grid lg:grid-cols-2 lg:gap-x-12 xl:grid-cols-3">
           {recipe.ingredients.map((ingredient) => {

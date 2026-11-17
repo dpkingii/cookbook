@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { TECHNIQUE_STATION, type Recipe, type Station } from "@/lib/recipe/types";
 import type { Tone } from "@/components/site/AppShell";
+import { lastWith, type PastCook } from "@/lib/sessions/past-cook";
 import {
   acknowledgeTimer,
   back,
@@ -28,7 +29,7 @@ import { TimerDock } from "./TimerDock";
 /** Each station has its own pastel, which tints the stage's shadow and the current step. */
 const STATION_TONE: Record<Station, Tone> = { board: "mint", bowl: "lilac", pan: "tomato", pot: "sky", oven: "pink", rest: "sky" };
 
-export function CookPlayer({ recipe }: { recipe: Recipe }) {
+export function CookPlayer({ recipe, past }: { recipe: Recipe; past: PastCook[] }) {
   const { state, now, ready, run, restart, flush, sessionId } = useSession(recipe);
   const [wrapUp, setWrapUp] = useState(false);
   const lastStep = state.currentStep === recipe.steps.length - 1;
@@ -86,6 +87,7 @@ export function CookPlayer({ recipe }: { recipe: Recipe }) {
         <MiseScreen
           recipe={recipe}
           checked={state.checked}
+          lastNote={lastWith(past, "note")}
           onToggle={(id) => run((ctx) => toggleMise(ctx, id))}
           onStart={() => {
             unlockAudio();
@@ -117,6 +119,7 @@ export function CookPlayer({ recipe }: { recipe: Recipe }) {
         <FinishScreen
           recipe={recipe}
           state={state}
+          past={past}
           flush={flush}
           sessionId={sessionId}
           onFinish={(result) => run((ctx) => finish(ctx, result))}
