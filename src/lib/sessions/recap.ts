@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/db/client";
-import { listRecipes } from "@/lib/db/recipes";
 import { buildRecap, type Recap } from "@/lib/stats/recap";
 import type { FinishedSession } from "@/lib/stats";
 import { listSessions, toFinished } from "./queries";
@@ -26,8 +25,8 @@ export async function getRecap({
   if (row.userId !== viewerId) return { ok: false, reason: "forbidden" };
   if (!row.finishedAt) return { ok: false, reason: "unfinished" };
 
-  const [entries, catalogue] = await Promise.all([listSessions(viewerId), listRecipes({ viewerId })]);
+  const entries = await listSessions(viewerId);
   const finished = entries.map(toFinished).filter((s): s is FinishedSession => s !== null);
-  const recap = buildRecap({ sessions: finished, sessionId, tz, catalogue });
+  const recap = buildRecap({ sessions: finished, sessionId, tz });
   return recap ? { ok: true, recap } : { ok: false, reason: "not_found" };
 }

@@ -1,10 +1,6 @@
 import { TECHNIQUES } from "@/lib/recipe/types";
-import type { Difficulty, Recipe, Technique } from "@/lib/recipe/types";
-import { nextUp, type FinishedSession } from "./index";
-
-export type RecapRecipe = Pick<Recipe, "id" | "title" | "cuisine" | "difficulty" | "prepMinutes" | "cookMinutes"> & {
-  steps: readonly Pick<Recipe["steps"][number], "technique">[];
-};
+import type { Technique } from "@/lib/recipe/types";
+import type { FinishedSession } from "./index";
 
 export interface Recap {
   session: { id: string; title: string; seconds: number; minutes: number; plausible: boolean };
@@ -13,15 +9,6 @@ export interface Recap {
   nth: { today: number | null; week: number | null };
   streak: { weeks: number; days: boolean[]; todayIndex: number };
   techniques: { items: { technique: Technique; count: number; first: boolean }[]; practised: number; total: number };
-  next: {
-    id: string;
-    title: string;
-    cuisine: string;
-    difficulty: Difficulty;
-    minutes: number;
-    steps: number;
-    teaches: Technique[];
-  } | null;
 }
 
 const DAY_MS = 86_400_000;
@@ -67,12 +54,10 @@ export function buildRecap({
   sessions,
   sessionId,
   tz,
-  catalogue,
 }: {
   sessions: readonly FinishedSession[];
   sessionId: string;
   tz: string;
-  catalogue: readonly RecapRecipe[];
 }): Recap | null {
   const mine = sessions.find((s) => s.id === sessionId);
   if (!mine) return null;
@@ -105,13 +90,6 @@ export function buildRecap({
       })
     : [];
 
-  const suggestion = nextUp(
-    counted.map((p) => p.session),
-    catalogue,
-    1,
-  )[0];
-  const suggested = suggestion && catalogue.find((r) => r.id === suggestion.recipe.id)!;
-
   return {
     session: {
       id: mine.id,
@@ -127,16 +105,5 @@ export function buildRecap({
       : { today: null, week: null },
     streak: { weeks: streak, days, todayIndex: weekdayOf(today) },
     techniques: { items, practised: tally.size, total: TECHNIQUES.length },
-    next: suggested
-      ? {
-          id: suggested.id,
-          title: suggested.title,
-          cuisine: suggested.cuisine,
-          difficulty: suggested.difficulty,
-          minutes: suggested.prepMinutes + suggested.cookMinutes,
-          steps: suggested.steps.length,
-          teaches: suggestion.newTechniques,
-        }
-      : null,
   };
 }

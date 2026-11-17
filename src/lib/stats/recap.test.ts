@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { TECHNIQUES } from "@/lib/recipe/types";
-import { buildRecap, isTimeZone, type RecapRecipe } from "./recap";
+import { buildRecap, isTimeZone } from "./recap";
 import type { FinishedSession } from "./index";
 
 let n = 0;
@@ -22,19 +22,8 @@ function session(over: Partial<FinishedSession> = {}): FinishedSession {
 }
 
 const at = (iso: string) => new Date(iso);
-const recipe = (id: string, techniques: RecapRecipe["steps"][number]["technique"][], over: Partial<RecapRecipe> = {}): RecapRecipe => ({
-  id,
-  title: id,
-  cuisine: "Thai",
-  difficulty: "easy",
-  prepMinutes: 5,
-  cookMinutes: 10,
-  steps: techniques.map((technique) => ({ technique })),
-  ...over,
-});
-
-const recap = (sessions: FinishedSession[], current: FinishedSession, tz = "UTC", catalogue: RecapRecipe[] = []) =>
-  buildRecap({ sessions, sessionId: current.id, tz, catalogue })!;
+const recap = (sessions: FinishedSession[], current: FinishedSession, tz = "UTC") =>
+  buildRecap({ sessions, sessionId: current.id, tz })!;
 
 describe("isTimeZone", () => {
   it("accepts IANA names and rejects anything else", () => {
@@ -47,7 +36,7 @@ describe("isTimeZone", () => {
 
 describe("buildRecap", () => {
   it("returns null for an unknown or unfinished session", () => {
-    expect(buildRecap({ sessions: [session()], sessionId: "nope", tz: "UTC", catalogue: [] })).toBeNull();
+    expect(buildRecap({ sessions: [session()], sessionId: "nope", tz: "UTC" })).toBeNull();
   });
 
   it("describes this session", () => {
@@ -163,39 +152,6 @@ describe("buildRecap", () => {
       expect(r.techniques.items).toEqual([]);
       expect(r.techniques.practised).toBe(1);
       expect(r.streak.weeks).toBe(1);
-    });
-  });
-
-  describe("next", () => {
-    it("suggests a recipe that teaches something not yet practised, with what it teaches", () => {
-      const mine = session({ techniques: ["chop", "saute"] });
-      const catalogue = [
-        recipe("only-known", ["chop", "saute"]),
-        recipe("sear-dish", ["chop", "sear", "plate"], { title: "Seared Salmon", cuisine: "Cantonese", prepMinutes: 5, cookMinutes: 10 }),
-        recipe("one-new", ["saute", "sear"]),
-      ];
-      expect(recap([mine], mine, "UTC", catalogue).next).toEqual({
-        id: "sear-dish",
-        title: "Seared Salmon",
-        cuisine: "Cantonese",
-        difficulty: "easy",
-        minutes: 15,
-        steps: 3,
-        teaches: ["sear", "plate"],
-      });
-    });
-
-    it("counts this session's techniques as practised, but not an implausible one's", () => {
-      const catalogue = [recipe("sear-dish", ["sear"])];
-      const mine = session({ techniques: ["sear"] });
-      expect(recap([mine], mine, "UTC", catalogue).next).toBeNull();
-      const walk = session({ techniques: ["sear"], plausible: false });
-      expect(recap([walk], walk, "UTC", catalogue).next?.id).toBe("sear-dish");
-    });
-
-    it("is null when the catalogue has nothing new", () => {
-      const mine = session();
-      expect(recap([mine], mine, "UTC", []).next).toBeNull();
     });
   });
 });
