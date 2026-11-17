@@ -34,11 +34,18 @@ const GROUPS: (Rule[] | typeof COOK_HERE)[] = [
   ]],
   COOK_HERE,
   [
+    ["slice", /\bcut\b[^.;]*\binto\b[^.;]*\b(?:slices|strips|rounds|matchsticks)\b/],
+    ["chop", /\bcut\b[^.;]*\binto\b[^.;]*\b(?:chunks|cubes|pieces|bits|dice)\b/],
+  ],
+  [
     ["chop", /\b(?:chop(?:ping)?|dic(?:e|ing))\b/],
     ["mince", /\b(?:minc(?:e|ing)|crush(?:ing)?|grat(?:e|ing))\b/],
-    ["slice", /\b(?:slic(?:e|es|ing)|cut(?:ting)?|trim(?:ming)?|julienne|shred(?:ding)?|carve|(?<!\b(?:mandarin|orange|tangerine|citrus|lemon|lime|grapefruit|dried|fruit) )peel(?:ing)?)\b/],
+    ["slice", /(?<!\b(?:a|an|the|initial|thin|few|of|pork|beef|ginger|\d) )\bslic(?:e|ing)\b(?! of\b)|\b(?:julienne|shred(?:ding)?|carve)\b/],
   ],
-  [["drain", /\b(?:drain(?:ing)?|wash(?:ing)?|rins(?:e|ing)|soak(?:ing)?|strain(?:ing)?|pat dry|rehydrat(?:e|ing)|submerg(?:e|ing))\b/]],
+  [
+    ["slice", /\b(?:cut(?:ting)?|trim(?:ming)?|(?<!\b(?:mandarin|orange|tangerine|citrus|lemon|lime|grapefruit|dried|fruit) )peel(?:ing)?)\b/],
+  ],
+  [["drain", /\b(?:drain(?:ing)?|wash(?:ing)?|rins(?:e|ing)|soak(?:ing)?|strain(?:ing)?|pat dry|rehydrat(?:e|ing)|submerg(?:e|ing))\b|\b(?:discard|pour (?:out|off)|dump)\b[^.;]*\bwater\b|\b(?:place|put|plunge|dunk|transfer)\b[^.;]*\b(?:cold|ice|iced) water\b/]],
   [[
     "season",
     /\b(?:season(?:ing|s)?|sprinkle|coat|dredge|rub|dust|taste|brush(?:ing)?|baste|basting)\b|\badd (?:the |some |a bit of |more )?(?:\w+ )?(?:salt|pepper)\b/,
