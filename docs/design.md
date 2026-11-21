@@ -82,7 +82,7 @@ The bar is hidden in cooking mode (`/cook/[id]`), the finish flow, the recipe ed
 
 ## Cooking mode
 
-- Top: recipe name as a label, Pause as a text button. Progress is a row of thin segments: done in ink, current in accent, rest in rule.
+- Top: recipe name as a label, then the cook clock, then Pause as a text button. The clock shows time spent so far (pauses don't count) over the recipe's estimate (prep plus cook), with a thin ink bar filling toward it. Running over is not a warning: it stays ink and the bar simply stays full. Progress is a row of thin segments: done in ink, current in accent, rest in rule.
 - The illustration sits in a 1px frame.
 - Label line: "Step 4 of 10 · Sauté · Medium heat".
 - Step text in the serif.

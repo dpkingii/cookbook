@@ -37,6 +37,15 @@ export function formatClock(ms: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
+/** Time that has passed, counting up: whole seconds, with hours only once there are some. */
+export function formatElapsed(ms: number): string {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = String(total % 60).padStart(2, "0");
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+}
+
 export function formatDuration(seconds: number): string {
   if (seconds < 60) return `${seconds} sec`;
   const m = Math.round(seconds / 60);

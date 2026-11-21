@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { formatMinutes, ordinal } from "./format";
+import { formatElapsed, formatMinutes, ordinal } from "./format";
+
+describe("formatElapsed", () => {
+  it("counts up in minutes and seconds, adding hours only when needed", () => {
+    expect(formatElapsed(0)).toBe("0:00");
+    expect(formatElapsed(59_999)).toBe("0:59");
+    expect(formatElapsed(372_000)).toBe("6:12");
+    expect(formatElapsed(3_725_000)).toBe("1:02:05");
+  });
+});
 
 describe("ordinal", () => {
   it("handles the irregular teens and the usual endings", () => {

@@ -20,6 +20,7 @@ import { useWakeLock } from "@/lib/kitchen/useWakeLock";
 import { textLink } from "@/components/ui/styles";
 import { wideColumn } from "./focus";
 import { useSession } from "./useSession";
+import { CookClock } from "./CookClock";
 import { MiseScreen } from "./MiseScreen";
 import { StepScreen } from "./StepScreen";
 import { StepBar } from "./StepBar";
@@ -72,6 +73,11 @@ export function CookPlayer({ recipe, past }: { recipe: Recipe; past: PastCook[] 
         <Link href={`/recipes/${recipe.id}`} className="label-caps flex min-h-11 items-center truncate hover:text-[var(--ink)]">
           {recipe.title}
         </Link>
+        {!showWrapUp && state.phase !== "finished" && (
+          <div className="ml-auto">
+            <CookClock recipe={recipe} state={state} now={now} />
+          </div>
+        )}
         {cooking && !showWrapUp && (
           <button
             type="button"
