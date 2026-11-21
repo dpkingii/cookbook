@@ -3,7 +3,8 @@
 import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
-import { cookedColor, isEgg, poolsUp, isStaple, Mound, PiecePath, placements, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
+import { cookedColor, isEgg, miseCut, poolsUp, isStaple, Mound, PiecePath, placements, poolOf, sauceTints, Scattered, stapleColor, Tangle, VESSEL_PX_PER_CM } from "../food";
+import { MiseArt, miseFor, miseSize } from "../mise";
 import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse } from "../rough";
 import { Steam } from "../Steam";
@@ -11,26 +12,44 @@ import s from "../stage.module.css";
 
 const P = { x: 200, y: 212 };
 const TOPPING = { cx: 200, cy: 180, rx: 40, ry: 13 };
+/** Where loose food lies on the plate, so a garnish lands on it rather than above it. */
+const SPREAD = { cx: 200, cy: 200, rx: 46, ry: 14 };
 
 const GARNISH_SHAPE = { cube: "cube", leaf: "leaf", grain: "grain" } as const;
 
 /** A garnish shower: pieces drifting down onto the food, and the ones that have landed. */
-function Garnish({ item, landed }: { item: Item; landed: number }) {
+function Garnish({ item, landed, bed }: { item: Item; landed: number; bed: typeof TOPPING }) {
+  const { uid } = useStage();
   const ing = item.ingredient;
   const shape = GARNISH_SHAPE[ing.token.shape as keyof typeof GARNISH_SHAPE] ?? "grain";
   const size = shape === "cube" ? 1 : shape === "leaf" ? 0.8 : 1.4;
-  const spots = placements(ing.id + "garnish", 14, TOPPING.cx, TOPPING.cy - 2, TOPPING.rx + 18, TOPPING.ry + 4);
+  const spots = placements(ing.id + "garnish", 14, bed.cx, bed.cy - 2, bed.rx + 18, bed.ry + 4);
+  /** Food mise can draw falls as one real piece of it (a parsley leaf, a ring of scallion), drawn once and reused. */
+  const match = miseFor(ing);
+  const cut = match ? miseCut(item, match).cut : "whole";
+  /** Big pieces (picked parsley leaves) come in a few; small ones (chopped scallion) in a shower. */
+  const big = match != null && miseSize(match, cut, 1, "piece") > 1.5;
+  const id = `${uid}-garnish-${ing.id.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  const piece = (seed: number) =>
+    match ? <use href={`#${id}`} transform={`rotate(${(seed % 61) - 30}) scale(${seed % 2 ? -1 : 1} 1)`} /> : <PiecePath shape={shape} color={ing.token.color} seed={seed} size={size} line={1.1} />;
   return (
     <g>
-      {spots.slice(0, landed).map((p) => (
+      {match && (
+        <defs>
+          <g id={id}>
+            <MiseArt match={match} cut={cut} x={0} y={0} pxPerCm={VESSEL_PX_PER_CM} layout="piece" />
+          </g>
+        </defs>
+      )}
+      {spots.slice(0, big ? Math.min(5, landed) : landed).map((p) => (
         <g key={p.seed} transform={`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
-          <PiecePath shape={shape} color={ing.token.color} seed={p.seed} size={size} line={1.1} />
+          {piece(p.seed)}
         </g>
       ))}
-      {Array.from({ length: 9 }, (_, i) => (
-        <g key={i} transform={`translate(${158 + i * 10.5} ${118 + ((i * 17) % 5) * 7})`}>
+      {Array.from({ length: big ? 4 : 9 }, (_, i) => (
+        <g key={i} transform={`translate(${(big ? 165 : 158) + i * (big ? 22 : 10.5)} ${118 + ((i * 17) % 5) * 7})`}>
           <g className={s.fall} style={{ animationDelay: `${-i * 0.27}s`, animationDuration: `${2 + (i % 3) * 0.35}s` }}>
-            <PiecePath shape={shape} color={ing.token.color} seed={i * 101 + 3} size={size} line={1.1} />
+            {piece(i * 101 + 3)}
           </g>
         </g>
       ))}
@@ -144,7 +163,7 @@ export function Plate({ scene }: { scene: Scene }) {
         })}
         {garnish.map((it) => (
           <motion.g key={`g-${it.ingredient.id}`} initial={still ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Garnish item={it} landed={landed} />
+            <Garnish item={it} landed={landed} bed={nest || pool?.sauce || staple ? TOPPING : SPREAD} />
           </motion.g>
         ))}
       </AnimatePresence>

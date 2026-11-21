@@ -29,13 +29,21 @@ const MiseDef = memo(function MiseDef({ id, match, cut, cooked, browning, px }: 
   );
 });
 
+/**
+ * The cut a mise ingredient is in once it reaches a vessel: the one its board step asked for. Herbs and spinach added
+ * straight to a dish go in as picked leaves ("torn basil"), not whole sprigs.
+ */
+export function miseCut(item: Item, match: MiseMatch): { cut: Cut; picked: boolean } {
+  const picked = !item.cutIn && match.form === "leaf" && !["bokchoy", "cabbage"].includes((match.props as { shape?: string }).shape ?? "");
+  const cut: Cut = item.cutIn ? cutFor(item.ingredient, item.cutIn.technique, item.cutIn.text, match) : picked ? "halved" : "whole";
+  return { cut, picked };
+}
+
 /** Mise pieces strewn at the given spots: two seeds, mirrored and turned a little, so no two neighbours match. */
 function MiseScatter({ item, match, at, keep, size, brown }: { item: Item; match: MiseMatch; at: [number, number, number, number]; keep: number; size: number; brown: boolean }) {
   const { uid } = useStage();
   const ing = item.ingredient;
-  /** Herbs and spinach added straight to a dish go in as picked leaves ("torn basil"), not whole sprigs. */
-  const picked = !item.cutIn && match.form === "leaf" && !["bokchoy", "cabbage"].includes((match.props as { shape?: string }).shape ?? "");
-  const cut: Cut = item.cutIn ? cutFor(ing, item.cutIn.technique, item.cutIn.text, match) : picked ? "halved" : "whole";
+  const { cut, picked } = miseCut(item, match);
   const [cx, cy, rx, ry] = at;
   const n = useMemo(() => miseCount(item.cutIn != null || picked, match, cut, keep), [item.cutIn, picked, match, cut, keep]);
   const spots = useMemo(() => placements(ing.id, n, cx, cy, rx, ry), [ing.id, n, cx, cy, rx, ry]);
