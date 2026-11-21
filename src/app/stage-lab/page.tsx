@@ -135,12 +135,16 @@ function NewStations({ narrow = false }: { narrow?: boolean }) {
 const noSubscribe = () => () => {};
 /** ?only=new renders just the bowl and oven sections for screenshots; ?only=narrow does it 360px wide. */
 const onlyParam = () => new URLSearchParams(window.location.search).get("only");
+/** ?recipe=<id> steps through any seed recipe instead of the demo. */
+const recipeParam = () => new URLSearchParams(window.location.search).get("recipe");
 
 export default function StageLab() {
   const [i, setI] = useState(0);
   const [pct, setPct] = useState(0);
   const [noTimer, setNoTimer] = useState(false);
   const only = useSyncExternalStore(noSubscribe, onlyParam, () => null);
+  const picked = useSyncExternalStore(noSubscribe, recipeParam, () => null);
+  const recipe = SEED_RECIPES.find((r) => r.id === picked) ?? DEMO_RECIPE;
   const step = recipe.steps[i];
   const last = recipe.steps.length - 1;
   const gallery = useMemo(() => TECHNIQUES.map((t) => ({ t, r: single(t) })), []);
