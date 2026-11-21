@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
+import { miseFor } from "../mise";
 import { landing, useStage } from "../context";
 import { cookedColor, placements, Scattered } from "../food";
 import { blendOf, browned } from "../mixing";
@@ -49,7 +50,7 @@ function Tray({ items, char, sizzle }: { items: Item[]; char: number; sizzle: bo
           const cut = it.cut ? 1.6 : 1.45;
           return (
             <motion.g key={it.ingredient.id} {...landing(it.fresh, still, k, -90)}>
-              {char > 0.02 && (
+              {char > 0.02 && !miseFor(it.ingredient) && (
                 <g opacity={clamp01(char * 1.2)}>
                   <Scattered item={it} {...food} color={CHAR} size={cut * 1.22} />
                 </g>

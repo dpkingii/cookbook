@@ -122,7 +122,7 @@ export function Pot({ scene }: { scene: Scene }) {
               <AnimatePresence>
                 {floaters.map((it, k) => (
                   <motion.g key={it.ingredient.id} {...landing(it.fresh, still, k)}>
-                    <Scattered item={it} cx={CX} cy={SURF.cy + 2} rx={SURF.rx - 16} ry={SURF.ry - 4} color={cookedColor(it.ingredient, it.cooked)} />
+                    <Scattered brown={false} item={it} cx={CX} cy={SURF.cy + 2} rx={SURF.rx - 16} ry={SURF.ry - 4} color={cookedColor(it.ingredient, it.cooked)} />
                   </motion.g>
                 ))}
               </AnimatePresence>

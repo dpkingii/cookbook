@@ -38,7 +38,7 @@ export function Colander({ items }: { items: Item[] }) {
         it.ingredient.token.shape === "strand" ? (
           <Tangle key={it.ingredient.id} id={it.ingredient.id} cx={C.x} cy={C.y - 4} rx={C.rx - 14} ry={C.ry} n={10} color={cookedColor(it.ingredient, it.cooked)} />
         ) : (
-          <Scattered key={it.ingredient.id} item={it} cx={C.x} cy={C.y - 2} rx={C.rx - 18} ry={C.ry - 4} color={cookedColor(it.ingredient, it.cooked)} />
+          <Scattered key={it.ingredient.id} brown={false} item={it} cx={C.x} cy={C.y - 2} rx={C.rx - 18} ry={C.ry - 4} color={cookedColor(it.ingredient, it.cooked)} />
         ),
       )}
       <path d={BOWL} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main} strokeLinejoin="round" />

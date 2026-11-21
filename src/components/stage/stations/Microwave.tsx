@@ -55,7 +55,7 @@ export function Microwave({ scene }: { scene: Scene }) {
           <AnimatePresence>
             {solids.map((it, k) => (
               <motion.g key={it.ingredient.id} {...landing(it.fresh && progress == null, still, k, -40)}>
-                <Scattered item={it} cx={DISH.cx} cy={DISH.rim - 6} rx={DISH.rx - 10} ry={DISH.ry} color={cookedColor(it.ingredient, it.cooked * 0.3)} keep={0.8} size={0.75} />
+                <Scattered brown={false} item={it} cx={DISH.cx} cy={DISH.rim - 6} rx={DISH.rx - 10} ry={DISH.ry} color={cookedColor(it.ingredient, it.cooked * 0.3)} keep={0.8} size={0.75} />
               </motion.g>
             ))}
           </AnimatePresence>

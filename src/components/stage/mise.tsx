@@ -134,6 +134,7 @@ export function MiseArt({
   pxPerCm,
   layout = "pile",
   cooked,
+  browning,
   max = Infinity,
 }: {
   match: MiseMatch;
@@ -143,11 +144,12 @@ export function MiseArt({
   pxPerCm: number;
   layout?: Layout;
   cooked?: boolean;
+  browning?: number;
   /** Largest box allowed, for food set aside at the edge of a zoomed-in board. */
   max?: number;
 }) {
   const size = Math.min(max, miseSize(match, cut, pxPerCm, layout));
   const draw = DRAW[match.form] as (p: object) => React.ReactElement;
-  const props = { ...match.props, cut, layout, cooked, size };
+  const props = { ...match.props, cut, layout, cooked, size, ...(browning != null ? { browning } : {}) };
   return <g transform={`translate(${(x - size / 2).toFixed(1)} ${(y - size / 2).toFixed(1)})`}>{draw(props)}</g>;
 }

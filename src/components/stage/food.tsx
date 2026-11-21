@@ -3,6 +3,66 @@ import type { Item } from "./contents";
 import { clamp01, HEX, mix } from "./palette";
 import { blob, rng, seedOf, smooth, type Pt } from "./rough";
 import { TokenArt } from "./tokens";
+import { memo, useMemo } from "react";
+import type { Cut } from "@/vendor/mise";
+import { useStage } from "./context";
+import { cutFor, miseFor, MiseArt, miseSize, type MiseMatch } from "./mise";
+import { measure } from "@/vendor/mise";
+
+/** Vessel scale: a 28 cm pan or pot fills about 230 stage units, so pieces cook at their true size. */
+export const VESSEL_PX_PER_CM = 8;
+
+/** One mise piece, drawn once into <defs> and reused at every spot. Memoised: geometry is costly and the stage re-renders as timers tick. */
+const MiseDef = memo(function MiseDef({ id, match, cut, cooked, browning, px }: { id: string; match: MiseMatch; cut: Cut; cooked: boolean; browning: number; px: number }) {
+  /** mise draws a slice of meat standing tall in its box; in a pan it lies along the pan, so tall pieces are laid down. */
+  const lie = useMemo(() => {
+    const pts = measure(match.form, { ...match.props, cut, layout: "piece" } as never).outlines.flat();
+    const span = (k: 0 | 1) => Math.max(...pts.map((q) => q[k])) - Math.min(...pts.map((q) => q[k]));
+    return span(1) > span(0) * 1.4;
+  }, [match, cut]);
+  return (
+    <g id={id}>
+      <g transform={lie ? "rotate(-78) scale(1 0.85)" : undefined}>
+        <MiseArt match={match} cut={cut} x={0} y={0} pxPerCm={px} layout="piece" cooked={cooked} browning={browning} />
+      </g>
+    </g>
+  );
+});
+
+/** Mise pieces strewn at the given spots: two seeds, mirrored and turned a little, so no two neighbours match. */
+function MiseScatter({ item, match, at, keep, size, brown }: { item: Item; match: MiseMatch; at: [number, number, number, number]; keep: number; size: number; brown: boolean }) {
+  const { uid } = useStage();
+  const ing = item.ingredient;
+  const cut: Cut = item.cutIn ? cutFor(ing, item.cutIn.technique, item.cutIn.text, match) : "whole";
+  const [cx, cy, rx, ry] = at;
+  const n = useMemo(() => miseCount(item.cutIn != null, match, cut, keep), [item.cutIn, match, cut, keep]);
+  const spots = useMemo(() => placements(ing.id, n, cx, cy, rx, ry), [ing.id, n, cx, cy, rx, ry]);
+  const cooked = item.cooked > 0.25;
+  /** Browning builds with time on the heat, in steps of 0.1 so the drawing only changes when the look does. */
+  const browning = brown ? Math.round(Math.min(0.75, Math.max(0, item.cooked - 0.25) * 0.45) * 10) / 10 : 0;
+  const px = VESSEL_PX_PER_CM * Math.min(1.3, Math.max(0.8, size));
+  const variants = useMemo(() => [1, 2].map((seed) => ({ ...match, props: { ...match.props, seed: ((match.props as { seed?: number }).seed ?? 0) + seed } })), [match]);
+  const base = `${uid}-m-${ing.id.replace(/[^a-zA-Z0-9_-]/g, "")}`;
+  return (
+    <g>
+      <defs>
+        {variants.map((v, i) => (
+          <MiseDef key={i} id={`${base}-${i}`} match={v} cut={cut} cooked={cooked} browning={browning} px={px} />
+        ))}
+      </defs>
+      {spots.map((p, i) => (
+        <use key={p.seed} href={`#${base}-${i % 2}`} transform={`translate(${p.x} ${p.y}) rotate(${(p.seed % 21) - 10}) scale(${p.seed % 2 ? -1 : 1} 1)`} />
+      ))}
+    </g>
+  );
+}
+
+/** How many mise pieces to strew: small pieces come in greater numbers, as they do in a real pan. */
+function miseCount(isCut: boolean, match: MiseMatch, cut: Cut, keep: number): number {
+  if (!isCut) return Math.max(1, Math.round(3 * keep));
+  const cm = miseSize(match, cut, 1, "piece");
+  return Math.round(Math.min(22, Math.max(5, 30 / Math.max(1, cm))) * keep);
+}
 
 const REDUCED = "#a82c1f";
 
@@ -265,6 +325,7 @@ export function Scattered({
   color,
   keep = 1,
   size = 1,
+  brown = true,
 }: {
   item: Item;
   cx: number;
@@ -274,7 +335,13 @@ export function Scattered({
   color: string;
   keep?: number;
   size?: number;
+  /** Heat browns mise pieces here; a pot of water or a microwave only softens them. */
+  brown?: boolean;
 }) {
+  const match = miseFor(item.ingredient);
+  if (match) {
+    return <MiseScatter item={item} match={match} at={[cx, cy, rx, ry]} keep={keep} size={size} brown={brown} />;
+  }
   const shape = item.ingredient.token.shape;
   const whole = !item.cut && shape !== "leaf" && shape !== "grain";
   const n = Math.round((whole ? 4 : COUNT[shape]) * keep);
