@@ -1,16 +1,16 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import type { Ingredient, Technique } from "@/lib/recipe/types";
+import type { Ingredient, TokenShape } from "@/lib/recipe/types";
+import type { Cut } from "@/vendor/mise";
 import type { Item, Scene } from "../contents";
-import { landing, useClock, useStage } from "../context";
-import { PiecePath, placements, Scattered } from "../food";
+import { landing, useStage } from "../context";
+import { PiecePath, placements } from "../food";
+import { boardScale, cutFor, miseFor, MiseArt } from "../mise";
 import { HEX, LINE } from "../palette";
 import { TokenArt } from "../tokens";
 import s from "../stage.module.css";
 import { Knife } from "./Knife";
-import { BOARD_PX_PER_CM, boardScale, cutFor, miseFor, MiseArt, miseSize, type MiseMatch } from "../mise";
-import type { Cut } from "@/vendor/mise";
 
 const TOP = "M60 152C140 147 260 149 342 146C350 176 352 210 356 240C250 243 140 245 44 244C48 212 54 180 60 152Z";
 const EDGE = "M44 244C140 245 250 243 356 240L356 252C250 255 140 257 44 256Z";
@@ -21,113 +21,43 @@ const GRAIN_LINES = [
   "M232 220C262 218 300 222 340 218",
 ];
 
-const C = { x: 214, y: 192 };
-const SCALE = 2.6;
-const HALF = 24 * SCALE;
-const ANGLE = (118 * Math.PI) / 180;
-const DIR = { x: Math.cos(ANGLE), y: Math.sin(ANGLE) };
-const NORMAL = { x: Math.sin(ANGLE), y: -Math.cos(ANGLE) };
+/** Where this step's cut food sits: a row across the front of the board. */
+const FRONT = { left: 78, right: 322, y: 194 };
+/** Food cut in earlier steps waits in a row along the back, smaller. */
+const BACK = { left: 84, right: 316, y: 166, max: 52 };
 
-const STYLE: Record<string, { period: number; amp: number; pieces: number; size: number; cycle: number }> = {
-  chop: { period: 0.62, amp: 22, pieces: 26, size: 1.4, cycle: 6 },
-  mince: { period: 0.3, amp: 12, pieces: 46, size: 0.95, cycle: 4.5 },
-  slice: { period: 0.95, amp: 26, pieces: 9, size: 1, cycle: 7 },
+/** Pieces for food mise can't draw yet, shaped by the cut rather than the token: diced carrot is cubes, not coins. */
+const FALLBACK: Partial<Record<Cut, { shape: TokenShape; size: number; n: number }>> = {
+  diced: { shape: "cube", size: 0.75, n: 22 },
+  minced: { shape: "cube", size: 0.42, n: 40 },
+  strips: { shape: "long", size: 0.8, n: 16 },
 };
 
-function Pile({ item, x, y, cut, px }: { item: Item; x: number; y: number; cut: Cut; px: number }) {
-  const ing = item.ingredient;
+/** A pile of cut pieces for food mise has no form for yet. */
+function TokenPile({ ing, cut, x, y, w }: { ing: Ingredient; cut: Cut; x: number; y: number; w: number }) {
+  const shape = ing.token.shape;
+  const f = FALLBACK[cut] ?? { shape: shape === "strand" ? "long" : shape, size: 1, n: 12 };
+  const spots = placements(ing.id + cut, f.n, x, y, w * 0.4, w * 0.15);
+  return (
+    <g>
+      {spots.map((p) => (
+        <g key={p.seed} transform={`translate(${p.x} ${p.y})`}>
+          <PiecePath shape={f.shape} color={ing.token.color} seed={p.seed} size={f.size} line={1.5} />
+        </g>
+      ))}
+    </g>
+  );
+}
+
+/** One ingredient as it should look once cut, centred on (x, y) and no wider than `w`. */
+function CutFood({ ing, cut, x, y, w, px }: { ing: Ingredient; cut: Cut; x: number; y: number; w: number; px: number }) {
   const match = miseFor(ing);
-  if (match) return <MiseArt match={match} cut={cut} x={x} y={y} pxPerCm={px} max={78} />;
-  return <Scattered item={{ ...item, cut: true }} cx={x} cy={y} rx={28} ry={11} color={ing.token.color} keep={1.4} size={0.85} />;
+  if (match) return <MiseArt match={match} cut={cut} x={x} y={y} pxPerCm={px} max={w * 1.15} />;
+  return <TokenPile ing={ing} cut={cut} x={x} y={y} w={Math.min(w, 90)} />;
 }
 
-/** The ingredient under the knife: whole beyond the blade, in pieces behind it. */
-function Cutting({ ing, technique, cut, rock }: { ing: Ingredient; technique: Technique; cut: number; rock: number }) {
-  const { uid } = useStage();
-  const st = STYLE[technique] ?? STYLE.chop;
-  const travel = -HALF * 1.05 + cut * HALF * 2.1;
-  const kx = C.x + NORMAL.x * travel;
-  const ky = C.y + 6 + NORMAL.y * travel;
-  const big = 600;
-  const clip = `${uid}-cut`;
-  const keep = `M${kx - DIR.x * big} ${ky - DIR.y * big}L${kx + DIR.x * big} ${ky + DIR.y * big}L${kx + DIR.x * big + NORMAL.x * big} ${ky + DIR.y * big + NORMAL.y * big}L${kx - DIR.x * big + NORMAL.x * big} ${ky - DIR.y * big + NORMAL.y * big}Z`;
-  const spots = placements(ing.id + technique, st.pieces, C.x - 6, C.y + 16, HALF * 1.05, HALF * 0.42);
-  const behind = (x: number, y: number) => (x - kx) * NORMAL.x + (y - ky) * NORMAL.y < -6;
-  const slices = technique === "slice";
-
-  return (
-    <g>
-      <clipPath id={clip}>
-        <path d={keep} />
-      </clipPath>
-      {spots.map((p, i) => {
-        if (!behind(p.x, p.y)) return null;
-        const away = ((p.x - kx) * NORMAL.x + (p.y - ky) * NORMAL.y) * -0.12;
-        const x = slices ? C.x - HALF + i * 15 - away * 3 : p.x - NORMAL.x * Math.min(away, 8);
-        const y = slices ? C.y + 22 : p.y;
-        return (
-          <g key={p.seed} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}>
-            {slices ? (
-              <ellipse rx={7} ry={HALF * 0.5} fill={ing.token.color} stroke={HEX.ink} strokeWidth={2.2} transform="rotate(-14)" />
-            ) : (
-              <PiecePath shape={ing.token.shape === "strand" ? "long" : ing.token.shape} color={ing.token.color} seed={p.seed} size={st.size} />
-            )}
-          </g>
-        );
-      })}
-      <g clipPath={`url(#${clip})`}>
-        <g transform={`translate(${C.x - HALF} ${C.y - HALF}) scale(${SCALE})`}>
-          <TokenArt shape={ing.token.shape} color={ing.token.color} stroke={3.4 / SCALE} />
-        </g>
-      </g>
-      <Knife x={kx} y={ky} angle={-62} lift={rock * st.amp} rock={rock * st.amp * 0.7} />
-    </g>
-  );
-}
-
-/** The knife's line through the food: what lies ahead of it is still whole, what lies behind is cut. */
-function halves(kx: number, ky: number) {
-  const big = 600;
-  const side = (sign: number) =>
-    `M${kx - DIR.x * big} ${ky - DIR.y * big}L${kx + DIR.x * big} ${ky + DIR.y * big}L${kx + DIR.x * big + sign * NORMAL.x * big} ${ky + DIR.y * big + sign * NORMAL.y * big}L${kx - DIR.x * big + sign * NORMAL.x * big} ${ky - DIR.y * big + sign * NORMAL.y * big}Z`;
-  return { ahead: side(1), behind: side(-1) };
-}
-
-/** A mise ingredient under the knife: mise's whole drawing ahead of the blade, its cut pile behind it. */
-function MiseCutting({ match, cut, progress, rock, technique, px }: { match: MiseMatch; cut: Cut; progress: number; rock: number; technique: Technique; px: number }) {
-  const zoom = Math.min(1.2, Math.max(0.85, px / BOARD_PX_PER_CM));
-  const { uid } = useStage();
-  const st = STYLE[technique] ?? STYLE.chop;
-  const reach = Math.max(miseSize(match, "whole", px), miseSize(match, cut, px)) * 0.36;
-  const travel = -reach + progress * reach * 2;
-  const kx = C.x + NORMAL.x * travel;
-  const ky = C.y + NORMAL.y * travel;
-  const { ahead, behind } = halves(kx, ky);
-  return (
-    <g>
-      <clipPath id={`${uid}-ahead`}>
-        <path d={ahead} />
-      </clipPath>
-      <clipPath id={`${uid}-behind`}>
-        <path d={behind} />
-      </clipPath>
-      {/* Food under the knife never hangs past the board, and mise's ground shadow stays on it. */}
-      <clipPath id={`${uid}-board`}>
-        <path d={TOP} />
-        <rect x={0} y={0} width={400} height={150} />
-      </clipPath>
-      <g clipPath={`url(#${uid}-board)`}>
-        <g clipPath={`url(#${uid}-behind)`}>
-          <MiseArt match={match} cut={cut} x={C.x} y={C.y} pxPerCm={px} />
-        </g>
-        <g clipPath={`url(#${uid}-ahead)`}>
-          <MiseArt match={match} cut="whole" x={C.x} y={C.y} pxPerCm={px} />
-        </g>
-      </g>
-      <Knife x={kx} y={ky} angle={-62} lift={rock * st.amp * zoom} rock={rock * st.amp * 0.7} zoom={zoom} />
-    </g>
-  );
-}
+/** Spread n things evenly between left and right. */
+const spread = (n: number, left: number, right: number, k: number) => (n === 1 ? (left + right) / 2 : left + ((right - left) * k) / (n - 1));
 
 export function BoardTop() {
   return (
@@ -144,72 +74,55 @@ export function BoardTop() {
 
 export function Board({ scene }: { scene: Scene }) {
   const { still } = useStage();
-  const { technique, items, progress } = scene;
+  const { technique, items } = scene;
   const usedIds = new Set(scene.uses.map((u) => u.id));
   const season = technique === "season";
-  const active = season ? null : items.find((it) => usedIds.has(it.ingredient.id) && it.ingredient.token.shape !== "grain");
-  const st = STYLE[technique] ?? STYLE.chop;
-  const running = !still && active != null;
-  const t = useClock(running);
-  const cut = progress ?? (running ? (t % st.cycle) / st.cycle : 0.5);
-  const phase = (t % st.period) / st.period;
-  // Slow lift, fast fall: the blade spends 70% of the stroke rising and drops in the rest.
-  const stroke = phase < 0.7 ? (phase / 0.7) * 0.5 : 0.5 + ((phase - 0.7) / 0.3) * 0.5;
-  const rock = running ? Math.sin(Math.PI * stroke) : 0;
-  const piles = items.filter((it) => it !== active && !usedIds.has(it.ingredient.id));
-  const waiting = items.filter((it) => it !== active && usedIds.has(it.ingredient.id) && !season);
-  const cutOf = (ing: Ingredient) => cutFor(ing, technique, scene.step.text, miseFor(ing));
-  const activeMatch = active ? miseFor(active.ingredient) : null;
-  const px = active && activeMatch
-    ? boardScale(activeMatch, cutOf(active.ingredient))
-    : boardScale(waiting.map((it) => miseFor(it.ingredient)).find(Boolean) ?? null);
-  const pastCut = (it: Item) =>
-    it.cutIn ? cutFor(it.ingredient, it.cutIn.technique, it.cutIn.text, miseFor(it.ingredient)) : cutOf(it.ingredient);
+  const cutOf = (it: Item) =>
+    it.cutIn ? cutFor(it.ingredient, it.cutIn.technique, it.cutIn.text, miseFor(it.ingredient)) : cutFor(it.ingredient, technique, scene.step.text, miseFor(it.ingredient));
+  // A cutting step shows the result, not the cutting: each ingredient as it should look once cut.
+  const now = season ? [] : items.filter((it) => usedIds.has(it.ingredient.id) && it.ingredient.token.shape !== "grain");
+  const before = items.filter((it) => !now.includes(it));
+  const slot = Math.min(170, (FRONT.right - FRONT.left) / Math.max(1, now.length) + 10);
+  const px = boardScale(
+    now.flatMap((it) => {
+      const match = miseFor(it.ingredient);
+      return match ? [{ match, cut: cutOf(it) }] : [];
+    }),
+    slot,
+  );
+  const backPx = boardScale(
+    before.flatMap((it) => {
+      const match = miseFor(it.ingredient);
+      return match ? [{ match, cut: cutOf(it) }] : [];
+    }),
+    BACK.max,
+  );
 
   return (
     <g>
       <BoardTop />
 
       <AnimatePresence>
-        {piles.map((it, k) => (
+        {before.map((it, k) => (
           <motion.g
-            key={`pile-${it.ingredient.id}`}
-            initial={still ? false : { x: 80, y: 20, opacity: 0 }}
-            animate={{ x: 0, y: 0, opacity: 1 }}
+            key={`back-${it.ingredient.id}`}
+            initial={still ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: still ? 0 : 0.6 }}
+            transition={{ duration: still ? 0 : 0.4 }}
           >
-            <Pile item={it} x={piles.length > 2 ? 84 + (k % 2) * 58 : 100 + (k % 2) * 6} y={piles.length > 2 ? 178 + Math.floor(k / 2) * 40 : 176 + k * 30} cut={pastCut(it)} px={px} />
+            <CutFood ing={it.ingredient} cut={cutOf(it)} x={spread(Math.max(before.length, 3), BACK.left, BACK.right, k)} y={BACK.y} w={BACK.max} px={Math.min(px, backPx)} />
           </motion.g>
         ))}
-        {waiting.map((it, k) => (
-          <motion.g key={`wait-${it.ingredient.id}`} {...landing(it.fresh, still, k + 1)}>
-            {miseFor(it.ingredient) ? (
-              <MiseArt
-                match={miseFor(it.ingredient)!}
-                cut="whole"
-                x={Math.min(312 - k * 10, 352 - Math.min(110, miseSize(miseFor(it.ingredient)!, "whole", px)) * 0.42)}
-                y={190 + k * 26}
-                pxPerCm={px}
-                max={110}
-              />
-            ) : (
-              <g transform={`translate(${300 - k * 10} ${178 + k * 26}) scale(1.1) translate(-24 -24)`}>
-                <TokenArt shape={it.ingredient.token.shape} color={it.ingredient.token.color} stroke={2.6} />
-              </g>
-            )}
+        {now.map((it, k) => (
+          <motion.g key={`now-${it.ingredient.id}`} {...landing(it.fresh, still, k, -60)}>
+            <CutFood ing={it.ingredient} cut={cutOf(it)} x={spread(now.length, FRONT.left + slot / 2 - 10, FRONT.right - slot / 2 + 10, k)} y={FRONT.y} w={slot} px={px} />
           </motion.g>
         ))}
-        {active && (
-          <motion.g key={`cut-${active.ingredient.id}`} {...landing(active.fresh, still, 0, -150)}>
-            {activeMatch ? (
-              <MiseCutting match={activeMatch} cut={cutOf(active.ingredient)} progress={cut} rock={rock} technique={technique} px={px} />
-            ) : (
-              <Cutting ing={active.ingredient} technique={technique} cut={cut} rock={rock} />
-            )}
-          </motion.g>
-        )}
       </AnimatePresence>
+
+      {/* The knife is put down along the front edge, its work done. */}
+      {now.length > 0 && <Knife x={236} y={241} angle={-4} lift={0} zoom={0.62} />}
 
       {season &&
         scene.uses.map((ing, k) => (

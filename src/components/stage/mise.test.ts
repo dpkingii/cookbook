@@ -31,14 +31,13 @@ describe("mise on the board", () => {
     expect(cutFor(ing("scallions"), "chop", "Prepare the scallions.", miseFor(ing("scallions")))).toBe("rings");
   });
 
-  it("moves the camera in on small food and out on long food, within limits", () => {
-    const clove = boardScale(miseFor(ing("garlic")));
-    const onion = boardScale(miseFor(ing("onion")));
-    const scallion = boardScale(miseFor(ing("scallion")));
-    expect(clove).toBeGreaterThan(onion);
-    expect(onion).toBeGreaterThan(scallion);
-    expect(scallion).toBeGreaterThanOrEqual(4.6);
-    expect(clove).toBeLessThanOrEqual(15);
+  it("fits the biggest food in the room given, zooming in on small food", () => {
+    const at = (name: string, cut: "whole" | "sliced" = "whole") => boardScale([{ match: miseFor(ing(name))!, cut }], 170);
+    expect(at("garlic")).toBeGreaterThan(at("onion"));
+    expect(at("onion")).toBeGreaterThan(at("scallion"));
+    expect(at("garlic")).toBeLessThanOrEqual(15);
+    const both = boardScale([{ match: miseFor(ing("onion"))!, cut: "diced" }, { match: miseFor(ing("scallion"))!, cut: "rings" }], 120);
+    expect(miseSize(miseFor(ing("scallion"))!, "rings", both)).toBeLessThanOrEqual(120.01);
   });
 
   it("keeps real proportions between foods drawn at one scale", () => {

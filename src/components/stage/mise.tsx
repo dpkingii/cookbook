@@ -94,18 +94,14 @@ export function cutFor(ing: Ingredient, technique: Technique, text: string, matc
 
 /** At this scale a 44 cm board fills the 300-unit counter: the scale the knife and board are drawn at. */
 export const BOARD_PX_PER_CM = 6.8;
-/** How wide the food under the knife is framed, in stage units. */
-const FOCUS = 170;
-
 /**
- * The board's camera for one step: it moves in on small food and back from long food, so a garlic clove is still
- * readable and a scallion still fits, while everything on the board keeps its true size relative to the rest.
+ * The board's scale for one step: as close as possible while the biggest of these drawings still fits `room` stage
+ * units, so a garlic clove is readable and a scallion fits. Everything drawn at it keeps its true size relative to the rest.
  */
-export function boardScale(focus: MiseMatch | null, cut: Cut = "whole"): number {
-  if (!focus) return BOARD_PX_PER_CM;
-  // Thin slices spread wider than the food they came from, so frame whichever is bigger.
-  const cm = Math.max(boxCm(focus.form, { ...focus.props, cut: "whole" } as never), boxCm(focus.form, { ...focus.props, cut } as never));
-  return Math.min(15, Math.max(4.6, FOCUS / cm));
+export function boardScale(foods: { match: MiseMatch; cut: Cut }[], room: number): number {
+  if (foods.length === 0) return BOARD_PX_PER_CM;
+  const cm = Math.max(...foods.map(({ match, cut }) => boxCm(match.form, { ...match.props, cut } as never)));
+  return Math.min(15, Math.max(3, room / cm));
 }
 
 /** Box size in stage units for this drawing at `pxPerCm`. */
