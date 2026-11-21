@@ -19,6 +19,8 @@ import { floretGeometry, type FloretProps, type FloretShape } from "./forms/flor
 import { rootGeometry, type RootProps, type RootShape } from "./forms/root-shape";
 import { frameLeaf, LEAF_CUT } from "./forms/leaf-cuts";
 import { eggCut, frameEgg } from "./forms/egg-cuts";
+import { CURL_CUT, frameCurl } from "./forms/curl-cuts";
+import { curlGeometry, type CurlProps, type CurlShape } from "./forms/curl-shape";
 import { beatenGeometry, crackedGeometry, omeletteGeometry, shellGeometry, type EggProps, type EggState } from "./forms/egg-shape";
 import { leafGeometry, type LeafProps, type LeafShape } from "./forms/leaf-shape";
 import { frameSlab, outlinePolygon, type SlabOutline, type SlabProps } from "./forms/slab-shape";
@@ -118,6 +120,12 @@ export const REAL_SIZE = {
     /** Two beaten eggs poured out; cooked whole, a folded omelette is wider still. */
     beaten: { wide: 10, long: 15 },
   } satisfies Record<EggState, RealSize>,
+  curl: {
+    /** A large shrimp curled up, 6 cm across; 9 cm long straightened out. */
+    shrimp: { wide: 6, long: 9 },
+    /** A king prawn with its head and feelers, 12 cm across; 16 cm long. */
+    prawn: { wide: 12, long: 16 },
+  } satisfies Record<CurlShape, RealSize>,
   /** How wide a pour spreads on the counter (about two tablespoons), and one drop. */
   pool: {
     thin: { wide: 10, drop: 0.8 },
@@ -241,6 +249,16 @@ export const PIECE_SIZE = {
       batons: { cm: 0.8, by: "across" },
       coins: { cm: 3, by: "long" },
     })[FLORET_CUT[cut]] as PieceSize,
+  curl: (cut: Exclude<Cut, "whole">, d: Dims): PieceSize =>
+    ({
+      split: { cm: d.wide, by: "long" },
+      butterflied: { cm: d.long * 0.85, by: "long" },
+      /** A shrimp cut across in three. */
+      chunks: { cm: d.long / 3.2, by: "long" },
+      chopped: { cm: 0.8, by: "long" },
+      /** Paste scraped into a mound about as wide as a shrimp is long. */
+      paste: { cm: d.long, by: "long" },
+    })[CURL_CUT[cut]] as PieceSize,
   egg: (cut: Exclude<Cut, "whole">, d: Dims, state: EggState): PieceSize => {
     switch (eggCut(state, cut)) {
       case "halves":
@@ -283,7 +301,7 @@ export const PIECE_SIZE = {
   },
 };
 
-export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret" | "leaf" | "egg";
+export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret" | "leaf" | "egg" | "curl";
 export interface FormProps {
   slab: SlabProps;
   bulb: BulbProps;
@@ -298,6 +316,7 @@ export interface FormProps {
   floret: FloretProps;
   leaf: LeafProps;
   egg: EggProps;
+  curl: CurlProps;
 }
 
 /** What the box holds, measured from the geometry: the zoom it is drawn at, and the sizes (in box units, before that zoom) to match to real ones. */
@@ -420,6 +439,15 @@ export function measure<F extends FormName>(form: F, props: FormProps[F]): Measu
       }
       const f = frameEgg(state, cut, seed, layout, !!q.soft);
       return cutOf(f.k, f.pieces.map((x) => x.outer), PIECE_SIZE.egg(cut, d, state));
+    }
+    case "curl": {
+      const q = p as CurlProps;
+      const shape = q.shape ?? "shrimp";
+      const d = dims(REAL_SIZE.curl[shape], p.realSize);
+      if (cut === "whole") return wholeOf(curlGeometry(shape, seed, { peeled: !!q.peeled, tail: q.tail ?? true, cooked: false }).flatMap((x) => x.outer), d.wide);
+      /** Measured on the bodies, not the tail fans that come with them. */
+      const raw = frameCurl(shape, cut, seed, layout, false).pieces.filter((x) => x.kind !== "tail");
+      return cutOf(frameCurl(shape, cut, seed, layout, cooked).k, raw.map((x) => x.outer), PIECE_SIZE.curl(cut, d));
     }
     case "pool": {
       const shape = (p as PoolProps).shape ?? "thin";

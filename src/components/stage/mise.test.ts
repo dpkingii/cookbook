@@ -15,7 +15,14 @@ describe("mise on the board", () => {
   });
 
   it("leaves food mise can't draw yet to the old tokens", () => {
-    for (const name of ["shrimp", "ground coriander", "peppermint extract"]) expect(miseFor(ing(name))).toBeNull();
+    for (const name of ["ground coriander", "peppermint extract", "dried shiitake"]) expect(miseFor(ing(name))).toBeNull();
+  });
+
+  it("draws shrimp and prawns as mise curls, and halves them down the back", () => {
+    expect(miseFor(ing("shrimp"))?.form).toBe("curl");
+    expect(miseFor(ing("peeled shrimp"))?.props).toMatchObject({ peeled: true });
+    expect(miseFor(ing("tiger prawns"))?.props).toMatchObject({ shape: "prawn" });
+    expect(cutFor(ing("shrimp"), "slice", "Peel the shrimp, slice each one in half lengthwise, rinse.", miseFor(ing("shrimp")))).toBe("halved");
   });
 
   it("draws eggs as mise eggs, but never eggplant", () => {

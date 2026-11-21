@@ -3,6 +3,7 @@ import {
   boxCm,
   Bulb,
   Clove,
+  Curl,
   Egg,
   Floret,
   Knob,
@@ -18,7 +19,7 @@ import {
 } from "@/vendor/mise";
 
 /** Forms that can be drawn on the board. Pool, Dust and Grain are poured or sprinkled, never cut. */
-type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round" | "root" | "floret" | "leaf" | "egg">;
+type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round" | "root" | "floret" | "leaf" | "egg" | "curl">;
 
 export interface MiseMatch {
   form: BoardForm;
@@ -59,6 +60,9 @@ const CATALOG: [RegExp, MiseMatch][] = [
   [/\blimes?\b/i, m("round", { color: "#6fa53a", flesh: "#cfe39a", shape: "citrus", seed: 3, realSize: 5.5 })],
   [/\boranges?\b/i, m("round", { color: "#f28a1a", flesh: "#f7a23a", shape: "citrus" })],
   [/\bapples?\b/i, m("round", { color: "#b51f2a", flesh: "#f6ecc8", shape: "apple" })],
+  [/\b(king|tiger|jumbo) prawns?\b|\bprawns?\b/i, m("curl", { shape: "prawn" })],
+  [/\b(peeled|shelled) (shrimp|prawns?)\b/i, m("curl", { peeled: true })],
+  [/\bshrimps?\b/i, m("curl", {})],
   /** Eggs never reach the board: a vessel asks for curds, ribbons or bits by cut. */
   [/\beggs?\b|\byolks?\b/i, m("egg", { state: "beaten" })],
   [/\b(thai basil|basil|mint)\b/i, m("leaf", { color: "#3f8a32", shape: "basil" })],
@@ -77,7 +81,7 @@ const CATALOG: [RegExp, MiseMatch][] = [
   [/\btofu\b/i, m("slab", { color: "#f7f1e1", outline: "block", cookedColor: "#e8b770" })],
 ];
 
-/** How mise draws this ingredient, or null when mise has no form for it yet (shrimp). */
+/** How mise draws this ingredient, or null when mise has no form for it yet. */
 export function miseFor(ing: Ingredient): MiseMatch | null {
   return CATALOG.find(([re]) => re.test(ing.name))?.[1] ?? null;
 }
@@ -141,6 +145,7 @@ const DRAW: { [F in BoardForm]: (p: FormProps[F]) => React.ReactElement } = {
   floret: (p) => <Floret {...p} />,
   leaf: (p) => <Leaf {...p} />,
   egg: (p) => <Egg {...p} />,
+  curl: (p) => <Curl {...p} />,
 };
 
 /** A mise drawing centred on (x, y) at the board's real scale. Untitled: the stage's own label names the step. */
