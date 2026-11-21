@@ -18,6 +18,12 @@ describe("mise on the board", () => {
     for (const name of ["shrimp", "ground coriander", "peppermint extract"]) expect(miseFor(ing(name))).toBeNull();
   });
 
+  it("draws eggs as mise eggs, but never eggplant", () => {
+    expect(miseFor(ing("large eggs"))?.form).toBe("egg");
+    expect(miseFor(ing("egg yolks"))?.form).toBe("egg");
+    expect(miseFor(ing("eggplant"))?.form).not.toBe("egg");
+  });
+
   it("draws herbs and greens as mise leaves", () => {
     const shape = (name: string) => (miseFor(ing(name))?.props as { shape?: string } | undefined)?.shape;
     expect(["cilantro", "flat-leaf parsley", "basil leaves", "fresh mint", "baby spinach", "bok choy", "napa cabbage", "red cabbage"].map(shape)).toEqual([

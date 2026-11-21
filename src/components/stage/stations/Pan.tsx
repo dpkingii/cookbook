@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { Burner, Knob } from "../Burner";
-import { cookedColor, Curds, isEgg, poolsUp, isStaple, Mound, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
+import { cookedColor, isEgg, poolsUp, isStaple, Mound, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
 import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse, wall } from "../rough";
 import { Bubbles, Sizzle, Steam } from "../Steam";
@@ -96,7 +96,7 @@ export function Pan({ scene }: { scene: Scene }) {
             {!staple &&
               eggs.map((it, k) => (
                 <motion.g key={it.ingredient.id} {...landing(it.fresh, still, k, -40)}>
-                  <Curds id={it.ingredient.id} cx={FOOD.cx} cy={FOOD.cy} rx={FOOD.rx - 8} ry={FOOD.ry - 2} color={cookedColor(it.ingredient, it.cooked)} cooked={it.cooked} n={7} />
+                  <Scattered item={it} cx={FOOD.cx} cy={FOOD.cy} rx={FOOD.rx - 8} ry={FOOD.ry - 2} color={cookedColor(it.ingredient, it.cooked)} cut="diced" keep={1.6} />
                 </motion.g>
               ))}
             {staple && (

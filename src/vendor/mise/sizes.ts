@@ -18,6 +18,8 @@ import { FLORET_CUT, frameFloret } from "./forms/floret-cuts";
 import { floretGeometry, type FloretProps, type FloretShape } from "./forms/floret-shape";
 import { rootGeometry, type RootProps, type RootShape } from "./forms/root-shape";
 import { frameLeaf, LEAF_CUT } from "./forms/leaf-cuts";
+import { eggCut, frameEgg } from "./forms/egg-cuts";
+import { beatenGeometry, crackedGeometry, omeletteGeometry, shellGeometry, type EggProps, type EggState } from "./forms/egg-shape";
 import { leafGeometry, type LeafProps, type LeafShape } from "./forms/leaf-shape";
 import { frameSlab, outlinePolygon, type SlabOutline, type SlabProps } from "./forms/slab-shape";
 import { frameStalk, STALK_CUT } from "./forms/stalk-cuts";
@@ -107,6 +109,15 @@ export const REAL_SIZE = {
     bokchoy: { wide: 20, across: 7 },
     cabbage: { wide: 16, across: 16 },
   } satisfies Record<LeafShape, RealSize>,
+  egg: {
+    /** A large hen's egg lying on its side, 5.7 long and 4.4 across. */
+    shell: { wide: 5.7, across: 4.4 },
+    boiled: { wide: 5.7, across: 4.4 },
+    /** A cracked egg spread on a pan: a fried egg is about 11 cm across. */
+    cracked: { wide: 11 },
+    /** Two beaten eggs poured out; cooked whole, a folded omelette is wider still. */
+    beaten: { wide: 10, long: 15 },
+  } satisfies Record<EggState, RealSize>,
   /** How wide a pour spreads on the counter (about two tablespoons), and one drop. */
   pool: {
     thin: { wide: 10, drop: 0.8 },
@@ -230,6 +241,26 @@ export const PIECE_SIZE = {
       batons: { cm: 0.8, by: "across" },
       coins: { cm: 3, by: "long" },
     })[FLORET_CUT[cut]] as PieceSize,
+  egg: (cut: Exclude<Cut, "whole">, d: Dims, state: EggState): PieceSize => {
+    switch (eggCut(state, cut)) {
+      case "halves":
+      case "quarters":
+        return { cm: d.wide, by: "long" };
+      case "slices":
+        return { cm: d.across, by: "long" };
+      case "chopped":
+        return { cm: 0.8, by: "long" };
+      case "grated":
+        return { cm: KNIFE_CM.minced, by: "long" };
+      /** Scrambled curds about 3 cm; omelette ribbons 5 mm wide; fried-rice bits 5 mm. */
+      case "curds":
+        return { cm: 3, by: "long" };
+      case "ribbons":
+        return { cm: 0.5, by: "across" };
+      default:
+        return { cm: 0.5, by: "long" };
+    }
+  },
   leaf: (cut: Exclude<Cut, "whole">, d: Dims, shape: LeafShape): PieceSize => {
     const herb = shape === "cilantro" || shape === "basil";
     switch (LEAF_CUT[shape][cut]) {
@@ -252,7 +283,7 @@ export const PIECE_SIZE = {
   },
 };
 
-export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret" | "leaf";
+export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret" | "leaf" | "egg";
 export interface FormProps {
   slab: SlabProps;
   bulb: BulbProps;
@@ -266,6 +297,7 @@ export interface FormProps {
   root: RootProps;
   floret: FloretProps;
   leaf: LeafProps;
+  egg: EggProps;
 }
 
 /** What the box holds, measured from the geometry: the zoom it is drawn at, and the sizes (in box units, before that zoom) to match to real ones. */
@@ -376,6 +408,18 @@ export function measure<F extends FormName>(form: F, props: FormProps[F]): Measu
       const d = dims(REAL_SIZE.leaf[shape], p.realSize);
       if (cut === "whole") return wholeOf(leafGeometry(shape, seed).flatMap((x) => x.outer), d.wide);
       return cutOf(frameLeaf(shape, cut, seed, layout, cooked).k, frameLeaf(shape, cut, seed, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.leaf(cut, d, shape));
+    }
+    case "egg": {
+      const q = p as EggProps;
+      const state = q.state ?? "shell";
+      const d = dims(REAL_SIZE.egg[state], p.realSize);
+      if (cut === "whole" || state === "cracked") {
+        if (state === "cracked") return wholeOf(crackedGeometry(seed).white, d.wide);
+        if (state === "beaten") return cooked ? wholeOf(omeletteGeometry(seed).outline, d.long) : wholeOf(beatenGeometry(seed).pool, d.wide);
+        return wholeOf(shellGeometry(seed).outline, d.wide);
+      }
+      const f = frameEgg(state, cut, seed, layout, !!q.soft);
+      return cutOf(f.k, f.pieces.map((x) => x.outer), PIECE_SIZE.egg(cut, d, state));
     }
     case "pool": {
       const shape = (p as PoolProps).shape ?? "thin";

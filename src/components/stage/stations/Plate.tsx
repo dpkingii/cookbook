@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
-import { cookedColor, isEgg, miseCut, poolsUp, isStaple, Mound, PiecePath, placements, poolOf, sauceTints, Scattered, stapleColor, Tangle, VESSEL_PX_PER_CM } from "../food";
+import { cookedColor, isBroth, isEgg, miseCut, poolsUp, isStaple, Mound, PiecePath, placements, poolOf, sauceTints, Scattered, stapleColor, Tangle, VESSEL_PX_PER_CM } from "../food";
 import { MiseArt, miseFor, miseSize } from "../mise";
 import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse } from "../rough";
@@ -85,7 +85,10 @@ export function Plate({ scene }: { scene: Scene }) {
   const garnish = items.filter((it) => it.fresh && !it.carried && !poolsUp(it.ingredient) && it.ingredient.token.shape !== "strand");
   const food = items.filter((it) => !garnish.includes(it));
   const grain = porridge ? all.find((it) => isStaple(it.ingredient)) : undefined;
-  const watery = poolOf(food);
+  /** Egg in a soup is ribbons in the broth; on its own (steamed egg) it is the custard itself. */
+  const broth = food.some((it) => isBroth(it.ingredient));
+  const ribbons = broth ? food.filter((it) => isEgg(it.ingredient)) : [];
+  const watery = poolOf(food.filter((it) => !ribbons.includes(it)));
   const pool = watery && grain ? { ...watery, color: mix(watery.color, stapleColor(grain.ingredient, 1), 0.75) } : watery;
   const strands = food.filter((it) => it.ingredient.token.shape === "strand");
   const pieces = food.filter((it) => !poolsUp(it.ingredient) && it.ingredient.token.shape !== "strand");
@@ -143,6 +146,11 @@ export function Plate({ scene }: { scene: Scene }) {
             />
           </motion.g>
         )}
+        {ribbons.map((it, k) => (
+          <motion.g key={`r-${it.ingredient.id}`} {...landing(it.fresh, still, k)}>
+            <Scattered brown={false} item={it} cx={P.x} cy={P.y - 6} rx={66} ry={20} color={cookedColor(it.ingredient, it.cooked)} cut="strips" keep={1.3} />
+          </motion.g>
+        ))}
         {pieces.map((it, k) => {
           const leaf = it.ingredient.token.shape === "leaf";
           const sunk = pool?.sauce && !leaf;

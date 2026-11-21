@@ -33,17 +33,20 @@ const MiseDef = memo(function MiseDef({ id, match, cut, cooked, browning, px }: 
  * The cut a mise ingredient is in once it reaches a vessel: the one its board step asked for. Herbs and spinach added
  * straight to a dish go in as picked leaves ("torn basil"), not whole sprigs.
  */
-export function miseCut(item: Item, match: MiseMatch): { cut: Cut; picked: boolean } {
+export function miseCut(item: Item, match: MiseMatch, override?: Cut): { cut: Cut; picked: boolean } {
+  if (override) return { cut: override, picked: true };
+  /** Beaten egg in a pan sets into scrambled curds unless a vessel asks otherwise. */
+  if (match.form === "egg") return { cut: "diced", picked: true };
   const picked = !item.cutIn && match.form === "leaf" && !["bokchoy", "cabbage"].includes((match.props as { shape?: string }).shape ?? "");
   const cut: Cut = item.cutIn ? cutFor(item.ingredient, item.cutIn.technique, item.cutIn.text, match) : picked ? "halved" : "whole";
   return { cut, picked };
 }
 
 /** Mise pieces strewn at the given spots: two seeds, mirrored and turned a little, so no two neighbours match. */
-function MiseScatter({ item, match, at, keep, size, brown }: { item: Item; match: MiseMatch; at: [number, number, number, number]; keep: number; size: number; brown: boolean }) {
+function MiseScatter({ item, match, at, keep, size, brown, cut: asked }: { item: Item; match: MiseMatch; at: [number, number, number, number]; keep: number; size: number; brown: boolean; cut?: Cut }) {
   const { uid } = useStage();
   const ing = item.ingredient;
-  const { cut, picked } = miseCut(item, match);
+  const { cut, picked } = miseCut(item, match, asked);
   const [cx, cy, rx, ry] = at;
   const n = useMemo(() => miseCount(item.cutIn != null || picked, match, cut, keep), [item.cutIn, picked, match, cut, keep]);
   const spots = useMemo(() => placements(ing.id, n, cx, cy, rx, ry), [ing.id, n, cx, cy, rx, ry]);
@@ -75,6 +78,9 @@ function miseCount(isCut: boolean, match: MiseMatch, cut: Cut, keep: number): nu
 }
 
 const REDUCED = "#a82c1f";
+
+/** A stock, broth or water that egg is poured into: it sets in ribbons there, as in egg drop soup. */
+export const isBroth = (ing: Ingredient) => ing.token.shape === "liquid" && /\b(water|stock|broth|soup)\b/i.test(ing.name);
 
 /** Eggs share the "round" token with tomatoes, but heat sets them into yellow curds rather than reducing them to sauce. */
 export const isEgg = (ing: Ingredient) => /\beggs?\b|\byolks?\b/i.test(ing.name) && !/eggplant/i.test(ing.name);
@@ -209,32 +215,6 @@ export function Mound({
   );
 }
 
-/** Soft scrambled egg: folds of yellow with a paler underside, set more firmly as `cooked` rises. */
-export function Curds({ id, cx, cy, rx, ry, color, cooked, n = 6 }: { id: string; cx: number; cy: number; rx: number; ry: number; color: string; cooked: number; n?: number }) {
-  const rand = rng(seedOf(id + "curds"));
-  const set = clamp01(cooked);
-  return (
-    <g>
-      {set < 0.6 && <path d={blob(cx, cy, rx * 1.05, ry * 1.1, seedOf(id), 0.08, 10)} fill={mix(color, HEX.white, 0.25)} stroke={HEX.ink} strokeWidth={1.8} opacity={1 - set} />}
-      {Array.from({ length: n }, (_, i) => {
-        const a = rand() * Math.PI * 2;
-        const r = Math.sqrt(rand()) * 0.75;
-        const x = cx + Math.cos(a) * rx * r;
-        const y = cy + Math.sin(a) * ry * r;
-        const w = (9 + rand() * 7) * (0.6 + set * 0.4);
-        const h = w * (0.55 + rand() * 0.2);
-        const fold = `M${(x - w * 0.5).toFixed(1)} ${(y + h * 0.1).toFixed(1)}q${(w * 0.3).toFixed(1)} ${(-h * 0.5).toFixed(1)} ${(w * 0.65).toFixed(1)} ${(-h * 0.15).toFixed(1)}`;
-        return (
-          <g key={i}>
-            <path d={blob(x, y, w, h, (seedOf(id) + i * 31) >>> 0, 0.28, 7, rand() * 3)} fill={color} stroke={HEX.ink} strokeWidth={1.7} strokeLinejoin="round" />
-            <path d={fold} fill="none" stroke={mix(color, HEX.ink, 0.4)} strokeWidth={1.1} strokeLinecap="round" />
-          </g>
-        );
-      })}
-    </g>
-  );
-}
-
 const PIECE_SIZE: Record<TokenShape, number> = {
   round: 9,
   bulb: 9,
@@ -343,6 +323,7 @@ export function Scattered({
   keep = 1,
   size = 1,
   brown = true,
+  cut,
 }: {
   item: Item;
   cx: number;
@@ -354,10 +335,12 @@ export function Scattered({
   size?: number;
   /** Heat browns mise pieces here; a pot of water or a microwave only softens them. */
   brown?: boolean;
+  /** The cut to draw, when the vessel decides it: beaten egg is curds in a pan but ribbons in a soup. */
+  cut?: Cut;
 }) {
   const match = miseFor(item.ingredient);
   if (match) {
-    return <MiseScatter item={item} match={match} at={[cx, cy, rx, ry]} keep={keep} size={size} brown={brown} />;
+    return <MiseScatter item={item} match={match} at={[cx, cy, rx, ry]} keep={keep} size={size} brown={brown} cut={cut} />;
   }
   const shape = item.ingredient.token.shape;
   const whole = !item.cut && shape !== "leaf" && shape !== "grain";

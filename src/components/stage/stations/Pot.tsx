@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { Burner, Knob } from "../Burner";
-import { cookedColor, poolOf, poolsUp, Scattered } from "../food";
+import { cookedColor, isEgg, poolOf, poolsUp, Scattered } from "../food";
 import { clamp01, HEX, lerp, LINE, mix, WATER } from "../palette";
 import { ellipse, wall } from "../rough";
 import { Bubbles, Steam } from "../Steam";
@@ -77,7 +77,9 @@ export function Pot({ scene }: { scene: Scene }) {
   const drain = technique === "drain";
   const boil = technique === "boil";
   const intensity = boil ? (scene.warmed ? 1 : Math.max(0.08, progress ?? 0.08)) : heat ? 0.3 : 0;
-  const pool = water ? null : poolOf(items);
+  /** Egg poured into a pot of broth sets in ribbons on the surface instead of tinting the broth yellow. */
+  const eggs = items.filter((it) => isEgg(it.ingredient));
+  const pool = water ? null : poolOf(items.filter((it) => !eggs.includes(it)));
   const surface = water ? WATER : (pool?.color ?? HEX.grey);
   const strands = items.filter((it) => it.ingredient.token.shape === "strand");
   const grains = items.filter((it) => it.fresh && it.ingredient.token.shape === "grain");
@@ -120,6 +122,11 @@ export function Pot({ scene }: { scene: Scene }) {
                 </>
               )}
               <AnimatePresence>
+                {eggs.map((it, k) => (
+                  <motion.g key={it.ingredient.id} {...landing(it.fresh, still, k, -30)}>
+                    <Scattered brown={false} item={it} cx={CX} cy={SURF.cy + 2} rx={SURF.rx - 14} ry={SURF.ry - 3} color={cookedColor(it.ingredient, it.cooked)} cut="strips" keep={1.4} />
+                  </motion.g>
+                ))}
                 {floaters.map((it, k) => (
                   <motion.g key={it.ingredient.id} {...landing(it.fresh, still, k)}>
                     <Scattered brown={false} item={it} cx={CX} cy={SURF.cy + 2} rx={SURF.rx - 16} ry={SURF.ry - 4} color={cookedColor(it.ingredient, it.cooked)} />
