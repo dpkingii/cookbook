@@ -113,6 +113,9 @@ export function cookedColor(ing: Ingredient, cooked: number): string {
 /** Sauce-like ingredients pool instead of sitting as pieces. */
 export const isPool = (shape: TokenShape) => shape === "liquid" || shape === "round";
 
+/** Does this ingredient pool into sauce? Broccoli and cauliflower share the round token with tomatoes, but stay florets. */
+export const poolsUp = (ing: Ingredient) => isPool(ing.token.shape) && !["floret", "root"].includes(miseFor(ing)?.form ?? "");
+
 /** Grains of rice heaped in a dome, each grain a short rounded tick so it reads as rice and not a blob. */
 export function Mound({
   id,
@@ -409,7 +412,7 @@ export function Tangle({
 
 /** Mix of the pool-forming ingredients' colours, plus how much of the vessel they fill. */
 export function poolOf(items: Item[]): { color: string; body: number; done: number; sauce: Item | null } | null {
-  const pools = items.filter((it) => isPool(it.ingredient.token.shape));
+  const pools = items.filter((it) => poolsUp(it.ingredient));
   if (pools.length === 0) return null;
   const sauce = pools.find((p) => p.ingredient.token.shape === "round") ?? null;
   if (sauce) {

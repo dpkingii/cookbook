@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { Burner, Knob } from "../Burner";
-import { cookedColor, Curds, isEgg, isPool, isStaple, Mound, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
+import { cookedColor, Curds, isEgg, poolsUp, isStaple, Mound, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
 import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse, wall } from "../rough";
 import { Bubbles, Sizzle, Steam } from "../Steam";
@@ -29,7 +29,7 @@ export function Pan({ scene }: { scene: Scene }) {
   const strands = items.filter((it) => it.ingredient.token.shape === "strand");
   // With rice in the pan, peas and corn (round tokens) sit in it as pieces instead of cooking down to sauce.
   const pieces = items.filter(
-    (it) => (!isPool(it.ingredient.token.shape) || (staple && it.ingredient.token.shape === "round")) && it.ingredient.token.shape !== "strand",
+    (it) => (!poolsUp(it.ingredient) || (staple && it.ingredient.token.shape === "round")) && it.ingredient.token.shape !== "strand",
   );
   const ON_MOUND = { cx: FOOD.cx, cy: FOOD.cy - 14, rx: 62, ry: 13 };
   const simmer = technique === "simmer";
@@ -38,7 +38,7 @@ export function Pan({ scene }: { scene: Scene }) {
   const coat = pool?.sauce ? clamp01(Math.max(0, ...strands.map((st) => st.cooked - 1))) : 0;
   const body = pool ? pool.body * (1 - coat * 0.3) : 0;
   const poolD = pool ? blob(FOOD.cx, FOOD.cy + 1, (FOOD.rx + 16) * body, (FOOD.ry + 10) * body, 77, 0.05 + (pool.done * 0.06), 11) : "";
-  const freshPool = all.find((it) => isPool(it.ingredient.token.shape) && !isEgg(it.ingredient) && it.fresh);
+  const freshPool = all.find((it) => poolsUp(it.ingredient) && !isEgg(it.ingredient) && it.fresh);
 
   const piece = (it: Item, k: number) => {
     const submerged = pool?.sauce && it.since < pool.sauce.since;

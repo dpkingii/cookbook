@@ -14,6 +14,8 @@ import { poolGeometry, type PoolProps, type PoolShape } from "./forms/pool-shape
 import { frameRound, roundCut } from "./forms/round-cuts";
 import { roundGeometry, type RoundProps, type RoundShape } from "./forms/round-shape";
 import { frameRoot, ROOT_CUT } from "./forms/root-cuts";
+import { FLORET_CUT, frameFloret } from "./forms/floret-cuts";
+import { floretGeometry, type FloretProps, type FloretShape } from "./forms/floret-shape";
 import { rootGeometry, type RootProps, type RootShape } from "./forms/root-shape";
 import { frameSlab, outlinePolygon, type SlabOutline, type SlabProps } from "./forms/slab-shape";
 import { frameStalk, STALK_CUT } from "./forms/stalk-cuts";
@@ -87,6 +89,11 @@ export const REAL_SIZE = {
     /** A baking potato lying on its side, 10 long and 6.5 across. */
     potato: { wide: 10, across: 6.5 },
   } satisfies Record<RootShape, RealSize>,
+  floret: {
+    /** A head of broccoli lying on its side, stalk and all. */
+    broccoli: { wide: 16, across: 12 },
+    cauliflower: { wide: 16, across: 15 },
+  } satisfies Record<FloretShape, RealSize>,
   /** How wide a pour spreads on the counter (about two tablespoons), and one drop. */
   pool: {
     thin: { wide: 10, drop: 0.8 },
@@ -199,9 +206,20 @@ export const PIECE_SIZE = {
       /** A carrot roll-cut is about as long as the carrot is wide; a potato wedge runs the potato's length; a half-moon is the daikon's width. */
       chunks: { cm: shape === "potato" ? d.wide * 0.85 : shape === "carrot" ? d.across * 1.4 : d.across, by: "long" },
     })[ROOT_CUT[cut]] as PieceSize,
+  floret: (cut: Exclude<Cut, "whole">, d: Dims): PieceSize =>
+    ({
+      halved: { cm: d.across, by: "long" },
+      steaks: { cm: d.across * 0.85, by: "long" },
+      /** Florets are broken off by hand: a large one about 5 cm, a bite-size one about 3. */
+      florets: { cm: 5, by: "long" },
+      bites: { cm: 3, by: "long" },
+      riced: { cm: KNIFE_CM.minced, by: "across" },
+      batons: { cm: 0.8, by: "across" },
+      coins: { cm: 3, by: "long" },
+    })[FLORET_CUT[cut]] as PieceSize,
 };
 
-export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root";
+export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret";
 export interface FormProps {
   slab: SlabProps;
   bulb: BulbProps;
@@ -213,6 +231,7 @@ export interface FormProps {
   grain: GrainProps;
   round: RoundProps;
   root: RootProps;
+  floret: FloretProps;
 }
 
 /** What the box holds, measured from the geometry: the zoom it is drawn at, and the sizes (in box units, before that zoom) to match to real ones. */
@@ -308,6 +327,15 @@ export function measure<F extends FormName>(form: F, props: FormProps[F]): Measu
       const d = dims(REAL_SIZE.root[shape], p.realSize);
       if (cut === "whole") return wholeOf(rootGeometry(shape, seed).outline, d.wide);
       return cutOf(frameRoot(shape, cut, seed, !!q.peeled, layout, cooked).k, frameRoot(shape, cut, seed, !!q.peeled, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.root(cut, d, shape));
+    }
+    case "floret": {
+      const shape = (p as FloretProps).shape ?? "broccoli";
+      const d = dims(REAL_SIZE.floret[shape], p.realSize);
+      if (cut === "whole") {
+        const g = floretGeometry(shape, seed);
+        return wholeOf([...g.lobes.flatMap((l) => l.outline), ...g.stalk, ...g.leavesBack.flatMap((l) => l.outline), ...g.leavesFront.flatMap((l) => l.outline)], d.wide);
+      }
+      return cutOf(frameFloret(shape, cut, seed, layout, cooked).k, frameFloret(shape, cut, seed, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.floret(cut, d));
     }
     case "pool": {
       const shape = (p as PoolProps).shape ?? "thin";

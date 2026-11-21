@@ -15,7 +15,12 @@ describe("mise on the board", () => {
   });
 
   it("leaves food mise can't draw yet to the old tokens", () => {
-    for (const name of ["broccoli", "cilantro", "shrimp"]) expect(miseFor(ing(name))).toBeNull();
+    for (const name of ["cilantro", "shrimp"]) expect(miseFor(ing(name))).toBeNull();
+  });
+
+  it("draws broccoli and cauliflower as mise florets", () => {
+    expect(miseFor(ing("broccoli"))?.form).toBe("floret");
+    expect(miseFor(ing("cauliflower"))?.props).toMatchObject({ shape: "cauliflower" });
   });
 
   it("draws carrots, daikon and potatoes as mise roots", () => {

@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
-import { cookedColor, isEgg, isPool, isStaple, Mound, PiecePath, placements, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
+import { cookedColor, isEgg, poolsUp, isStaple, Mound, PiecePath, placements, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
 import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse } from "../rough";
 import { Steam } from "../Steam";
@@ -63,13 +63,13 @@ export function Plate({ scene }: { scene: Scene }) {
   const staple = porridge ? undefined : all.find((it) => isStaple(it.ingredient));
   const neat = /\b(mound|pack|mou?ld|flip|invert|turn (it )?out)\b/i.test(scene.step.text);
   const items = staple ? [] : all;
-  const garnish = items.filter((it) => it.fresh && !it.carried && !isPool(it.ingredient.token.shape) && it.ingredient.token.shape !== "strand");
+  const garnish = items.filter((it) => it.fresh && !it.carried && !poolsUp(it.ingredient) && it.ingredient.token.shape !== "strand");
   const food = items.filter((it) => !garnish.includes(it));
   const grain = porridge ? all.find((it) => isStaple(it.ingredient)) : undefined;
   const watery = poolOf(food);
   const pool = watery && grain ? { ...watery, color: mix(watery.color, stapleColor(grain.ingredient, 1), 0.75) } : watery;
   const strands = food.filter((it) => it.ingredient.token.shape === "strand");
-  const pieces = food.filter((it) => !isPool(it.ingredient.token.shape) && it.ingredient.token.shape !== "strand");
+  const pieces = food.filter((it) => !poolsUp(it.ingredient) && it.ingredient.token.shape !== "strand");
   const nest = strands.length > 0;
   const coat = pool?.sauce ? clamp01(Math.max(0, ...strands.map((st) => st.cooked - 1))) : 0;
   const sauceD = pool
