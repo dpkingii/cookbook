@@ -22,5 +22,7 @@ export { Root } from "./forms/Root";
 export type { RootProps, RootShape } from "./forms/root-shape";
 export { Floret } from "./forms/Floret";
 export type { FloretProps, FloretShape } from "./forms/floret-shape";
+export { Leaf } from "./forms/Leaf";
+export type { LeafProps, LeafShape } from "./forms/leaf-shape";
 export { boxCm, measure, REAL_SIZE, PIECE_SIZE, KNIFE_CM } from "./sizes";
 export type { FormName, FormProps, RealSize, PieceSize, Measured } from "./sizes";

@@ -17,6 +17,8 @@ import { frameRoot, ROOT_CUT } from "./forms/root-cuts";
 import { FLORET_CUT, frameFloret } from "./forms/floret-cuts";
 import { floretGeometry, type FloretProps, type FloretShape } from "./forms/floret-shape";
 import { rootGeometry, type RootProps, type RootShape } from "./forms/root-shape";
+import { frameLeaf, LEAF_CUT } from "./forms/leaf-cuts";
+import { leafGeometry, type LeafProps, type LeafShape } from "./forms/leaf-shape";
 import { frameSlab, outlinePolygon, type SlabOutline, type SlabProps } from "./forms/slab-shape";
 import { frameStalk, STALK_CUT } from "./forms/stalk-cuts";
 import { stalkGeometry, type StalkProps, type StalkShape } from "./forms/stalk-shape";
@@ -94,6 +96,17 @@ export const REAL_SIZE = {
     broccoli: { wide: 16, across: 12 },
     cauliflower: { wide: 16, across: 15 },
   } satisfies Record<FloretShape, RealSize>,
+  leaf: {
+    /** A handful of cilantro sprigs, stems to leaves. */
+    cilantro: { wide: 20 },
+    /** A basil sprig. */
+    basil: { wide: 14 },
+    /** A bunch of spinach. */
+    spinach: { wide: 25 },
+    /** A head of bok choy lying down, 20 long and 7 across at the stalks. */
+    bokchoy: { wide: 20, across: 7 },
+    cabbage: { wide: 16, across: 16 },
+  } satisfies Record<LeafShape, RealSize>,
   /** How wide a pour spreads on the counter (about two tablespoons), and one drop. */
   pool: {
     thin: { wide: 10, drop: 0.8 },
@@ -217,9 +230,29 @@ export const PIECE_SIZE = {
       batons: { cm: 0.8, by: "across" },
       coins: { cm: 3, by: "long" },
     })[FLORET_CUT[cut]] as PieceSize,
+  leaf: (cut: Exclude<Cut, "whole">, d: Dims, shape: LeafShape): PieceSize => {
+    const herb = shape === "cilantro" || shape === "basil";
+    switch (LEAF_CUT[shape][cut]) {
+      case "halved":
+        return { cm: d.wide, by: "long" };
+      case "wedges":
+        return { cm: shape === "cabbage" ? d.wide * 0.5 : d.wide, by: "long" };
+      /** One leaf: a cilantro leaflet with its bit of stem, a basil or spinach leaf, a whole bok choy stalk. */
+      case "leaves":
+        return { cm: shape === "cilantro" ? 3 : shape === "basil" ? 5 : shape === "spinach" ? 12 : d.wide, by: "long" };
+      case "ribbons":
+        return { cm: shape === "spinach" ? 0.8 : KNIFE_CM.shred * 1.5, by: "across" };
+      case "torn":
+        return { cm: herb ? 1.2 : shape === "spinach" ? 4 : 2.5, by: "long" };
+      case "chopped":
+        return { cm: herb ? 0.5 : shape === "bokchoy" ? 1.2 : 2, by: "long" };
+      case "minced":
+        return { cm: KNIFE_CM.minced, by: "across" };
+    }
+  },
 };
 
-export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret";
+export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret" | "leaf";
 export interface FormProps {
   slab: SlabProps;
   bulb: BulbProps;
@@ -232,6 +265,7 @@ export interface FormProps {
   round: RoundProps;
   root: RootProps;
   floret: FloretProps;
+  leaf: LeafProps;
 }
 
 /** What the box holds, measured from the geometry: the zoom it is drawn at, and the sizes (in box units, before that zoom) to match to real ones. */
@@ -336,6 +370,12 @@ export function measure<F extends FormName>(form: F, props: FormProps[F]): Measu
         return wholeOf([...g.lobes.flatMap((l) => l.outline), ...g.stalk, ...g.leavesBack.flatMap((l) => l.outline), ...g.leavesFront.flatMap((l) => l.outline)], d.wide);
       }
       return cutOf(frameFloret(shape, cut, seed, layout, cooked).k, frameFloret(shape, cut, seed, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.floret(cut, d));
+    }
+    case "leaf": {
+      const shape = (p as LeafProps).shape ?? "cilantro";
+      const d = dims(REAL_SIZE.leaf[shape], p.realSize);
+      if (cut === "whole") return wholeOf(leafGeometry(shape, seed).flatMap((x) => x.outer), d.wide);
+      return cutOf(frameLeaf(shape, cut, seed, layout, cooked).k, frameLeaf(shape, cut, seed, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.leaf(cut, d, shape));
     }
     case "pool": {
       const shape = (p as PoolProps).shape ?? "thin";

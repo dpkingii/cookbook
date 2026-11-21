@@ -5,6 +5,7 @@ import {
   Clove,
   Floret,
   Knob,
+  Leaf,
   Root,
   Round,
   Slab,
@@ -16,7 +17,7 @@ import {
 } from "@/vendor/mise";
 
 /** Forms that can be drawn on the board. Pool, Dust and Grain are poured or sprinkled, never cut. */
-type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round" | "root" | "floret">;
+type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round" | "root" | "floret" | "leaf">;
 
 export interface MiseMatch {
   form: BoardForm;
@@ -57,6 +58,13 @@ const CATALOG: [RegExp, MiseMatch][] = [
   [/\blimes?\b/i, m("round", { color: "#6fa53a", flesh: "#cfe39a", shape: "citrus", seed: 3, realSize: 5.5 })],
   [/\boranges?\b/i, m("round", { color: "#f28a1a", flesh: "#f7a23a", shape: "citrus" })],
   [/\bapples?\b/i, m("round", { color: "#b51f2a", flesh: "#f6ecc8", shape: "apple" })],
+  [/\b(thai basil|basil|mint)\b/i, m("leaf", { color: "#3f8a32", shape: "basil" })],
+  [/\bparsley\b/i, m("leaf", { color: "#3f7f30", shape: "cilantro", seed: 2 })],
+  [/\bcilantro\b|\bcoriander (leaves|sprigs?)\b|\bfresh coriander\b/i, m("leaf", { color: "#4f8a3a", shape: "cilantro" })],
+  [/\b(baby )?spinach\b/i, m("leaf", { color: "#2f6a2a", shape: "spinach" })],
+  [/\b(bok choy|pak choi|bok choi|shanghai choy)\b/i, m("leaf", { color: "#3d7a33", shape: "bokchoy" })],
+  [/\b(red|purple) cabbage\b/i, m("leaf", { color: "#6b2d5c", rib: "#ead8e6", heart: "#f6eef3", shape: "cabbage" })],
+  [/\b(napa |savoy |green )?cabbage\b/i, m("leaf", { color: "#9cc47a", shape: "cabbage" })],
   [/\bchicken\b.*\bbreasts?\b/i, m("slab", { color: "#f3bba8", outline: "organic", cookedColor: "#efcf9f", seed: 4 })],
   [/\bchicken\b/i, m("slab", { color: "#efa992", outline: "organic", surface: "fatty", fat: "#fbe6c6", cookedColor: "#e6ad6e" })],
   [/\b(steak|beef)\b/i, m("slab", { color: "#c8414a", outline: "oval", surface: "marbled", rim: true, fat: "#f8e6dc", cookedColor: "#8c4a36" })],
@@ -66,7 +74,7 @@ const CATALOG: [RegExp, MiseMatch][] = [
   [/\btofu\b/i, m("slab", { color: "#f7f1e1", outline: "block", cookedColor: "#e8b770" })],
 ];
 
-/** How mise draws this ingredient, or null when mise has no form for it yet (herbs, shrimp). */
+/** How mise draws this ingredient, or null when mise has no form for it yet (shrimp, eggs). */
 export function miseFor(ing: Ingredient): MiseMatch | null {
   return CATALOG.find(([re]) => re.test(ing.name))?.[1] ?? null;
 }
@@ -128,6 +136,7 @@ const DRAW: { [F in BoardForm]: (p: FormProps[F]) => React.ReactElement } = {
   round: (p) => <Round {...p} />,
   root: (p) => <Root {...p} />,
   floret: (p) => <Floret {...p} />,
+  leaf: (p) => <Leaf {...p} />,
 };
 
 /** A mise drawing centred on (x, y) at the board's real scale. Untitled: the stage's own label names the step. */

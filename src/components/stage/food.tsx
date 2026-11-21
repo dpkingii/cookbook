@@ -33,9 +33,11 @@ const MiseDef = memo(function MiseDef({ id, match, cut, cooked, browning, px }: 
 function MiseScatter({ item, match, at, keep, size, brown }: { item: Item; match: MiseMatch; at: [number, number, number, number]; keep: number; size: number; brown: boolean }) {
   const { uid } = useStage();
   const ing = item.ingredient;
-  const cut: Cut = item.cutIn ? cutFor(ing, item.cutIn.technique, item.cutIn.text, match) : "whole";
+  /** Herbs and spinach added straight to a dish go in as picked leaves ("torn basil"), not whole sprigs. */
+  const picked = !item.cutIn && match.form === "leaf" && !["bokchoy", "cabbage"].includes((match.props as { shape?: string }).shape ?? "");
+  const cut: Cut = item.cutIn ? cutFor(ing, item.cutIn.technique, item.cutIn.text, match) : picked ? "halved" : "whole";
   const [cx, cy, rx, ry] = at;
-  const n = useMemo(() => miseCount(item.cutIn != null, match, cut, keep), [item.cutIn, match, cut, keep]);
+  const n = useMemo(() => miseCount(item.cutIn != null || picked, match, cut, keep), [item.cutIn, picked, match, cut, keep]);
   const spots = useMemo(() => placements(ing.id, n, cx, cy, rx, ry), [ing.id, n, cx, cy, rx, ry]);
   const cooked = item.cooked > 0.25;
   /** Browning builds with time on the heat, in steps of 0.1 so the drawing only changes when the look does. */
