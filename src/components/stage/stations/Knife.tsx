@@ -12,13 +12,14 @@ const CONTACT = { x: 34, y: -17.6 };
  * with the handle pointing at `angle` degrees; `lift` raises it off the food and
  * `rock` tips the heel up around the contact point, the way a chef's knife rocks.
  */
-export function Knife({ x, y, angle, lift, rock = 0 }: { x: number; y: number; angle: number; lift: number; rock?: number }) {
+export function Knife({ x, y, angle, lift, rock = 0, zoom = 1 }: { x: number; y: number; angle: number; lift: number; rock?: number; zoom?: number }) {
+  const k = SCALE * zoom;
   return (
-    <g aria-hidden transform={`translate(${x.toFixed(1)} ${(y - lift).toFixed(1)}) rotate(${(angle - rock).toFixed(1)}) scale(${SCALE} ${-SCALE}) translate(${-CONTACT.x} ${-CONTACT.y})`}>
-      <path d={BLADE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main / SCALE} strokeLinejoin="round" />
-      <path d="M22 -12Q60 -24 150 -26" fill="none" stroke={HEX.grey} strokeWidth={LINE.detail / SCALE} />
+    <g aria-hidden transform={`translate(${x.toFixed(1)} ${(y - lift).toFixed(1)}) rotate(${(angle - rock).toFixed(1)}) scale(${k} ${-k}) translate(${-CONTACT.x} ${-CONTACT.y})`}>
+      <path d={BLADE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main / k} strokeLinejoin="round" />
+      <path d="M22 -12Q60 -24 150 -26" fill="none" stroke={HEX.grey} strokeWidth={LINE.detail / k} />
       <rect x={148} y={-33} width={13} height={40} rx={3} fill={HEX.ink} />
-      <path d={HANDLE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main / SCALE} strokeLinejoin="round" />
+      <path d={HANDLE} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.main / k} strokeLinejoin="round" />
       <circle cx={186} cy={-11} r={3.2} fill={HEX.ink} />
       <circle cx={214} cy={-10} r={3.2} fill={HEX.ink} />
     </g>

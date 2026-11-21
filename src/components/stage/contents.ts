@@ -36,6 +36,8 @@ export interface Item {
   since: number;
   /** Heated steps it has been through, the current one counting as `progress`. */
   cooked: number;
+  /** The board step that cut it, so its pile keeps the cut that step asked for. */
+  cutIn: Step | null;
   /** Came along with the rest of a vessel's contents (tipped onto a plate), rather than being added on its own. */
   carried: boolean;
 }
@@ -91,6 +93,7 @@ export function sceneAt(recipe: Recipe, stepIndex: number, progress: number | nu
   const cut = new Set<string>();
   const cooked = new Map<string, number>();
   const carried = new Set<string>();
+  const cutIn = new Map<string, Step>();
   const heatedBefore = new Set<Vessel>();
   let water = false;
   let vessel: Vessel = "board";
@@ -121,7 +124,10 @@ export function sceneAt(recipe: Recipe, stepIndex: number, progress: number | nu
         carried.delete(use.ingredientId);
       }
       loc.set(use.ingredientId, vessel);
-      if (vessel === "board") cut.add(use.ingredientId);
+      if (vessel === "board") {
+        cut.add(use.ingredientId);
+        cutIn.set(use.ingredientId, step);
+      }
     }
 
     if (vessel === "pot" && step.technique === "boil") water = true;
@@ -152,6 +158,7 @@ export function sceneAt(recipe: Recipe, stepIndex: number, progress: number | nu
       since: since.get(id) ?? i,
       cooked: cooked.get(id) ?? 0,
       carried: carried.has(id),
+      cutIn: cutIn.get(id) ?? null,
     });
   }
   items.sort((a, b) => a.since - b.since);
