@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { Burner, Knob } from "../Burner";
-import { cookedColor, poolOf, Scattered } from "../food";
+import { cookedColor, poolOf, poolsUp, Scattered } from "../food";
 import { clamp01, HEX, lerp, LINE, mix, WATER } from "../palette";
 import { ellipse, wall } from "../rough";
 import { Bubbles, Steam } from "../Steam";
@@ -81,7 +81,7 @@ export function Pot({ scene }: { scene: Scene }) {
   const surface = water ? WATER : (pool?.color ?? HEX.grey);
   const strands = items.filter((it) => it.ingredient.token.shape === "strand");
   const grains = items.filter((it) => it.fresh && it.ingredient.token.shape === "grain");
-  const floaters = items.filter((it) => !["strand", "grain", "liquid", "round"].includes(it.ingredient.token.shape));
+  const floaters = items.filter((it) => !poolsUp(it.ingredient) && !["strand", "grain"].includes(it.ingredient.token.shape));
   const clip = `${uid}-pot`;
   const hasSurface = water || pool;
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { SEED_RECIPES } from "@/lib/recipe/seed-recipes";
 import type { Recipe } from "@/lib/recipe/types";
 import { sceneAt } from "./contents";
-import { isEgg, isStaple } from "./food";
+import { isEgg, isStaple, poolOf, poolsUp } from "./food";
 
 const friedRice = SEED_RECIPES.find((r) => r.id === "lau-egg-fried-rice")!;
 const vessels = (r: Recipe) => r.steps.map((_, i) => sceneAt(r, i, 0.5).vessel);
@@ -41,5 +41,18 @@ describe("scenes", () => {
     expect(isEgg(ing("cherry tomatoes", "round"))).toBe(false);
     expect(isStaple(ing("jasmine rice", "grain", "rice cups"))).toBe(true);
     expect(isStaple(ing("salt", "grain", "tsp"))).toBe(false);
+  });
+
+  it("reduces only tomatoes to sauce; peas, chickpeas, lemons and broccoli stay pieces", () => {
+    const ing = (name: string, shape: "round" | "liquid") => ({ id: name, name, quantity: 1, unit: null, token: { shape, color: "#a9cfe0" } });
+    expect(["crushed tomatoes", "eggs", "water"].map((n) => poolsUp(ing(n, n === "water" ? "liquid" : "round")))).toEqual([true, true, true]);
+    expect(["frozen peas", "chickpeas, drained", "lemon", "broccoli"].some((n) => poolsUp(ing(n, "round")))).toBe(false);
+  });
+
+  it("turns water cooked with the food into a clear glaze, not blue water", () => {
+    const water = { id: "w", name: "water", quantity: 1, unit: null, token: { shape: "liquid" as const, color: "#a9cfe0" } };
+    const at = (cooked: number) => poolOf([{ ingredient: water, fresh: false, cut: false, since: 0, cooked, carried: false, cutIn: null }])!.color;
+    expect(at(0)).toBe("#a9cfe0");
+    expect(at(1)).not.toBe("#a9cfe0");
   });
 });

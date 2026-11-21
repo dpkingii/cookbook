@@ -100,7 +100,7 @@ export function cookedColor(ing: Ingredient, cooked: number): string {
     case "wedge":
       return mix(mix(c, HEX.white, 0.28), "#e2bf6a", d * 0.75);
     case "round":
-      return mix(c, REDUCED, d * 0.75);
+      return reduces(ing) ? mix(c, REDUCED, d * 0.75) : mix(c, HEX.ink, d * 0.2);
     case "strand":
       return mix(c, "#f0d79a", d * 0.5);
     case "leaf":
@@ -110,11 +110,15 @@ export function cookedColor(ing: Ingredient, cooked: number): string {
   }
 }
 
-/** Sauce-like ingredients pool instead of sitting as pieces. */
-export const isPool = (shape: TokenShape) => shape === "liquid" || shape === "round";
+/** "Round" covers peas, chickpeas, lemons and broccoli too, but only tomatoes cook down into a sauce. */
+const reduces = (ing: Ingredient) => ing.token.shape === "round" && /\btomato|\bpassata\b/i.test(ing.name);
 
-/** Does this ingredient pool into sauce? Broccoli and cauliflower share the round token with tomatoes, but stay florets. */
-export const poolsUp = (ing: Ingredient) => isPool(ing.token.shape) && !["floret", "root"].includes(miseFor(ing)?.form ?? "");
+/** Does this ingredient pool into sauce? Liquids do, tomatoes reduce, and eggs set into a custard or a sheet. */
+export const poolsUp = (ing: Ingredient) => ing.token.shape === "liquid" || reduces(ing) || (ing.token.shape === "round" && isEgg(ing));
+
+/** Water and stock cooked with the food stop reading as water: they thicken into a clear glaze. */
+const GLAZE = "#f1ecd8";
+const clear = (ing: Ingredient) => /\b(water|stock|broth)\b/i.test(ing.name);
 
 /** Grains of rice heaped in a dome, each grain a short rounded tick so it reads as rice and not a blob. */
 export function Mound({
@@ -414,11 +418,12 @@ export function Tangle({
 export function poolOf(items: Item[]): { color: string; body: number; done: number; sauce: Item | null } | null {
   const pools = items.filter((it) => poolsUp(it.ingredient));
   if (pools.length === 0) return null;
-  const sauce = pools.find((p) => p.ingredient.token.shape === "round") ?? null;
+  const sauce = pools.find((p) => p.ingredient.token.shape !== "liquid") ?? null;
   if (sauce) {
     const done = clamp01(sauce.cooked);
     return { color: cookedColor(sauce.ingredient, done), body: 1 - done * 0.15, done, sauce };
   }
-  const oil = pools[0];
-  return { color: oil.ingredient.token.color, body: 0.55, done: 0, sauce: null };
+  const tones = pools.map((p) => (clear(p.ingredient) ? mix(p.ingredient.token.color, GLAZE, clamp01(p.cooked * 2)) : p.ingredient.token.color));
+  const color = tones.reduce((acc, c, i) => mix(acc, c, 1 / (i + 1)));
+  return { color, body: 0.55, done: 0, sauce: null };
 }
