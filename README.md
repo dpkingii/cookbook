@@ -88,6 +88,16 @@ DATABASE_URL="<direct Neon URL>" npx prisma migrate deploy   # after a schema ch
 
 Vercel holds two production variables: `DATABASE_URL` (Neon's pooled connection string) and `BETTER_AUTH_SECRET`. The site address comes from Vercel, so `BETTER_AUTH_URL` is only needed locally. Run migrations against Neon's direct connection string, which is the pooled one without `-pooler` in the host. The seed skips the demo account on any database that is not local.
 
+## Ingredient drawings
+
+Food on the cutting board is drawn by mise, a separate ingredient-drawing library in `../mise`. It isn't published yet, and Vercel builds from this folder alone, so its source is copied into `src/vendor/mise`. After changing mise, copy it again:
+
+```bash
+node scripts/sync-mise.mjs
+```
+
+`src/vendor/mise/VERSION.md` records which mise commit the copy came from. Don't edit the copy; change mise and sync.
+
 ## Stack
 
 Next.js 16 (App Router), React 19, TypeScript, Tailwind 4, Motion, Prisma 6, Postgres, Better Auth, Zod, Vitest.

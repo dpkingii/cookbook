@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Copied from mise by scripts/sync-mise.mjs, linted there.
+    "src/vendor/**",
   ]),
 ]);
 
