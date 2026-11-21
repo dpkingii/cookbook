@@ -18,5 +18,7 @@ export { Grain } from "./forms/Grain";
 export type { GrainProps, GrainShape } from "./forms/grain-shape";
 export { Round } from "./forms/Round";
 export type { RoundProps, RoundShape } from "./forms/round-shape";
+export { Root } from "./forms/Root";
+export type { RootProps, RootShape } from "./forms/root-shape";
 export { boxCm, measure, REAL_SIZE, PIECE_SIZE, KNIFE_CM } from "./sizes";
 export type { FormName, FormProps, RealSize, PieceSize, Measured } from "./sizes";

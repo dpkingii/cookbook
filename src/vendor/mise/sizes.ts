@@ -13,6 +13,8 @@ import { knobGeometry, type KnobProps, type KnobShape } from "./forms/knob-shape
 import { poolGeometry, type PoolProps, type PoolShape } from "./forms/pool-shape";
 import { frameRound, roundCut } from "./forms/round-cuts";
 import { roundGeometry, type RoundProps, type RoundShape } from "./forms/round-shape";
+import { frameRoot, ROOT_CUT } from "./forms/root-cuts";
+import { rootGeometry, type RootProps, type RootShape } from "./forms/root-shape";
 import { frameSlab, outlinePolygon, type SlabOutline, type SlabProps } from "./forms/slab-shape";
 import { frameStalk, STALK_CUT } from "./forms/stalk-cuts";
 import { stalkGeometry, type StalkProps, type StalkShape } from "./forms/stalk-shape";
@@ -77,6 +79,14 @@ export const REAL_SIZE = {
     lemon: { wide: 8, across: 5.5 },
     apple: { wide: 8 },
   } satisfies Record<RoundShape, RealSize>,
+  root: {
+    /** A medium carrot lying down, 18 long and 2.5 across at the shoulder. */
+    carrot: { wide: 18, across: 2.5 },
+    /** A daikon, 30 long and 6 across. */
+    daikon: { wide: 30, across: 6 },
+    /** A baking potato lying on its side, 10 long and 6.5 across. */
+    potato: { wide: 10, across: 6.5 },
+  } satisfies Record<RootShape, RealSize>,
   /** How wide a pour spreads on the counter (about two tablespoons), and one drop. */
   pool: {
     thin: { wide: 10, drop: 0.8 },
@@ -178,9 +188,20 @@ export const PIECE_SIZE = {
     }
     return { cm: d.across, by: "long" };
   },
+  root: (cut: Exclude<Cut, "whole">, d: Dims, shape: RootShape): PieceSize =>
+    ({
+      halved: { cm: d.wide, by: "long" },
+      coins: { cm: d.across, by: "long" },
+      /** Matchsticks for carrot and daikon, 1 cm batons for potato. */
+      sticks: { cm: shape === "potato" ? 1 : KNIFE_CM.matchstick, by: "across" },
+      diced: knife(KNIFE_CM.diced, d),
+      minced: knife(KNIFE_CM.minced, d),
+      /** A carrot roll-cut is about as long as the carrot is wide; a potato wedge runs the potato's length; a half-moon is the daikon's width. */
+      chunks: { cm: shape === "potato" ? d.wide * 0.85 : shape === "carrot" ? d.across * 1.4 : d.across, by: "long" },
+    })[ROOT_CUT[cut]] as PieceSize,
 };
 
-export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round";
+export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root";
 export interface FormProps {
   slab: SlabProps;
   bulb: BulbProps;
@@ -191,6 +212,7 @@ export interface FormProps {
   dust: DustProps;
   grain: GrainProps;
   round: RoundProps;
+  root: RootProps;
 }
 
 /** What the box holds, measured from the geometry: the zoom it is drawn at, and the sizes (in box units, before that zoom) to match to real ones. */
@@ -279,6 +301,13 @@ export function measure<F extends FormName>(form: F, props: FormProps[F]): Measu
       const d = dims(REAL_SIZE.round[shape], p.realSize);
       if (cut === "whole") return wholeOf(roundGeometry(shape, seed).pts, d.wide);
       return cutOf(frameRound(shape, cut, seed, layout, cooked).k, frameRound(shape, cut, seed, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.round(cut, d, shape));
+    }
+    case "root": {
+      const q = p as RootProps;
+      const shape = q.shape ?? "carrot";
+      const d = dims(REAL_SIZE.root[shape], p.realSize);
+      if (cut === "whole") return wholeOf(rootGeometry(shape, seed).outline, d.wide);
+      return cutOf(frameRoot(shape, cut, seed, !!q.peeled, layout, cooked).k, frameRoot(shape, cut, seed, !!q.peeled, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.root(cut, d, shape));
     }
     case "pool": {
       const shape = (p as PoolProps).shape ?? "thin";

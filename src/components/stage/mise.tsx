@@ -4,6 +4,7 @@ import {
   Bulb,
   Clove,
   Knob,
+  Root,
   Round,
   Slab,
   Stalk,
@@ -14,7 +15,7 @@ import {
 } from "@/vendor/mise";
 
 /** Forms that can be drawn on the board. Pool, Dust and Grain are poured or sprinkled, never cut. */
-type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round">;
+type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round" | "root">;
 
 export interface MiseMatch {
   form: BoardForm;
@@ -41,6 +42,11 @@ const CATALOG: [RegExp, MiseMatch][] = [
   [/\bgalangal\b/i, m("knob", { color: "#e8cdb4", flesh: "#f6ecd6", ring: "#b46a5a", tip: "#e5a2a0", shape: "stout", seed: 2 })],
   [/\bturmeric\b/i, m("knob", { color: "#b9824f", flesh: "#f08a1c", ring: "#8a5a32", shape: "finger", seed: 3 })],
   [/\bginger\b/i, m("knob", { color: "#c9a06a", flesh: "#f2dc8c", ring: "#9c7444", tip: "#e8a0a0", shape: "hand", seed: 3 })],
+  [/\bcarrots?\b/i, m("root", { color: "#e8742a", shape: "carrot" })],
+  [/\b(daikon|mooli|white radish)\b/i, m("root", { color: "#f1eee3", shape: "daikon" })],
+  [/\bsweet potato(es)?\b/i, m("root", { color: "#9a4a3a", flesh: "#f29a4a", shape: "potato", seed: 2 })],
+  [/\bred potato(es)?\b/i, m("root", { color: "#a8423a", flesh: "#f6ecc8", shape: "potato", seed: 3 })],
+  [/\bpotato(es)?\b/i, m("root", { color: "#b8875a", shape: "potato" })],
   [/\bcherry tomato(es)?\b|\bgrape tomato(es)?\b/i, m("round", { color: "#d8321f", flesh: "#e9573c", shape: "tomato", realSize: 2.5 })],
   [/\btomato(es)?\b/i, m("round", { color: "#d8321f", flesh: "#e9573c", shape: "tomato" })],
   [/\blemons?\b/i, m("round", { color: "#f5d23a", flesh: "#f8e79a", shape: "lemon" })],
@@ -56,7 +62,7 @@ const CATALOG: [RegExp, MiseMatch][] = [
   [/\btofu\b/i, m("slab", { color: "#f7f1e1", outline: "block", cookedColor: "#e8b770" })],
 ];
 
-/** How mise draws this ingredient, or null when mise has no form for it yet (carrots, broccoli, herbs). */
+/** How mise draws this ingredient, or null when mise has no form for it yet (broccoli, herbs, shrimp). */
 export function miseFor(ing: Ingredient): MiseMatch | null {
   return CATALOG.find(([re]) => re.test(ing.name))?.[1] ?? null;
 }
@@ -116,6 +122,7 @@ const DRAW: { [F in BoardForm]: (p: FormProps[F]) => React.ReactElement } = {
   knob: (p) => <Knob {...p} />,
   stalk: (p) => <Stalk {...p} />,
   round: (p) => <Round {...p} />,
+  root: (p) => <Root {...p} />,
 };
 
 /** A mise drawing centred on (x, y) at the board's real scale. Untitled: the stage's own label names the step. */
