@@ -12,10 +12,19 @@ import {
  * because a simmer usually happens in the pan the aromatics are already in,
  * not in the pot of pasta water.
  */
-export type Vessel = "board" | "bowl" | "pan" | "pot" | "oven" | "plate";
+export type Vessel = "board" | "bowl" | "microwave" | "cooker" | "pan" | "pot" | "oven" | "plate";
 
 /** Left-to-right order along the counter, so a station change pans the camera the right way. */
-export const COUNTER: Vessel[] = ["board", "bowl", "pan", "pot", "oven", "plate"];
+export const COUNTER: Vessel[] = ["board", "bowl", "microwave", "cooker", "pan", "pot", "oven", "plate"];
+
+/** Appliances named in the step text win over the technique: "cook it in a rice cooker" is not a pot on a burner. */
+const APPLIANCES: [RegExp, Vessel][] = [
+  [/\brice cooker\b/i, "cooker"],
+  [/\bmicrowav/i, "microwave"],
+];
+
+/** Appliances cook whatever is in them without a burner, and keep it there until it is taken out. */
+const APPLIANCE: Vessel[] = ["cooker", "microwave"];
 
 export interface Item {
   ingredient: Ingredient;
@@ -27,6 +36,8 @@ export interface Item {
   since: number;
   /** Heated steps it has been through, the current one counting as `progress`. */
   cooked: number;
+  /** Came along with the rest of a vessel's contents (tipped onto a plate), rather than being added on its own. */
+  carried: boolean;
 }
 
 export interface Scene {
@@ -44,11 +55,18 @@ export interface Scene {
   warmed: boolean;
 }
 
-const HEATED: Vessel[] = ["pan", "pot", "oven"];
+const HEATED: Vessel[] = ["pan", "pot", "oven", "cooker", "microwave"];
 
 function vesselFor(steps: Step[], j: number, loc: Map<string, Vessel>): Vessel {
   const step = steps[j];
+  for (const [re, v] of APPLIANCES) if (re.test(step.text)) return v;
   const station = stationOf(step);
+  if (station === "rest" && step.technique !== "plate") {
+    // "Leave the rice covered to steam" happens in the rice cooker, not on a plate.
+    const at = new Set(step.uses.map((u) => loc.get(u.ingredientId)));
+    const only = at.size === 1 ? [...at][0] : undefined;
+    if (only && APPLIANCE.includes(only)) return only;
+  }
   if (station === "rest") return "plate";
   if (station !== "pot") return station;
   if (step.technique !== "simmer") return "pot";
@@ -72,6 +90,7 @@ export function sceneAt(recipe: Recipe, stepIndex: number, progress: number | nu
   const since = new Map<string, number>();
   const cut = new Set<string>();
   const cooked = new Map<string, number>();
+  const carried = new Set<string>();
   const heatedBefore = new Set<Vessel>();
   let water = false;
   let vessel: Vessel = "board";
@@ -90,13 +109,17 @@ export function sceneAt(recipe: Recipe, stepIndex: number, progress: number | nu
         if (v === prevVessel) {
           loc.set(id, vessel);
           since.set(id, j);
+          carried.add(id);
         }
       }
     }
 
     for (const use of step.uses) {
       if (!byId.has(use.ingredientId)) continue;
-      if (loc.get(use.ingredientId) !== vessel) since.set(use.ingredientId, j);
+      if (loc.get(use.ingredientId) !== vessel) {
+        since.set(use.ingredientId, j);
+        carried.delete(use.ingredientId);
+      }
       loc.set(use.ingredientId, vessel);
       if (vessel === "board") cut.add(use.ingredientId);
     }
@@ -104,14 +127,15 @@ export function sceneAt(recipe: Recipe, stepIndex: number, progress: number | nu
     if (vessel === "pot" && step.technique === "boil") water = true;
     if (vessel === "pot" && step.technique === "drain" && !current) water = false;
 
-    if (step.heat && HEATED.includes(vessel)) {
+    const appliance = APPLIANCE.includes(vessel) && stationOf(step) !== "rest";
+    if ((step.heat || appliance) && HEATED.includes(vessel)) {
       const amount = current ? (progress ?? 0) : 1;
       for (const [id, v] of loc) {
         if (v === vessel) cooked.set(id, (cooked.get(id) ?? 0) + amount);
       }
       if (!current) heatedBefore.add(vessel);
     }
-    if (!current && !step.heat) heatedBefore.delete(vessel);
+    if (!current && !step.heat && !appliance) heatedBefore.delete(vessel);
     prevVessel = vessel;
   }
 
@@ -127,6 +151,7 @@ export function sceneAt(recipe: Recipe, stepIndex: number, progress: number | nu
       cut: cut.has(id),
       since: since.get(id) ?? i,
       cooked: cooked.get(id) ?? 0,
+      carried: carried.has(id),
     });
   }
   items.sort((a, b) => a.since - b.since);

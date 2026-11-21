@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { Burner, Knob } from "../Burner";
-import { cookedColor, isPool, poolOf, Scattered, Tangle } from "../food";
+import { cookedColor, Curds, isEgg, isPool, isStaple, Mound, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
 import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse, wall } from "../rough";
 import { Bubbles, Sizzle, Steam } from "../Steam";
@@ -20,18 +20,25 @@ const HEAT_AMOUNT = { low: 0.35, medium: 0.65, high: 1 } as const;
 
 export function Pan({ scene }: { scene: Scene }) {
   const { still } = useStage();
-  const { technique, heat, items } = scene;
+  const { technique, heat, items: all } = scene;
   const amt = heat ? HEAT_AMOUNT[heat] : 0;
-  const pool = poolOf(items);
+  const staple = all.find((it) => isStaple(it.ingredient));
+  const eggs = all.filter((it) => isEgg(it.ingredient));
+  const items = all.filter((it) => it !== staple && !eggs.includes(it));
+  const pool = staple ? null : poolOf(items);
   const strands = items.filter((it) => it.ingredient.token.shape === "strand");
-  const pieces = items.filter((it) => !isPool(it.ingredient.token.shape) && it.ingredient.token.shape !== "strand");
+  // With rice in the pan, peas and corn (round tokens) sit in it as pieces instead of cooking down to sauce.
+  const pieces = items.filter(
+    (it) => (!isPool(it.ingredient.token.shape) || (staple && it.ingredient.token.shape === "round")) && it.ingredient.token.shape !== "strand",
+  );
+  const ON_MOUND = { cx: FOOD.cx, cy: FOOD.cy - 14, rx: 62, ry: 13 };
   const simmer = technique === "simmer";
   const toss = !simmer && (technique === "saute" || technique === "fry") && heat != null && items.length > 0;
   const tossPeriod = 2.3 - amt * 0.9;
   const coat = pool?.sauce ? clamp01(Math.max(0, ...strands.map((st) => st.cooked - 1))) : 0;
   const body = pool ? pool.body * (1 - coat * 0.3) : 0;
   const poolD = pool ? blob(FOOD.cx, FOOD.cy + 1, (FOOD.rx + 16) * body, (FOOD.ry + 10) * body, 77, 0.05 + (pool.done * 0.06), 11) : "";
-  const freshPool = items.find((it) => isPool(it.ingredient.token.shape) && it.fresh);
+  const freshPool = all.find((it) => isPool(it.ingredient.token.shape) && !isEgg(it.ingredient) && it.fresh);
 
   const piece = (it: Item, k: number) => {
     const submerged = pool?.sauce && it.since < pool.sauce.since;
@@ -40,10 +47,10 @@ export function Pan({ scene }: { scene: Scene }) {
       <motion.g key={it.ingredient.id} {...landing(it.fresh, still, k)}>
         <Scattered
           item={it}
-          {...FOOD}
-          color={cookedColor(it.ingredient, it.cooked)}
-          keep={submerged ? 0.35 : leaf ? 1.5 : 1}
-          size={leaf ? 1.3 : 1}
+          {...(staple ? ON_MOUND : FOOD)}
+          color={staple && it.ingredient.token.shape === "round" ? it.ingredient.token.color : cookedColor(it.ingredient, it.cooked)}
+          keep={submerged ? 0.35 : leaf ? 1.5 : staple ? 0.8 : 1}
+          size={leaf ? 1.3 : staple ? 0.85 : 1}
         />
       </motion.g>
     );
@@ -84,6 +91,25 @@ export function Pan({ scene }: { scene: Scene }) {
                         strokeLinecap="round"
                       />
                     ))}
+              </motion.g>
+            )}
+            {!staple &&
+              eggs.map((it, k) => (
+                <motion.g key={it.ingredient.id} {...landing(it.fresh, still, k, -40)}>
+                  <Curds id={it.ingredient.id} cx={FOOD.cx} cy={FOOD.cy} rx={FOOD.rx - 8} ry={FOOD.ry - 2} color={cookedColor(it.ingredient, it.cooked)} cooked={it.cooked} n={7} />
+                </motion.g>
+              ))}
+            {staple && (
+              <motion.g key={staple.ingredient.id} {...landing(staple.fresh, still, 0, -80)}>
+                <Mound
+                  id={staple.ingredient.id}
+                  cx={FOOD.cx}
+                  base={FOOD.cy + 14}
+                  rx={96}
+                  height={36}
+                  color={stapleColor(staple.ingredient, staple.cooked, sauceTints(all, staple.since))}
+                  flecks={eggs.map((e) => ({ id: e.ingredient.id, shape: "cube" as const, color: cookedColor(e.ingredient, 1) }))}
+                />
               </motion.g>
             )}
             {pieces.filter((it) => it.ingredient.token.shape !== "leaf").map(piece)}

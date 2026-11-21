@@ -6,10 +6,34 @@ import { TokenArt } from "./tokens";
 
 const REDUCED = "#a82c1f";
 
+/** Eggs share the "round" token with tomatoes, but heat sets them into yellow curds rather than reducing them to sauce. */
+export const isEgg = (ing: Ingredient) => /\beggs?\b|\byolks?\b/i.test(ing.name) && !/eggplant/i.test(ing.name);
+
+/** A grain measured by the cup or by weight is the body of the dish (rice, quinoa), not a seasoning. */
+export const isStaple = (ing: Ingredient) =>
+  ing.token.shape === "grain" &&
+  (/\b(rice|quinoa|couscous|bulgur|oats|barley|farro|polenta|grits)\b/i.test(ing.name) || /\b(cups?|kg|lb|pounds?)\b/i.test(ing.unit ?? ""));
+
+/** A staple seen as a mound once cooked: rice goes from translucent raw grains to fluffy white. */
+export function stapleColor(ing: Ingredient, cooked: number, sauces: string[] = []): string {
+  let c = mix(mix(ing.token.color, "#e9e4d4", 0.5), HEX.white, clamp01(cooked) * 0.6);
+  // Soy fried into rice reads golden brown, not grey, so each sauce pulls toward a warmed version of itself.
+  for (const sauce of sauces) c = mix(c, mix(sauce, "#d08a2e", 0.6), 0.32);
+  return c;
+}
+
+/** Dark sauces poured over a staple after it arrived (soy over rice) stain it; oil and water don't. */
+export function sauceTints(items: Item[], since: number): string[] {
+  return items
+    .filter((it) => it.ingredient.token.shape === "liquid" && it.since >= since && !/\b(oil|water|stock|broth)\b/i.test(it.ingredient.name))
+    .map((it) => it.ingredient.token.color);
+}
+
 /** What heat does to each kind of ingredient, as a colour. */
 export function cookedColor(ing: Ingredient, cooked: number): string {
   const c = ing.token.color;
   const d = clamp01(cooked);
+  if (isEgg(ing)) return mix(mix(c, "#ffd84a", 0.35), "#f0c04a", d * 0.4);
   switch (ing.token.shape) {
     case "bulb":
       return mix(mix(c, HEX.white, 0.5), "#d9962a", d);
@@ -28,6 +52,111 @@ export function cookedColor(ing: Ingredient, cooked: number): string {
 
 /** Sauce-like ingredients pool instead of sitting as pieces. */
 export const isPool = (shape: TokenShape) => shape === "liquid" || shape === "round";
+
+/** Grains of rice heaped in a dome, each grain a short rounded tick so it reads as rice and not a blob. */
+export function Mound({
+  id,
+  cx,
+  base,
+  rx,
+  height,
+  color,
+  flecks = [],
+  neat = false,
+}: {
+  id: string;
+  cx: number;
+  /** y of the mound's foot. */
+  base: number;
+  rx: number;
+  height: number;
+  color: string;
+  /** Other ingredients mixed through, drawn as small pieces on the surface. */
+  flecks?: { shape: TokenShape; color: string; id: string }[];
+  /** A moulded dome (packed in a bowl and turned out) instead of a loose heap. */
+  neat?: boolean;
+}) {
+  const rand = rng(seedOf(id + "mound"));
+  const pts: Pt[] = [];
+  const N = 15;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const a = Math.PI * (1 - t);
+    const wob = neat ? 0 : (rand() - 0.5) * 6;
+    const lift = neat ? Math.sin(a) ** 0.8 : Math.sin(a) ** 1.3;
+    pts.push([cx + Math.cos(a) * rx + (i === 0 || i === N ? 0 : wob * 0.5), base - lift * height + (i === 0 || i === N ? 0 : wob)]);
+  }
+  const top = smooth(pts, false);
+  const d = `${top}Q${cx} ${base + height * 0.22} ${pts[0][0]} ${pts[0][1]}Z`;
+  const inside = (x: number, y: number) => {
+    const u = (x - cx) / rx;
+    if (Math.abs(u) > 0.92) return false;
+    const lift = neat ? Math.sqrt(1 - u * u) ** 0.8 : Math.sqrt(1 - u * u) ** 1.3;
+    return y > base - lift * height + 5 && y < base + 2;
+  };
+  const ticks: { x: number; y: number; a: number }[] = [];
+  for (let k = 0; ticks.length < 46 && k < 400; k++) {
+    const x = cx + (rand() * 2 - 1) * rx;
+    const y = base - rand() * height;
+    if (inside(x, y)) ticks.push({ x, y, a: rand() * 180 });
+  }
+  const dark = mix(color, HEX.ink, 0.45);
+  const spots: { x: number; y: number; seed: number }[] = [];
+  for (let k = 0; spots.length < flecks.length * 4 && k < 600; k++) {
+    const x = cx + (rand() * 2 - 1) * rx * 0.85;
+    const y = base - rand() * height * 0.9;
+    if (inside(x, y)) spots.push({ x, y, seed: (rand() * 1e6) | 0 });
+  }
+  return (
+    <g>
+      <path d={d} fill={color} stroke={HEX.ink} strokeWidth={2} strokeLinejoin="round" />
+      {ticks.map((t, i) => (
+        <path
+          key={i}
+          d={`M-2.4 0h4.8`}
+          transform={`translate(${t.x.toFixed(1)} ${t.y.toFixed(1)}) rotate(${t.a.toFixed(0)})`}
+          stroke={dark}
+          strokeWidth={1.3}
+          strokeLinecap="round"
+        />
+      ))}
+      {spots.map((p, i) => {
+        const f = flecks[i % flecks.length];
+        return (
+          <g key={`f${i}`} transform={`translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
+            <PiecePath shape={f.shape === "round" ? "cube" : f.shape} color={f.color} seed={p.seed} size={0.55} line={1.2} />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
+
+/** Soft scrambled egg: folds of yellow with a paler underside, set more firmly as `cooked` rises. */
+export function Curds({ id, cx, cy, rx, ry, color, cooked, n = 6 }: { id: string; cx: number; cy: number; rx: number; ry: number; color: string; cooked: number; n?: number }) {
+  const rand = rng(seedOf(id + "curds"));
+  const set = clamp01(cooked);
+  return (
+    <g>
+      {set < 0.6 && <path d={blob(cx, cy, rx * 1.05, ry * 1.1, seedOf(id), 0.08, 10)} fill={mix(color, HEX.white, 0.25)} stroke={HEX.ink} strokeWidth={1.8} opacity={1 - set} />}
+      {Array.from({ length: n }, (_, i) => {
+        const a = rand() * Math.PI * 2;
+        const r = Math.sqrt(rand()) * 0.75;
+        const x = cx + Math.cos(a) * rx * r;
+        const y = cy + Math.sin(a) * ry * r;
+        const w = (9 + rand() * 7) * (0.6 + set * 0.4);
+        const h = w * (0.55 + rand() * 0.2);
+        const fold = `M${(x - w * 0.5).toFixed(1)} ${(y + h * 0.1).toFixed(1)}q${(w * 0.3).toFixed(1)} ${(-h * 0.5).toFixed(1)} ${(w * 0.65).toFixed(1)} ${(-h * 0.15).toFixed(1)}`;
+        return (
+          <g key={i}>
+            <path d={blob(x, y, w, h, (seedOf(id) + i * 31) >>> 0, 0.28, 7, rand() * 3)} fill={color} stroke={HEX.ink} strokeWidth={1.7} strokeLinejoin="round" />
+            <path d={fold} fill="none" stroke={mix(color, HEX.ink, 0.4)} strokeWidth={1.1} strokeLinecap="round" />
+          </g>
+        );
+      })}
+    </g>
+  );
+}
 
 const PIECE_SIZE: Record<TokenShape, number> = {
   round: 9,

@@ -9,7 +9,9 @@ import { clamp01 } from "./palette";
 import { Backdrop, H, W } from "./Backdrop";
 import { Board } from "./stations/Board";
 import { Bowl } from "./stations/Bowl";
+import { Cooker } from "./stations/Cooker";
 import { Fallback } from "./stations/Fallback";
+import { Microwave } from "./stations/Microwave";
 import { Oven } from "./stations/Oven";
 import { Pan } from "./stations/Pan";
 import { Plate } from "./stations/Plate";
@@ -33,6 +35,10 @@ function SceneFor({ scene }: { scene: Scene }) {
       return <Pan scene={scene} />;
     case "pot":
       return <Pot scene={scene} />;
+    case "cooker":
+      return <Cooker scene={scene} />;
+    case "microwave":
+      return <Microwave scene={scene} />;
     case "oven":
       return <Oven scene={scene} />;
     case "plate":
@@ -53,11 +59,12 @@ const slide = {
 };
 
 /** How much each station is enlarged around the counter so the action fills the frame. */
-const ZOOM: Partial<Record<Vessel, number>> = { board: 1.2, pan: 1.14, pot: 1.12, bowl: 1.1, plate: 1.14 };
+const ZOOM: Partial<Record<Vessel, number>> = { board: 1.2, pan: 1.14, pot: 1.12, bowl: 1.1, plate: 1.14, cooker: 1.08, microwave: 1.04 };
+const APPLIANCE_NAME: Partial<Record<Vessel, string>> = { cooker: " in the rice cooker", microwave: " in the microwave" };
 const ZOOM_AT = { x: W / 2, y: 200 };
 
 function label(scene: Scene): string {
-  const heat = scene.heat ? ` over ${scene.heat} heat` : "";
+  const heat = scene.heat ? ` over ${scene.heat} heat` : (APPLIANCE_NAME[scene.vessel] ?? "");
   const what = scene.uses.map((u) => u.name).join(", ");
   return `${scene.technique}${heat}${what ? `: ${what}` : ""}`;
 }

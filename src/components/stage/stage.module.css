@@ -12,7 +12,9 @@
 .wobble,
 .splash,
 .breathe,
-.pulse {
+.pulse,
+.turn,
+.fluff {
   transform-box: fill-box;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
@@ -322,6 +324,50 @@
   }
 }
 
+/* The microwave turntable seen from the front: the dish drifts side to side as it turns. */
+.turn {
+  transform-origin: 50% 100%;
+  animation-name: turn;
+  animation-duration: 6s;
+  animation-timing-function: linear;
+}
+
+@keyframes turn {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1, 1);
+  }
+  25% {
+    transform: translate(9px, 0) scale(0.94, 1);
+  }
+  50% {
+    transform: translate(0, 0) scale(1, 1);
+  }
+  75% {
+    transform: translate(-9px, 0) scale(0.94, 1);
+  }
+}
+
+/* Chopsticks lifting and turning the rice. */
+.fluff {
+  transform-origin: 50% 100%;
+  animation-name: fluff;
+  animation-duration: 1.4s;
+}
+
+@keyframes fluff {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  40% {
+    transform: translate(-10px, -9px) rotate(-8deg);
+  }
+  70% {
+    transform: translate(8px, -3px) rotate(5deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .flicker,
   .rise,
@@ -337,7 +383,9 @@
   .wobble,
   .splash,
   .breathe,
-  .pulse {
+  .pulse,
+  .turn,
+  .fluff {
     animation: none;
   }
   .ease {

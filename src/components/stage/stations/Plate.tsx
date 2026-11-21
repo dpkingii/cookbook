@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
-import { cookedColor, isPool, PiecePath, placements, poolOf, Scattered, Tangle } from "../food";
+import { cookedColor, isEgg, isPool, isStaple, Mound, PiecePath, placements, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
 import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse } from "../rough";
 import { Steam } from "../Steam";
@@ -57,10 +57,17 @@ function Frost() {
 
 export function Plate({ scene }: { scene: Scene }) {
   const { still } = useStage();
-  const { technique, items, progress } = scene;
-  const garnish = items.filter((it) => it.fresh && !isPool(it.ingredient.token.shape) && it.ingredient.token.shape !== "strand");
+  const { technique, items: all, progress } = scene;
+  // Rice that came with its cooking water is congee: it stays a porridge, not a heap.
+  const porridge = all.some((it) => it.ingredient.token.shape === "liquid" && /\b(water|stock|broth)\b/i.test(it.ingredient.name));
+  const staple = porridge ? undefined : all.find((it) => isStaple(it.ingredient));
+  const neat = /\b(mound|pack|mou?ld|flip|invert|turn (it )?out)\b/i.test(scene.step.text);
+  const items = staple ? [] : all;
+  const garnish = items.filter((it) => it.fresh && !it.carried && !isPool(it.ingredient.token.shape) && it.ingredient.token.shape !== "strand");
   const food = items.filter((it) => !garnish.includes(it));
-  const pool = poolOf(food);
+  const grain = porridge ? all.find((it) => isStaple(it.ingredient)) : undefined;
+  const watery = poolOf(food);
+  const pool = watery && grain ? { ...watery, color: mix(watery.color, stapleColor(grain.ingredient, 1), 0.75) } : watery;
   const strands = food.filter((it) => it.ingredient.token.shape === "strand");
   const pieces = food.filter((it) => !isPool(it.ingredient.token.shape) && it.ingredient.token.shape !== "strand");
   const nest = strands.length > 0;
@@ -79,6 +86,22 @@ export function Plate({ scene }: { scene: Scene }) {
       <ellipse cx={P.x} cy={P.y + 2} rx={106} ry={37} fill={HEX.white} stroke={HEX.ink} strokeWidth={LINE.detail} />
 
       <AnimatePresence>
+        {staple && (
+          <motion.g key={staple.ingredient.id} {...landing(staple.fresh, still, 0, -60)}>
+            <Mound
+              id={staple.ingredient.id}
+              cx={P.x}
+              base={P.y + 8}
+              rx={neat ? 74 : 92}
+              height={neat ? 62 : 40}
+              neat={neat}
+              color={stapleColor(staple.ingredient, staple.cooked, sauceTints(all, staple.since))}
+              flecks={all
+                .filter((it) => it !== staple && it.ingredient.token.shape !== "liquid")
+                .map((it) => ({ id: it.ingredient.id, shape: isEgg(it.ingredient) ? ("cube" as const) : it.ingredient.token.shape, color: it.ingredient.token.shape === "round" && !isEgg(it.ingredient) ? it.ingredient.token.color : cookedColor(it.ingredient, it.cooked) }))}
+            />
+          </motion.g>
+        )}
         {strands.map((it, k) => {
           const color = mix(cookedColor(it.ingredient, it.cooked), pool?.color ?? it.ingredient.token.color, 0.15 + coat * 0.3);
           return (
@@ -129,7 +152,7 @@ export function Plate({ scene }: { scene: Scene }) {
       {technique === "chill" ? (
         <Frost />
       ) : (
-        food.length > 0 && <Steam x={P.x} y={TOPPING.cy - 26} width={110} amount={technique === "rest" ? 0.45 : 0.3} />
+        (food.length > 0 || staple) && <Steam x={P.x} y={TOPPING.cy - 26} width={110} amount={technique === "rest" ? 0.45 : 0.3} />
       )}
     </g>
   );

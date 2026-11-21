@@ -113,3 +113,5 @@ A cook that finished too fast to be real (see `plausible` in the player summary)
 - Vessels, tools and the stove are white with a 2 to 3px black outline. Flames are solid black shapes (accent when heat is high is not allowed; show heat by flame count and size).
 - Food keeps the ingredient colours from the recipe data as flat fills with a black outline.
 - Motion, zoom and timing are unchanged.
+- The step text can name an appliance, and it wins over the technique: "rice cooker" draws a rice cooker and "microwave" a microwave. Food stays in an appliance for rest steps ("leave it covered to steam") until a later step takes it out.
+- Ingredients are drawn as what they become, not as their token shape alone. Eggs share the round token with tomatoes, but heat sets them into yellow curds rather than reducing them to sauce. A grain measured by the cup (rice) is the body of the dish: a heap in the pan that soy turns golden, a moulded dome when the step says to pack or flip it, and a porridge when it was cooked in water or stock.
