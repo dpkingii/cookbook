@@ -20,6 +20,8 @@ import { rootGeometry, type RootProps, type RootShape } from "./forms/root-shape
 import { frameLeaf, LEAF_CUT } from "./forms/leaf-cuts";
 import { eggCut, frameEgg } from "./forms/egg-cuts";
 import { CURL_CUT, frameCurl } from "./forms/curl-cuts";
+import { frameStrand, STRAND_CUT } from "./forms/strand-cuts";
+import { strandGeometry, type StrandProps, type StrandShape } from "./forms/strand-shape";
 import { curlGeometry, type CurlProps, type CurlShape } from "./forms/curl-shape";
 import { beatenGeometry, crackedGeometry, omeletteGeometry, shellGeometry, type EggProps, type EggState } from "./forms/egg-shape";
 import { leafGeometry, type LeafProps, type LeafShape } from "./forms/leaf-shape";
@@ -126,6 +128,12 @@ export const REAL_SIZE = {
     /** A king prawn with its head and feelers, 12 cm across; 16 cm long. */
     prawn: { wide: 12, long: 16 },
   } satisfies Record<CurlShape, RealSize>,
+  /** Dry, the length of a bundle or the width of a nest; `across` is the heap the same noodles make cooked. */
+  strand: {
+    spaghetti: { wide: 25, across: 14 },
+    egg: { wide: 9, across: 13 },
+    flat: { wide: 22, across: 14 },
+  } satisfies Record<StrandShape, RealSize>,
   /** How wide a pour spreads on the counter (about two tablespoons), and one drop. */
   pool: {
     thin: { wide: 10, drop: 0.8 },
@@ -259,6 +267,12 @@ export const PIECE_SIZE = {
       /** Paste scraped into a mound about as wide as a shrimp is long. */
       paste: { cm: d.long, by: "long" },
     })[CURL_CUT[cut]] as PieceSize,
+  strand: (cut: Exclude<Cut, "whole">, d: Dims): PieceSize =>
+    ({
+      broken: { cm: d.wide / 2, by: "long" },
+      short: { cm: 4, by: "long" },
+      bits: { cm: 1, by: "long" },
+    })[STRAND_CUT[cut]] as PieceSize,
   egg: (cut: Exclude<Cut, "whole">, d: Dims, state: EggState): PieceSize => {
     switch (eggCut(state, cut)) {
       case "halves":
@@ -301,7 +315,7 @@ export const PIECE_SIZE = {
   },
 };
 
-export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret" | "leaf" | "egg" | "curl";
+export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret" | "leaf" | "egg" | "curl" | "strand";
 export interface FormProps {
   slab: SlabProps;
   bulb: BulbProps;
@@ -317,6 +331,7 @@ export interface FormProps {
   leaf: LeafProps;
   egg: EggProps;
   curl: CurlProps;
+  strand: StrandProps;
 }
 
 /** What the box holds, measured from the geometry: the zoom it is drawn at, and the sizes (in box units, before that zoom) to match to real ones. */
@@ -448,6 +463,13 @@ export function measure<F extends FormName>(form: F, props: FormProps[F]): Measu
       /** Measured on the bodies, not the tail fans that come with them. */
       const raw = frameCurl(shape, cut, seed, layout, false).pieces.filter((x) => x.kind !== "tail");
       return cutOf(frameCurl(shape, cut, seed, layout, cooked).k, raw.map((x) => x.outer), PIECE_SIZE.curl(cut, d));
+    }
+    case "strand": {
+      const shape = (p as StrandProps).shape ?? "spaghetti";
+      const d = dims(REAL_SIZE.strand[shape], p.realSize);
+      /** A cooked heap is a different size from the dry bundle or nest it came from. */
+      if (cut === "whole") return wholeOf(strandGeometry(shape, seed, cooked).flatMap((x) => x.outer), cooked ? d.across : d.wide);
+      return cutOf(frameStrand(shape, cut, seed, layout, cooked).k, frameStrand(shape, cut, seed, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.strand(cut, d));
     }
     case "pool": {
       const shape = (p as PoolProps).shape ?? "thin";

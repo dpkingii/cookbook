@@ -4,7 +4,8 @@ import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
 import { Burner, Knob } from "../Burner";
-import { cookedColor, isEgg, poolsUp, isStaple, Mound, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
+import { miseFor } from "../mise";
+import { cookedColor, isEgg, MiseNoodles, poolsUp, isStaple, Mound, poolOf, sauceTints, Scattered, stapleColor, Tangle } from "../food";
 import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse, wall } from "../rough";
 import { Bubbles, Sizzle, Steam } from "../Steam";
@@ -26,7 +27,10 @@ export function Pan({ scene }: { scene: Scene }) {
   const eggs = all.filter((it) => isEgg(it.ingredient));
   const items = all.filter((it) => it !== staple && !eggs.includes(it));
   const pool = staple ? null : poolOf(items);
-  const strands = items.filter((it) => it.ingredient.token.shape === "strand");
+  /** Strands mise can't draw yet (bean sprouts) go under the noodles, lighter, so they don't bury them. */
+  const isNoodle = (it: Item) => miseFor(it.ingredient)?.form === "strand";
+  const strands = items.filter((it) => it.ingredient.token.shape === "strand").sort((a, b) => Number(isNoodle(a)) - Number(isNoodle(b)));
+  const noodles = strands.some(isNoodle);
   // With rice in the pan, peas and corn (round tokens) sit in it as pieces instead of cooking down to sauce.
   const pieces = items.filter(
     (it) => (!poolsUp(it.ingredient) || (staple && it.ingredient.token.shape === "round")) && it.ingredient.token.shape !== "strand",
@@ -115,15 +119,27 @@ export function Pan({ scene }: { scene: Scene }) {
             {pieces.filter((it) => it.ingredient.token.shape !== "leaf").map(piece)}
             {strands.map((it, k) => (
               <motion.g key={it.ingredient.id} {...landing(it.fresh, still, k + 1)}>
-                <Tangle
-                  id={it.ingredient.id}
-                  cx={FOOD.cx}
-                  cy={FOOD.cy - 2}
-                  rx={FOOD.rx + 6}
-                  ry={FOOD.ry + 4}
-                  n={11}
-                  color={mix(cookedColor(it.ingredient, it.cooked), pool?.color ?? it.ingredient.token.color, coat * 0.65)}
-                />
+                {isNoodle(it) ? (
+                  <MiseNoodles
+                    ing={it.ingredient}
+                    cx={FOOD.cx}
+                    cy={FOOD.cy - 8}
+                    cooked={it.cooked > 0.25}
+                    browning={Math.round(Math.min(0.7, Math.max(0, it.cooked - 0.5) * 0.5) * 10) / 10}
+                    sauce={pool?.sauce && coat > 0.05 ? pool.color : sauceTints(all, it.since)[0] ?? null}
+                  />
+                ) : (
+                  <Tangle
+                    id={it.ingredient.id}
+                    cx={FOOD.cx}
+                    cy={FOOD.cy - 2}
+                    rx={FOOD.rx + 6}
+                    ry={FOOD.ry + 4}
+                    n={noodles ? 6 : 11}
+                    line={noodles ? 2.2 : 3.2}
+                    color={mix(cookedColor(it.ingredient, it.cooked), pool?.color ?? it.ingredient.token.color, coat * 0.65)}
+                  />
+                )}
               </motion.g>
             ))}
             {pieces.filter((it) => it.ingredient.token.shape === "leaf").map(piece)}

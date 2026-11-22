@@ -136,6 +136,23 @@ export const poolsUp = (ing: Ingredient) => ing.token.shape === "liquid" || redu
 const GLAZE = "#f1ecd8";
 const clear = (ing: Ingredient) => /\b(water|stock|broth)\b/i.test(ing.name);
 
+/**
+ * Noodles mise can draw, heaped at true size where they lie: a dry bundle until a quarter of the way through a heated
+ * step, then a soft tangle that soaks up the sauce it is tossed in and chars in patches with time in the wok. Null for
+ * strands mise has no form for yet (bean sprouts), which keep the plain tangle.
+ */
+export const MiseNoodles = memo(function MiseNoodles({ ing, cx, cy, cooked, browning, sauce }: { ing: Ingredient; cx: number; cy: number; cooked: boolean; browning: number; sauce: string | null }) {
+  const match = miseFor(ing);
+  if (match?.form !== "strand") return null;
+  const props = match.props as { color?: string };
+  const plain = mix(props.color ?? ing.token.color, "#f7e4a8", 0.4);
+  /** Soy turns noodles amber, not grey, so a sauce is warmed before it tints them. */
+  const sauced = sauce ? { ...match, props: { ...match.props, cookedColor: mix(plain, mix(sauce, "#d08a2e", 0.5), 0.4) } } : match;
+  /** Fresh or already-cooked noodles go in soft, never as a dry bundle. */
+  const soft = cooked || /\b(fresh|cooked|boiled)\b/i.test(ing.name);
+  return <MiseArt match={sauced} cut="whole" x={cx} y={cy} pxPerCm={VESSEL_PX_PER_CM} cooked={soft} browning={browning} />;
+});
+
 /** Grains of rice heaped in a dome, each grain a short rounded tick so it reads as rice and not a blob. */
 export function Mound({
   id,

@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import type { Item, Scene } from "../contents";
 import { landing, useStage } from "../context";
-import { cookedColor, isBroth, isEgg, miseCut, poolsUp, isStaple, Mound, PiecePath, placements, poolOf, sauceTints, Scattered, stapleColor, Tangle, VESSEL_PX_PER_CM } from "../food";
+import { cookedColor, isBroth, isEgg, miseCut, MiseNoodles, poolsUp, isStaple, Mound, PiecePath, placements, poolOf, sauceTints, Scattered, stapleColor, Tangle, VESSEL_PX_PER_CM } from "../food";
 import { MiseArt, miseFor, miseSize } from "../mise";
 import { clamp01, HEX, LINE, mix } from "../palette";
 import { blob, ellipse } from "../rough";
@@ -90,7 +90,9 @@ export function Plate({ scene }: { scene: Scene }) {
   const ribbons = broth ? food.filter((it) => isEgg(it.ingredient)) : [];
   const watery = poolOf(food.filter((it) => !ribbons.includes(it)));
   const pool = watery && grain ? { ...watery, color: mix(watery.color, stapleColor(grain.ingredient, 1), 0.75) } : watery;
-  const strands = food.filter((it) => it.ingredient.token.shape === "strand");
+  const isNoodle = (it: Item) => miseFor(it.ingredient)?.form === "strand";
+  const strands = food.filter((it) => it.ingredient.token.shape === "strand").sort((a, b) => Number(isNoodle(a)) - Number(isNoodle(b)));
+  const noodles = strands.some(isNoodle);
   const pieces = food.filter((it) => !poolsUp(it.ingredient) && it.ingredient.token.shape !== "strand");
   const nest = strands.length > 0;
   const coat = pool?.sauce ? clamp01(Math.max(0, ...strands.map((st) => st.cooked - 1))) : 0;
@@ -128,9 +130,24 @@ export function Plate({ scene }: { scene: Scene }) {
           const color = mix(cookedColor(it.ingredient, it.cooked), pool?.color ?? it.ingredient.token.color, 0.15 + coat * 0.3);
           return (
             <motion.g key={it.ingredient.id} {...landing(it.fresh, still, k)}>
-              <Tangle id={it.ingredient.id} cx={P.x} cy={P.y - 2} rx={96} ry={30} n={13} color={color} line={3.6} />
-              <Tangle id={it.ingredient.id + "m"} cx={P.x} cy={P.y - 14} rx={72} ry={22} n={10} color={color} line={3.6} />
-              <Tangle id={it.ingredient.id + "t"} cx={P.x} cy={P.y - 26} rx={46} ry={14} n={7} color={color} line={3.6} />
+              {isNoodle(it) ? (
+                <MiseNoodles
+                  ing={it.ingredient}
+                  cx={P.x}
+                  cy={P.y - 18}
+                  cooked={it.cooked > 0.25}
+                  browning={Math.round(Math.min(0.7, Math.max(0, it.cooked - 0.5) * 0.5) * 10) / 10}
+                  sauce={pool?.sauce && coat > 0.05 ? pool.color : sauceTints(all, it.since)[0] ?? null}
+                />
+              ) : noodles ? (
+                <Tangle id={it.ingredient.id} cx={P.x} cy={P.y - 8} rx={70} ry={20} n={7} color={color} line={2.4} />
+              ) : (
+                <>
+                  <Tangle id={it.ingredient.id} cx={P.x} cy={P.y - 2} rx={96} ry={30} n={13} color={color} line={3.6} />
+                  <Tangle id={it.ingredient.id + "m"} cx={P.x} cy={P.y - 14} rx={72} ry={22} n={10} color={color} line={3.6} />
+                  <Tangle id={it.ingredient.id + "t"} cx={P.x} cy={P.y - 26} rx={46} ry={14} n={7} color={color} line={3.6} />
+                </>
+              )}
             </motion.g>
           );
         })}

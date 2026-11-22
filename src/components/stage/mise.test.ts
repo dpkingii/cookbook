@@ -25,6 +25,15 @@ describe("mise on the board", () => {
     expect(cutFor(ing("shrimp"), "slice", "Peel the shrimp, slice each one in half lengthwise, rinse.", miseFor(ing("shrimp")))).toBe("halved");
   });
 
+  it("draws noodles and pasta as mise strands, flat, egg or round, but leaves bean sprouts alone", () => {
+    const shape = (name: string) => (miseFor(ing(name))?.props as { shape?: string } | undefined)?.shape;
+    expect(miseFor(ing("spaghetti"))?.form).toBe("strand");
+    expect(shape("fresh flat rice noodles")).toBe("flat");
+    expect(shape("egg noodles")).toBe("egg");
+    expect(miseFor(ing("fettuccine"))?.props).toMatchObject({ shape: "flat", color: "#e8c77a" });
+    expect(miseFor(ing("bean sprouts"))).toBeNull();
+  });
+
   it("draws eggs as mise eggs, but never eggplant", () => {
     expect(miseFor(ing("large eggs"))?.form).toBe("egg");
     expect(miseFor(ing("egg yolks"))?.form).toBe("egg");

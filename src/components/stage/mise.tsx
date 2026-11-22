@@ -12,6 +12,7 @@ import {
   Round,
   Slab,
   Stalk,
+  Strand,
   type Cut,
   type FormName,
   type FormProps,
@@ -19,7 +20,7 @@ import {
 } from "@/vendor/mise";
 
 /** Forms that can be drawn on the board. Pool, Dust and Grain are poured or sprinkled, never cut. */
-type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round" | "root" | "floret" | "leaf" | "egg" | "curl">;
+type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round" | "root" | "floret" | "leaf" | "egg" | "curl" | "strand">;
 
 export interface MiseMatch {
   form: BoardForm;
@@ -63,6 +64,11 @@ const CATALOG: [RegExp, MiseMatch][] = [
   [/\b(king|tiger|jumbo) prawns?\b|\bprawns?\b/i, m("curl", { shape: "prawn" })],
   [/\b(peeled|shelled) (shrimp|prawns?)\b/i, m("curl", { peeled: true })],
   [/\bshrimps?\b/i, m("curl", {})],
+  /** Flat rice noodles before plain "rice noodles", and egg noodles before any noodle. */
+  [/\b(flat rice noodles?|ho fun|chow fun|hor fun|kway teow|rice sticks?)\b/i, m("strand", { shape: "flat" })],
+  [/\b(fettuccine|tagliatelle|pappardelle|linguine)\b/i, m("strand", { shape: "flat", color: "#e8c77a" })],
+  [/\b(egg noodles?|lo mein|chow mein|ramen|wonton noodles?|yee mein)\b/i, m("strand", { shape: "egg" })],
+  [/\b(spaghetti|spaghettini|bucatini|angel hair|vermicelli|udon|soba|noodles?|pasta)\b/i, m("strand", {})],
   /** Eggs never reach the board: a vessel asks for curds, ribbons or bits by cut. */
   [/\beggs?\b|\byolks?\b/i, m("egg", { state: "beaten" })],
   [/\b(thai basil|basil|mint)\b/i, m("leaf", { color: "#3f8a32", shape: "basil" })],
@@ -130,8 +136,8 @@ export function boardScale(foods: { match: MiseMatch; cut: Cut }[], room: number
 }
 
 /** Box size in stage units for this drawing at `pxPerCm`. */
-export function miseSize(match: MiseMatch, cut: Cut, pxPerCm: number, layout: Layout = "pile"): number {
-  return boxCm(match.form, { ...match.props, cut, layout } as never) * pxPerCm;
+export function miseSize(match: MiseMatch, cut: Cut, pxPerCm: number, layout: Layout = "pile", cooked = false): number {
+  return boxCm(match.form, { ...match.props, cut, layout, cooked } as never) * pxPerCm;
 }
 
 const DRAW: { [F in BoardForm]: (p: FormProps[F]) => React.ReactElement } = {
@@ -146,6 +152,7 @@ const DRAW: { [F in BoardForm]: (p: FormProps[F]) => React.ReactElement } = {
   leaf: (p) => <Leaf {...p} />,
   egg: (p) => <Egg {...p} />,
   curl: (p) => <Curl {...p} />,
+  strand: (p) => <Strand {...p} />,
 };
 
 /** A mise drawing centred on (x, y) at the board's real scale. Untitled: the stage's own label names the step. */
@@ -171,7 +178,8 @@ export function MiseArt({
   /** Largest box allowed, for food set aside at the edge of a zoomed-in board. */
   max?: number;
 }) {
-  const size = Math.min(max, miseSize(match, cut, pxPerCm, layout));
+  /** Measured as drawn: cooked noodles heap smaller than the dry bundle they came from. */
+  const size = Math.min(max, miseSize(match, cut, pxPerCm, layout, !!cooked));
   const draw = DRAW[match.form] as (p: object) => React.ReactElement;
   const props = { ...match.props, cut, layout, cooked, size, ...(browning != null ? { browning } : {}) };
   return <g transform={`translate(${(x - size / 2).toFixed(1)} ${(y - size / 2).toFixed(1)})`}>{draw(props)}</g>;
