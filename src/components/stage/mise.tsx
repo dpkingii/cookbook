@@ -2,12 +2,14 @@ import type { Ingredient, Technique } from "@/lib/recipe/types";
 import {
   boxCm,
   Bulb,
+  Cap,
   Clove,
   Curl,
   Egg,
   Floret,
   Knob,
   Leaf,
+  Pepper,
   Root,
   Round,
   Slab,
@@ -20,7 +22,7 @@ import {
 } from "@/vendor/mise";
 
 /** Forms that can be drawn on the board. Pool, Dust and Grain are poured or sprinkled, never cut. */
-type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round" | "root" | "floret" | "leaf" | "egg" | "curl" | "strand">;
+type BoardForm = Extract<FormName, "slab" | "bulb" | "clove" | "knob" | "stalk" | "round" | "root" | "floret" | "leaf" | "egg" | "curl" | "strand" | "pepper" | "cap">;
 
 export interface MiseMatch {
   form: BoardForm;
@@ -64,6 +66,19 @@ const CATALOG: [RegExp, MiseMatch][] = [
   [/\b(king|tiger|jumbo) prawns?\b|\bprawns?\b/i, m("curl", { shape: "prawn" })],
   [/\b(peeled|shelled) (shrimp|prawns?)\b/i, m("curl", { peeled: true })],
   [/\bshrimps?\b/i, m("curl", {})],
+  [/\b(mung )?bean ?sprouts?\b/i, m("strand", { shape: "sprout" })],
+  /** Only bell peppers and fresh chilies: "pepper" alone is black pepper, and chili powder, flakes and oil are not pods. */
+  [/\bgreen (bell )?peppers?\b|\bgreen capsicums?\b/i, m("pepper", { color: "#3f8a2a", seed: 2 })],
+  [/\byellow (bell )?peppers?\b/i, m("pepper", { color: "#f2c12e", seed: 3 })],
+  [/\borange (bell )?peppers?\b/i, m("pepper", { color: "#ee8a1e", seed: 4 })],
+  [/\b(red )?bell peppers?\b|\bcapsicums?\b|\bred peppers?\b(?! flakes)/i, m("pepper", { color: "#d42a1e" })],
+  [/\b(green chil(i|li|e)(e?s)?|jalape(ñ|n)os?|serranos?)\b(?! (powder|flakes|oil|sauce|paste|crisp))/i, m("pepper", { color: "#4a8a2a", shape: "chili", seed: 2 })],
+  [/\b(bird'?s[- ]eye chil(i|li)(e?s)?|thai chil(i|li)(e?s)?)\b/i, m("pepper", { color: "#c8241a", shape: "chili", realSize: 5 })],
+  [/\b(red )?chil(i|li|e)(e?s)?\b(?! (powder|flakes|oil|sauce|paste|crisp|bean))/i, m("pepper", { color: "#c8241a", shape: "chili" })],
+  [/\bshiitakes?\b/i, m("cap", { color: "#7a4a2a", shape: "shiitake" })],
+  [/\b(king )?oyster mushrooms?\b/i, m("cap", { color: "#bfb4a4", shape: "oyster" })],
+  [/\b(cremini|crimini|baby bella|chestnut mushrooms?|portobello)\b/i, m("cap", { color: "#9a6a44", seed: 2 })],
+  [/\bmushrooms?\b/i, m("cap", { color: "#efe6d6" })],
   /** Flat rice noodles before plain "rice noodles", and egg noodles before any noodle. */
   [/\b(flat rice noodles?|ho fun|chow fun|hor fun|kway teow|rice sticks?)\b/i, m("strand", { shape: "flat" })],
   [/\b(fettuccine|tagliatelle|pappardelle|linguine)\b/i, m("strand", { shape: "flat", color: "#e8c77a" })],
@@ -153,6 +168,8 @@ const DRAW: { [F in BoardForm]: (p: FormProps[F]) => React.ReactElement } = {
   egg: (p) => <Egg {...p} />,
   curl: (p) => <Curl {...p} />,
   strand: (p) => <Strand {...p} />,
+  pepper: (p) => <Pepper {...p} />,
+  cap: (p) => <Cap {...p} />,
 };
 
 /** A mise drawing centred on (x, y) at the board's real scale. Untitled: the stage's own label names the step. */

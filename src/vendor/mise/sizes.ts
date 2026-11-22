@@ -21,6 +21,10 @@ import { frameLeaf, LEAF_CUT } from "./forms/leaf-cuts";
 import { eggCut, frameEgg } from "./forms/egg-cuts";
 import { CURL_CUT, frameCurl } from "./forms/curl-cuts";
 import { frameStrand, STRAND_CUT } from "./forms/strand-cuts";
+import { framePepper, PEPPER_CUT } from "./forms/pepper-cuts";
+import { CAP_CUT, frameCap } from "./forms/cap-cuts";
+import { capGeometry, type CapProps, type CapShape } from "./forms/cap-shape";
+import { pepperGeometry, type PepperProps, type PepperShape } from "./forms/pepper-shape";
 import { strandGeometry, type StrandProps, type StrandShape } from "./forms/strand-shape";
 import { curlGeometry, type CurlProps, type CurlShape } from "./forms/curl-shape";
 import { beatenGeometry, crackedGeometry, omeletteGeometry, shellGeometry, type EggProps, type EggState } from "./forms/egg-shape";
@@ -133,7 +137,23 @@ export const REAL_SIZE = {
     spaghetti: { wide: 25, across: 14 },
     egg: { wide: 9, across: 13 },
     flat: { wide: 22, across: 14 },
+    /** A handful of bean sprouts heaped about 12 cm across, raw or cooked. */
+    sprout: { wide: 12, across: 10 },
   } satisfies Record<StrandShape, RealSize>,
+  pepper: {
+    /** A bell pepper standing up, 9 cm across and 8 cm through its wall-to-wall ring. */
+    bell: { wide: 9, across: 8 },
+    /** A long red chili lying down, 12 cm with its stem, 1.5 across. */
+    chili: { wide: 12, across: 1.5 },
+  } satisfies Record<PepperShape, RealSize>,
+  cap: {
+    /** A button mushroom 4 cm across the cap. */
+    button: { wide: 4 },
+    /** A shiitake cap 6 cm across. */
+    shiitake: { wide: 6 },
+    /** A cluster of oyster mushrooms, 10 cm across. */
+    oyster: { wide: 10, across: 5 },
+  } satisfies Record<CapShape, RealSize>,
   /** How wide a pour spreads on the counter (about two tablespoons), and one drop. */
   pool: {
     thin: { wide: 10, drop: 0.8 },
@@ -267,6 +287,26 @@ export const PIECE_SIZE = {
       /** Paste scraped into a mound about as wide as a shrimp is long. */
       paste: { cm: d.long, by: "long" },
     })[CURL_CUT[cut]] as PieceSize,
+  cap: (cut: Exclude<Cut, "whole">, d: Dims, shape: CapShape): PieceSize =>
+    ({
+      halves: { cm: d.wide, by: "long" },
+      slices: { cm: d.wide, by: "long" },
+      quarters: { cm: d.wide * 0.8, by: "long" },
+      /** Shiitake slices 4 mm thick; torn oyster strips 1 cm wide. */
+      strips: { cm: shape === "oyster" ? 1 : 0.4, by: "across" },
+      torn: { cm: d.across, by: "long" },
+      diced: { cm: 1, by: "long" },
+      minced: { cm: KNIFE_CM.minced, by: "long" },
+    })[CAP_CUT[shape][cut]] as PieceSize,
+  pepper: (cut: Exclude<Cut, "whole">, d: Dims, shape: PepperShape): PieceSize =>
+    ({
+      halves: { cm: shape === "bell" ? d.across : d.wide * 0.85, by: "long" },
+      rings: { cm: d.across, by: "long" },
+      strips: { cm: shape === "bell" ? 0.8 : 0.3, by: "across" },
+      quarters: { cm: d.across, by: "long" },
+      diced: knife(KNIFE_CM.diced, d),
+      minced: { cm: shape === "bell" ? KNIFE_CM.minced : 0.2, by: "long" },
+    })[PEPPER_CUT[shape][cut]] as PieceSize,
   strand: (cut: Exclude<Cut, "whole">, d: Dims): PieceSize =>
     ({
       broken: { cm: d.wide / 2, by: "long" },
@@ -315,7 +355,7 @@ export const PIECE_SIZE = {
   },
 };
 
-export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret" | "leaf" | "egg" | "curl" | "strand";
+export type FormName = "slab" | "bulb" | "clove" | "knob" | "stalk" | "pool" | "dust" | "grain" | "round" | "root" | "floret" | "leaf" | "egg" | "curl" | "strand" | "pepper" | "cap";
 export interface FormProps {
   slab: SlabProps;
   bulb: BulbProps;
@@ -332,6 +372,8 @@ export interface FormProps {
   egg: EggProps;
   curl: CurlProps;
   strand: StrandProps;
+  pepper: PepperProps;
+  cap: CapProps;
 }
 
 /** What the box holds, measured from the geometry: the zoom it is drawn at, and the sizes (in box units, before that zoom) to match to real ones. */
@@ -470,6 +512,22 @@ export function measure<F extends FormName>(form: F, props: FormProps[F]): Measu
       /** A cooked heap is a different size from the dry bundle or nest it came from. */
       if (cut === "whole") return wholeOf(strandGeometry(shape, seed, cooked).flatMap((x) => x.outer), cooked ? d.across : d.wide);
       return cutOf(frameStrand(shape, cut, seed, layout, cooked).k, frameStrand(shape, cut, seed, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.strand(cut, d));
+    }
+    case "pepper": {
+      const shape = (p as PepperProps).shape ?? "bell";
+      const d = dims(REAL_SIZE.pepper[shape], p.realSize);
+      if (cut === "whole") return wholeOf(pepperGeometry(shape, seed).outline, d.wide);
+      return cutOf(framePepper(shape, cut, seed, layout, cooked).k, framePepper(shape, cut, seed, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.pepper(cut, d, shape));
+    }
+    case "cap": {
+      const shape = (p as CapProps).shape ?? "button";
+      const d = dims(REAL_SIZE.cap[shape], p.realSize);
+      if (cut === "whole") {
+        const g = capGeometry(shape, seed);
+        /** Measured across the cap, or across the whole cluster. */
+        return wholeOf(g.fans.length ? g.fans.flatMap((f) => f.outline) : g.caps.flatMap((c) => c.cap), d.wide);
+      }
+      return cutOf(frameCap(shape, cut, seed, layout, cooked).k, frameCap(shape, cut, seed, layout, false).pieces.map((x) => x.outer), PIECE_SIZE.cap(cut, d, shape));
     }
     case "pool": {
       const shape = (p as PoolProps).shape ?? "thin";

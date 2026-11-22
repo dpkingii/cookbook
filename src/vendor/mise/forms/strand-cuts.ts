@@ -2,7 +2,7 @@ import type { Cut, Layout } from "../core/cut";
 import { frameCut } from "../core/frame";
 import { centroid } from "../core/geometry";
 import { rng, type Pt } from "../core/rough";
-import { drape, part, rod, wave, WIDTH, type StrandPart, type StrandShape } from "./strand-shape";
+import { drape, part, rod, sprout, wave, WIDTH, type StrandPart, type StrandShape } from "./strand-shape";
 
 /** Broken in half (as spaghetti for a soup), cut short, or chopped into bits. */
 export type StrandCut = "broken" | "short" | "bits";
@@ -24,6 +24,7 @@ export interface StrandCutResult {
 
 /** A piece `len` long: a straight rod or crimped wave dry, a soft curve cooked. */
 function piece(shape: StrandShape, rand: () => number, x: number, y: number, len: number, cooked: boolean, seed: number): StrandPart {
+  if (shape === "sprout") return sprout(rand, x, y, len, cooked, seed);
   const w = WIDTH[shape];
   const angle = rand() * Math.PI * 2;
   let line: Pt[];
@@ -52,6 +53,8 @@ export function cutStrand(shape: StrandShape, cut: Exclude<Cut, "whole">, seed: 
     case "broken": {
       /** Dry, the halves stay a bundle; cooked, a looser tangle of shorter strands. */
       const n = shape === "flat" ? 10 : 22;
+      /** A bean sprout snapped in two is just a shorter sprout. */
+      if (shape === "sprout") return { heap: true, pieces: Array.from({ length: 30 }, (_, i) => piece(shape, rand, (rand() - 0.5) * 40, (rand() - 0.5) * 22, 11 + rand() * 3, cooked, seed * 50 + i)) };
       if (cooked) return { heap: true, pieces: Array.from({ length: n }, (_, i) => part(shape, drape(rand, 0, 0, 24, 15, 32 + rand() * 12, shape === "egg"), WIDTH[shape], seed * 50 + i, (rand() - 0.5) * 0.8)) };
       const angle = -0.25;
       return {

@@ -15,7 +15,7 @@ describe("mise on the board", () => {
   });
 
   it("leaves food mise can't draw yet to the old tokens", () => {
-    for (const name of ["ground coriander", "peppermint extract", "dried shiitake"]) expect(miseFor(ing(name))).toBeNull();
+    for (const name of ["ground coriander", "peppermint extract", "white pepper", "black pepper", "chili flakes", "chili oil", "oyster sauce"]) expect(miseFor(ing(name)), name).toBeNull();
   });
 
   it("draws shrimp and prawns as mise curls, and halves them down the back", () => {
@@ -31,7 +31,17 @@ describe("mise on the board", () => {
     expect(shape("fresh flat rice noodles")).toBe("flat");
     expect(shape("egg noodles")).toBe("egg");
     expect(miseFor(ing("fettuccine"))?.props).toMatchObject({ shape: "flat", color: "#e8c77a" });
-    expect(miseFor(ing("bean sprouts"))).toBeNull();
+    expect(miseFor(ing("bean sprouts"))?.props).toMatchObject({ shape: "sprout" });
+  });
+
+  it("draws bell peppers and chilies as mise peppers, and mushrooms as mise caps", () => {
+    expect(miseFor(ing("green bell pepper"))?.props).toMatchObject({ color: "#3f8a2a" });
+    expect(miseFor(ing("red bell peppers"))?.form).toBe("pepper");
+    expect(miseFor(ing("fresh red chilies"))?.props).toMatchObject({ shape: "chili" });
+    expect(miseFor(ing("Thai chilies"))?.props).toMatchObject({ realSize: 5 });
+    expect(miseFor(ing("dried shiitake mushrooms"))?.props).toMatchObject({ shape: "shiitake" });
+    expect(miseFor(ing("oyster mushrooms"))?.props).toMatchObject({ shape: "oyster" });
+    expect(miseFor(ing("button mushrooms"))?.form).toBe("cap");
   });
 
   it("draws eggs as mise eggs, but never eggplant", () => {

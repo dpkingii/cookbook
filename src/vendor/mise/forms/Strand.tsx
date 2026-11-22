@@ -78,10 +78,13 @@ function Strands({ parts, pal, u, k, cooked }: { parts: StrandPart[]; pal: Stran
         }
         return (
           <g key={i}>
+            {p.root && <path d={smooth(p.root, false)} fill="none" stroke={mix(pal.body, SHADE, 0.3)} strokeWidth={p.width * 0.3} strokeLinecap="round" />}
             <path d={d} fill="none" stroke={edge} strokeWidth={p.width + e * 2} strokeLinecap="round" strokeLinejoin="round" />
             <path d={d} fill="none" stroke={tone} strokeWidth={p.width} strokeLinecap="round" strokeLinejoin="round" />
             {patch && <path d={patch} fill="none" stroke={pal.char} strokeWidth={p.width * 0.9} strokeLinecap="round" opacity={Math.min(0.95, pal.browning * 1.2)} />}
             <path d={d} fill="none" stroke={WHITE} strokeWidth={p.width * 0.3} strokeLinecap="round" opacity={cooked ? 0.6 : 0.35} transform={`translate(${-p.width * 0.18} ${-p.width * 0.18})`} />
+            {/* A bean sprout's seed head: pale yellow, a little wider than the stem. */}
+            {p.head && <ellipse cx={p.head[0]} cy={p.head[1]} rx={p.width * 0.95} ry={p.width * 0.72} fill={cooked ? "#d9cf7a" : "#e9dc6e"} stroke={outline("#e9dc6e", 0.5)} strokeWidth={e} />}
           </g>
         );
       })}

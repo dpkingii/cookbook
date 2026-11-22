@@ -6,8 +6,9 @@ import { rng, type Pt } from "../core/rough";
 /**
  * Spaghetti (and other round pasta): thin round rods, a bundle dry, a glossy tangle cooked. Egg noodles: wavy and
  * golden, a coiled nest dry. Flat: wide ribbons, as rice noodles for chow fun or fettuccine, folding over as they cook.
+ * Sprout: a bean sprout, a short crisp white stem with a yellow seed head and a thin root, heaped loosely.
  */
-export type StrandShape = "spaghetti" | "egg" | "flat";
+export type StrandShape = "spaghetti" | "egg" | "flat" | "sprout";
 
 export interface StrandProps extends ArtProps {
   color?: string;
@@ -24,9 +25,9 @@ export interface StrandProps extends ArtProps {
   seed?: number;
 }
 
-export const COLOR: Record<StrandShape, string> = { spaghetti: "#e8c77a", egg: "#e9b94a", flat: "#efe8d8" };
+export const COLOR: Record<StrandShape, string> = { spaghetti: "#e8c77a", egg: "#e9b94a", flat: "#efe8d8", sprout: "#f2efdc" };
 /** How wide each strand is, in box units at the whole drawing's scale. */
-export const WIDTH: Record<StrandShape, number> = { spaghetti: 1.5, egg: 1.3, flat: 4 };
+export const WIDTH: Record<StrandShape, number> = { spaghetti: 1.5, egg: 1.3, flat: 4, sprout: 2.4 };
 
 export interface StrandPart {
   /** The strand's centre line. */
@@ -41,6 +42,10 @@ export interface StrandPart {
   tone: number;
   /** A patch charred in the wok, 0 to 1. */
   char?: number;
+  /** A bean sprout's yellow seed head, at the start of its line. */
+  head?: Pt;
+  /** Its thin root, trailing from the end. */
+  root?: Pt[];
 }
 
 /** A ribbon round a centre line: as wide as `w` where it lies flat, narrower where it twists edge-on. */
@@ -107,11 +112,39 @@ export function drape(rand: () => number, cx: number, cy: number, rx: number, ry
   return pts.map(([px, py], i): Pt => [px + Math.sin(i * 1.4) * 0.6, py + Math.cos(i * 1.4) * 0.6]);
 }
 
+/** One bean sprout centred on (x, y): a gently curved stem, its seed head at one end and a thin root at the other. */
+export function sprout(rand: () => number, x: number, y: number, len: number, cooked: boolean, seed: number): StrandPart {
+  const angle = rand() * Math.PI * 2;
+  const bend = (rand() - 0.5) * (cooked ? 2 : 0.9);
+  const n = 8;
+  const line = Array.from({ length: n + 1 }, (_, i): Pt => {
+    const t = i / n;
+    const a = angle + bend * t;
+    return [x + Math.cos(a) * len * (t - 0.5), y + Math.sin(a) * len * (t - 0.5) * 0.8];
+  });
+  const end = line[n]!;
+  const prev = line[n - 1]!;
+  const [dx, dy] = [end[0] - prev[0], end[1] - prev[1]];
+  const root: Pt[] = [end, [end[0] + dx * 1.2 + dy * 0.4, end[1] + dy * 1.2 - dx * 0.4], [end[0] + dx * 2.2 + dy * 0.2, end[1] + dy * 2.2 - dx * 0.2]];
+  const p = part("sprout", line, WIDTH.sprout * (0.85 + rand() * 0.3), seed, (rand() - 0.5) * 0.6);
+  return { ...p, head: line[0], root, outer: [...line, ...root] };
+}
+
 /** The whole amount, fitted to the box: a dry bundle or nest, or a cooked tangle. */
 export function strandGeometry(shape: StrandShape, seed: number, cooked: boolean): StrandPart[] {
   const rand = rng(seed * 43 + 7);
   const w = WIDTH[shape];
   const parts: StrandPart[] = [];
+  if (shape === "sprout") {
+    /** A loose heap of sprouts, each a short curved stem; cooked, they go limp and curl more. */
+    const n = 34;
+    for (let i = 0; i < n; i++) {
+      const r = Math.sqrt((i + 0.5) / n);
+      const a = i * 2.39996;
+      parts.push(sprout(rand, 50 + Math.cos(a) * r * 30, 52 + Math.sin(a) * r * 18, 20 + rand() * 6, cooked, seed * 100 + i));
+    }
+    return fitStrands(parts);
+  }
   if (cooked) {
     const n = shape === "flat" ? 9 : 30;
     for (let i = 0; i < n; i++) {
@@ -157,5 +190,5 @@ export function fitStrands(parts: StrandPart[], room: Pt = [86, 78]): StrandPart
   const k = Math.min(room[0] / b.w, room[1] / b.h, 1.4);
   const [cx, cy] = [(b.l + b.r) / 2, (b.t + b.b) / 2];
   const go = (pts: Pt[]) => pts.map(([x, y]): Pt => [50 + (x - cx) * k, 50 + (y - cy) * k]);
-  return parts.map((p) => ({ ...p, line: go(p.line), ribbon: p.ribbon && go(p.ribbon), outer: go(p.outer), width: p.width * k }));
+  return parts.map((p) => ({ ...p, line: go(p.line), ribbon: p.ribbon && go(p.ribbon), outer: go(p.outer), width: p.width * k, head: p.head && go([p.head])[0], root: p.root && go(p.root) }));
 }
