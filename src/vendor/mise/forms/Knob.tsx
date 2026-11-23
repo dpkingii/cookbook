@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { BrownDefs, Browned } from "../core/Browning";
 import { lighten, mix, outline, SHADE, tint, WHITE } from "../core/color";
@@ -57,7 +58,7 @@ function WholeKnob({
   const tip = look ? undefined : freshTip;
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const u = (name: string) => `${id}-${name}`;
-  const g = knobGeometry(shape, seed);
+  const g = snap(knobGeometry(shape, seed));
   const body = peeled ? flesh : color;
   const edge = outline(body, 0.6);
   const ringColor = peeled ? mix(flesh, SHADE, 0.22) : (ring ?? mix(color, SHADE, 0.4));

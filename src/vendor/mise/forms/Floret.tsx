@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { BrownDefs } from "../core/Browning";
 import { lighten, mix, outline, SHADE, tint, WHITE } from "../core/color";
@@ -81,7 +82,7 @@ function Lobes({ lobes, u, clip, pal, look, k = 1 }: { lobes: Pt[][]; u: (n: str
 function WholeFloret({ color, stem, leaf, shape, seed = 1, look, ...art }: Inner) {
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const u = (name: string) => `${id}-${name}`;
-  const g = floretGeometry(shape, seed);
+  const g = snap(floretGeometry(shape, seed));
   const pal = palette(shape, color, stem, leaf, look);
   const stalk = smooth(g.stalk, true);
   const leafEdge = outline(pal.leaf, 0.55);

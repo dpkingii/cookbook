@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { lighten, mix, outline, SHADE, WHITE } from "../core/color";
 import { bbox, polyPath } from "../core/geometry";
@@ -15,7 +16,7 @@ export function Curl({ color = SHELL, shape = "shrimp", peeled = false, tail = t
   const pal = curlPalette(color, peeled || cut !== "whole", cooked, cookedColor, browning);
 
   if (cut === "whole") {
-    const parts = curlGeometry(shape, seed, { peeled, tail, cooked });
+    const parts = snap(curlGeometry(shape, seed, { peeled, tail, cooked }));
     const b = bbox(parts.filter((p) => p.kind === "body" || p.kind === "head").flatMap((p) => p.outer));
     return (
       <Art {...art}>

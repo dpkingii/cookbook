@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { BrownDefs, Browned } from "../core/Browning";
 import { lighten, mix, outline, SHADE, WHITE } from "../core/color";
@@ -15,7 +16,7 @@ export function Cap({ color, flesh, shape = "button", cut = "whole", layout = "p
   const pal = capPalette(shape, color, flesh, cooked, cookedColor, browning);
 
   if (cut === "whole") {
-    const g = capGeometry(shape, seed);
+    const g = snap(capGeometry(shape, seed));
     const all = [...g.caps.flatMap((c) => [...c.cap, ...c.stem]), ...g.fans.flatMap((f) => f.outline)];
     const b = bbox(all);
     return (

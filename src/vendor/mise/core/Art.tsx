@@ -27,8 +27,9 @@ export interface ArtProps {
  * one); unnamed, it is hidden. It never takes focus and never moves, so it adds nothing to a keyboard or switch path and
  * nothing for a vestibular disorder to react to.
  */
-export function Art({ size = 96, title, className, children }: ArtProps & { children: ReactNode }) {
+export function Art({ size: rawSize = 96, title, className, children }: ArtProps & { children: ReactNode }) {
   const id = `${useId().replace(/[^a-zA-Z0-9_-]/g, "")}-title`;
+  const size = Math.round(rawSize * 100) / 100;
   return (
     <svg
       viewBox={`0 0 ${BOX} ${BOX}`}

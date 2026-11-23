@@ -13,9 +13,23 @@ export interface Framed<P> {
  * `extra` points (a stem, torn skin, a pool of juice). Every cut form frames through here, so what is drawn and what
  * `boxCm` measures are the same thing.
  */
-export function frameCut<P extends { outer: Pt[]; thick: number }>(pieces: P[], cap: number, extra: Pt[] = [], room: Pt = [84, 76]): Framed<P> {
+export function frameCut<P extends { outer: Pt[]; thick: number }>(raw: P[], cap: number, rawExtra: Pt[] = [], room: Pt = [84, 76]): Framed<P> {
+  const pieces = snap(raw);
+  const extra = snap(rawExtra);
   const fit = bbox([...pieces.flatMap((p) => [...p.outer, ...p.outer.map(([x, y]): Pt => [x, y + p.thick + 3])]), ...extra]);
   return { pieces, fit, k: Math.min(cap, room[0] / fit.w, room[1] / fit.h) };
+}
+
+/**
+ * Rounds every number in a piece to a thousandth. `**`, `sin` and the like can differ in the last bit between Node and
+ * a browser (or between V8's tiers), so a server-rendered drawing would not hydrate; after snapping, everything derived
+ * from the piece is plain arithmetic, which is the same everywhere.
+ */
+export function snap<T>(v: T): T {
+  if (typeof v === "number") return (Math.round(v * 1000) / 1000) as T;
+  if (Array.isArray(v)) return v.map(snap) as T;
+  if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, snap(x)])) as T;
+  return v;
 }
 
 /**

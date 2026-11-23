@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { Glints, sprinkle } from "../core/Imperfect";
 import { BrownDefs, Browned } from "../core/Browning";
@@ -170,7 +171,7 @@ function WholeBulb({
 }: BulbProps & { look: Look | null }) {
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const u = (name: string) => `${id}-${name}`;
-  const g = bulbGeometry(shape, seed, peeled);
+  const g = snap(bulbGeometry(shape, seed, peeled));
   const rand = rng(seed * 7 + 1);
   const body = peeled ? flesh : color;
   const edge = look ? mix(body, BURNT, 0.6) : outline(body, 0.72);

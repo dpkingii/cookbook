@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { lighten, luma, mix, outline, SHADE, WHITE } from "../core/color";
 import { smooth, type Pt } from "../core/rough";
@@ -43,7 +44,7 @@ export function Grain({ color, shape = "rice", accent, layout = "pile", cooked =
   const u = (name: string) => `${id}-${name}`;
   const look = cooked ? grainLook(shape, cookedColor, browning) : null;
   const c = look ? look.cook(color) : color;
-  const g = grainGeometry(shape, seed, layout, !!look);
+  const g = snap(grainGeometry(shape, seed, layout, !!look));
   const few = layout === "piece";
   const zoom = few ? 3 : 1;
   const { cx, cy, rx, ry } = g.base;

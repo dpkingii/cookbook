@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { BrownDefs } from "../core/Browning";
 import { lighten, mix, outline, SHADE, tint, WHITE } from "../core/color";
@@ -59,7 +60,7 @@ export function Pool({
   const piece = layout === "piece";
   const look = cooked ? poolLook(shape, color, cookedColor, browning) : null;
   const reduce = look?.reduce ?? 0;
-  const g = poolGeometry(shape, seed, layout, reduce);
+  const g = snap(poolGeometry(shape, seed, layout, reduce));
   const c = look ? look.color : color;
   const clarity = Math.min(1, body.clarity + reduce * 0.35);
   const clear = 1 - clarity;

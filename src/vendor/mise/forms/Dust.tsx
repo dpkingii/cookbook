@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { lighten, luma, mix, outline, SHADE, tint, WHITE } from "../core/color";
 import { polyPath } from "../core/geometry";
@@ -87,7 +88,7 @@ export function Dust({ color, shape = "powder", speckle, layout = "pile", cooked
   /** Sugar glazes amber as it starts to melt. */
   const c = melt > 0 && look ? mix(base, look.caramel, melt * 0.6) : base;
   const odd = speckle ? (look ? look.toast(speckle) : speckle) : c;
-  const g = dustGeometry(shape, seed, layout, melt);
+  const g = snap(dustGeometry(shape, seed, layout, melt));
   const rand = rng(seed * 17 + 5);
   const { cx, cy, rx, ry } = g.base;
   const px = g.peak[0];

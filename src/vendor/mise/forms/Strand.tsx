@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { lighten, mix, outline, SHADE, WHITE } from "../core/color";
 import { bbox } from "../core/geometry";
@@ -14,7 +15,7 @@ export function Strand({ shape = "spaghetti", color, cut = "whole", layout = "pi
   const pal = strandPalette(shape, color ?? COLOR[shape], cooked, cookedColor, browning);
 
   if (cut === "whole") {
-    const parts = strandGeometry(shape, seed, cooked);
+    const parts = snap(strandGeometry(shape, seed, cooked));
     const b = bbox(parts.flatMap((p) => p.outer));
     return (
       <Art {...art}>

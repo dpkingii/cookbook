@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { BrownDefs, Browned } from "../core/Browning";
 import { lighten, mix, outline, SHADE, tint, WHITE } from "../core/color";
@@ -30,7 +31,7 @@ function WholeStalk({
 }: Omit<StalkProps, "cut" | "layout" | "cooked" | "cookedColor" | "browning"> & { look: Look | null }) {
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const u = (name: string) => `${id}-${name}`;
-  const g = stalkGeometry(shape, seed, look ? 0.4 + look.browning * 0.6 : 0);
+  const g = snap(stalkGeometry(shape, seed, look ? 0.4 + look.browning * 0.6 : 0));
   const pal = palette(shape, base, color, look);
   const sheathColor = mix(pal.skin(0.7), "#b9b386", 0.55);
   const fillOf = (t: Tube) => (t.kind === "stalk" ? pal.skin(0.5) : t.kind === "sheath" ? sheathColor : pal.leaf);

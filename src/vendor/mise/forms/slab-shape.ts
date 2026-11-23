@@ -1,3 +1,4 @@
+import { snap } from "../core/frame";
 import type { ArtProps } from "../core/Art";
 import type { Cut, Layout } from "../core/cut";
 import { area, bands, bbox, centroid, place, sampleClosed, scaleAbout } from "../core/geometry";
@@ -158,7 +159,7 @@ export const placed = (p: Piece): Pt[] => place(p.pts, centroid(p.pts), p.rot, p
 export function frameSlab(outline: SlabOutline, cut: Cut, seed: number, layout: Layout, cooked: boolean) {
   const result = cutSlab(outline, cut, seed);
   const picked = layout === "piece" ? representative(result) : result.pieces;
-  const pieces = cooked ? picked.map((p) => ({ ...p, pts: scaleAbout(p.pts, SHRINK) })) : picked;
+  const pieces = snap(cooked ? picked.map((p) => ({ ...p, pts: scaleAbout(p.pts, SHRINK) })) : picked);
   const thick = result.thick * (cooked ? 1.08 : 1);
   const spots = pieces.flatMap(placed);
   const fit = bbox([...spots, ...spots.map(([x, y]): Pt => [x, y + thick + 3])]);

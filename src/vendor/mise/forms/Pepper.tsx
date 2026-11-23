@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { lighten, mix, outline, SHADE, WHITE } from "../core/color";
 import { bbox, polyPath, type Box } from "../core/geometry";
@@ -14,7 +15,7 @@ export function Pepper({ color, shape = "bell", cut = "whole", layout = "pile", 
   const pal = pepperPalette(color, cooked, cookedColor, browning);
 
   if (cut === "whole") {
-    const g = pepperGeometry(shape, seed);
+    const g = snap(pepperGeometry(shape, seed));
     const d = smooth(g.outline, true);
     const b = bbox(g.outline);
     return (

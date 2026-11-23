@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { BrownDefs } from "../core/Browning";
 import { Glints, ImperfectDefs, sprinkle } from "../core/Imperfect";
@@ -51,7 +52,7 @@ function palette(shape: RoundShape, color: string, flesh: string): Record<Role, 
 function WholeRound({ color, blush, shape = "tomato", leaf = false, seed = 1, size, title, className, look }: RoundProps & { look: RoundLook | null }) {
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const u = (name: string) => `${id}-${name}`;
-  const g = roundGeometry(shape, seed);
+  const g = snap(roundGeometry(shape, seed));
   const d = smooth(g.pts, true);
   const c = look ? look.skin : color;
   const gloss = GLOSS[shape] * (look && shape === "apple" ? 1.15 : 1);
@@ -61,8 +62,8 @@ function WholeRound({ color, blush, shape = "tomato", leaf = false, seed = 1, si
   const box = { x: g.cx - g.rx - 4, y: g.cy - g.ry - 4, w: g.rx * 2 + 8, h: g.ry * 2 + 8 };
   /** Softened fruit sinks a little and spreads at the foot. */
   const slump = look ? `translate(${g.cx} ${g.bottom}) scale(${1 + look.collapse * 0.35} ${1 - look.collapse}) translate(${-g.cx} ${-g.bottom})` : undefined;
-  const wrinkles = look && (shape === "tomato" || shape === "apple") ? wrinkleLines(g, seed, Math.round(3 + look.browning * 7)) : [];
-  const blisters = look ? blistersOf(g, shape, seed, look.browning) : [];
+  const wrinkles = look && (shape === "tomato" || shape === "apple") ? snap(wrinkleLines(g, seed, Math.round(3 + look.browning * 7))) : [];
+  const blisters = look ? snap(blistersOf(g, shape, seed, look.browning)) : [];
   /** Tiny points of light scattered over the lit side: wax on a tomato or apple, oil glands on citrus. */
   const sheenRand = rng(seed * 17 + 5);
   const sheen: Pt[] = Array.from({ length: peel ? 14 : 9 }, () => {
@@ -71,7 +72,7 @@ function WholeRound({ color, blush, shape = "tomato", leaf = false, seed = 1, si
     return [hi[0] + Math.cos(a) * d * g.rx * 0.5, hi[1] + Math.sin(a) * d * g.ry * 0.38];
   });
   const sheenR = sheen.map(() => (peel ? 0.18 : 0.22) + sheenRand() * 0.25);
-  const split = look && shape === "tomato" ? splitOf(g, seed) : null;
+  const split = look && shape === "tomato" ? snap(splitOf(g, seed)) : null;
 
   return (
     <Art size={size} title={title} className={className}>

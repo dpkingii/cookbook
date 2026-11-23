@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { BrownDefs, Browned } from "../core/Browning";
 import { lighten, mix, outline, SHADE, WHITE } from "../core/color";
@@ -19,7 +20,7 @@ export function Leaf({ shape = "cilantro", cut = "whole", layout = "pile", cooke
   const pal = palette(shape, color, rib, heart, look);
 
   if (cut === "whole") {
-    const raw = leafGeometry(shape, seed);
+    const raw = snap(leafGeometry(shape, seed));
     const parts = look ? wilt(shape, raw, seed) : raw;
     const b = bbox(parts.flatMap((p) => p.outer));
     return (

@@ -1,4 +1,5 @@
 import { useId } from "react";
+import { snap } from "../core/frame";
 import { Art, EDGE } from "../core/Art";
 import { BrownDefs, Browned } from "../core/Browning";
 import { lighten, mix, outline, SHADE, tint, WHITE } from "../core/color";
@@ -29,7 +30,7 @@ const LEAF = "#5f9a3a";
 function WholeRoot({ color = SKIN.carrot, flesh, core, shoulder, shape, tops = false, peeled = false, seed = 1, look, ...art }: Inner) {
   const id = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const u = (name: string) => `${id}-${name}`;
-  const g = rootGeometry(shape, seed, tops && !look);
+  const g = snap(rootGeometry(shape, seed, tops && !look));
   const pal = palette(shape, color, flesh, core, shoulder, look);
   /** Peeled, the root is its flesh all over, a little glossier. */
   const body = peeled ? pal.flesh : pal.skin;
