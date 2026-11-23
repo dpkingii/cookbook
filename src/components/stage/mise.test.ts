@@ -14,6 +14,10 @@ describe("mise on the board", () => {
     expect(miseFor(ing("cherry tomatoes"))?.props).toMatchObject({ realSize: 2.5 });
   });
 
+  it("never draws stock, juice, paste or a ground spice as the fresh food it is named after", () => {
+    for (const name of ["chicken stock", "chicken broth", "beef broth", "lemon juice", "tomato paste", "garlic powder", "ginger powder", "potato starch", "red fermented bean curd"]) expect(miseFor(ing(name)), name).toBeNull();
+  });
+
   it("leaves food mise can't draw yet to the old tokens", () => {
     for (const name of ["ground coriander", "peppermint extract", "white pepper", "black pepper", "chili flakes", "chili oil", "oyster sauce"]) expect(miseFor(ing(name)), name).toBeNull();
   });
@@ -25,7 +29,7 @@ describe("mise on the board", () => {
     expect(cutFor(ing("shrimp"), "slice", "Peel the shrimp, slice each one in half lengthwise, rinse.", miseFor(ing("shrimp")))).toBe("halved");
   });
 
-  it("draws noodles and pasta as mise strands, flat, egg or round, but leaves bean sprouts alone", () => {
+  it("draws noodles and pasta as mise strands, flat, egg or round, and bean sprouts as sprouts", () => {
     const shape = (name: string) => (miseFor(ing(name))?.props as { shape?: string } | undefined)?.shape;
     expect(miseFor(ing("spaghetti"))?.form).toBe("strand");
     expect(shape("fresh flat rice noodles")).toBe("flat");
