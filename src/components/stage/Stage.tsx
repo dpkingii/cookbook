@@ -92,7 +92,15 @@ export function Stage({ recipe, stepIndex, progress, className }: StageProps) {
       <svg
         viewBox={`0 0 ${W} ${H}`}
         className={className}
-        style={{ display: "block", width: "100%", height: "auto", overflow: "hidden" }}
+        style={{
+          display: "block",
+          width: "100%",
+          height: "auto",
+          overflow: "hidden",
+          /** A Stage scrolled out of view repaints every frame it animates; skip it until it comes back. */
+          contentVisibility: "auto",
+          aspectRatio: `${W} / ${H}`,
+        }}
         role="img"
         aria-label={scene ? label(scene) : "Empty stage"}
       >
