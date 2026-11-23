@@ -36,3 +36,5 @@ export { Cap } from "./forms/Cap";
 export type { CapProps, CapShape } from "./forms/cap-shape";
 export { boxCm, measure, REAL_SIZE, PIECE_SIZE, KNIFE_CM } from "./sizes";
 export type { FormName, FormProps, RealSize, PieceSize, Measured } from "./sizes";
+export { CATALOG, match, type CatalogEntry, type EntryProps, type IngredientId } from "./catalog";
+export { Form, FORMS, Ingredient, type IngredientProps } from "./Ingredient";
